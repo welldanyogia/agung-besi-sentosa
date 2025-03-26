@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 226 100% 97%; /* Warna latar belakang lebih terang */
+        --foreground: 226 40% 10%; /* Warna teks utama */
+        --card: 226 100% 97%;
+        --card-foreground: 226 40% 10%;
+        --popover: 226 100% 97%;
+        --popover-foreground: 226 40% 10%;
+        --primary: 226 90% 45%; /* Warna utama Indigo */
+        --primary-foreground: 226 100% 98%;
+        --secondary: 226 80% 85%;
+        --secondary-foreground: 226 40% 10%;
+        --muted: 226 80% 85%;
+        --muted-foreground: 226 30% 40%;
+        --accent: 226 80% 75%;
+        --accent-foreground: 226 40% 10%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 226 60% 70%;
+        --input: 226 60% 70%;
+        --ring: 226 90% 40%;
+        --chart-1: 226 70% 55%;
+        --chart-2: 250 60% 50%;
+        --chart-3: 275 50% 45%;
+        --chart-4: 200 65% 55%;
+        --chart-5: 230 75% 60%;
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 226 40% 10%;
+        --foreground: 226 80% 95%;
+        --card: 226 40% 15%;
+        --card-foreground: 226 80% 95%;
+        --popover: 226 40% 15%;
+        --popover-foreground: 226 80% 95%;
+        --primary: 226 80% 70%;
+        --primary-foreground: 226 40% 15%;
+        --secondary: 226 30% 30%;
+        --secondary-foreground: 226 80% 95%;
+        --muted: 226 30% 30%;
+        --muted-foreground: 226 50% 65%;
+        --accent: 226 40% 35%;
+        --accent-foreground: 226 80% 95%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 226 40% 35%;
+        --input: 226 40% 35%;
+        --ring: 226 80% 85%;
+        --chart-1: 226 60% 50%;
+        --chart-2: 240 50% 45%;
+        --chart-3: 280 50% 50%;
+        --chart-4: 200 55% 55%;
+        --chart-5: 220 65% 60%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* Sembunyikan scrollbar di Chrome/Safari */
+}
+.scrollbar-hidden {
+    -ms-overflow-style: none;  /* Sembunyikan scrollbar di IE/Edge */
+    scrollbar-width: none;  /* Sembunyikan scrollbar di Firefox */
+}
