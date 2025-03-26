@@ -13,7 +13,7 @@ import {
 } from "@/Components/ui/dropdown-menu"
 import { AlertDeleteDialog } from "@/Components/Inventory/AlertDeleteDialog.jsx";
 import { AlertEditDialog } from "@/Components/Inventory/AlertEditDialog.jsx";
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/Components/ui/checkbox"
 import { Badge } from "@/Components/ui/badge.jsx";
 import {DialogEditBarang} from "@/Components/Inventory/DialogEditBarang.jsx";
 
@@ -146,7 +146,7 @@ export const columns = [
         cell: ({ row }) => (
             <div className="flex justify-center gap-2">
                 <DialogEditBarang barang={row.original}/>
-                <AlertDeleteDialog />
+                <AlertDeleteDialog id={row.original} />
             </div>
         ),
     },

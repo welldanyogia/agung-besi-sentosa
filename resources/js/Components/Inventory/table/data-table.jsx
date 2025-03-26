@@ -56,7 +56,7 @@ export const statuses = [
     //     // icon: Circle,
     // },
 ]
-const DataTable = ({columns, data, auth,setError, setSuccess}) => {
+const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
     const [rowSelection, setRowSelection] = useState({})
     const [columnFilters, setColumnFilters] = useState(
         []
@@ -153,7 +153,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                                 </div>
                             </div>
                             <div className={'flex gap-2 '}>
-                                <DialogTambahBarang auth={auth} setSuccess={setSuccess} setError={setError}/>
+                                <DialogTambahBarang auth={auth} getData={getData} setSuccess={setSuccess} setError={setError}/>
                                 <DataTableViewOptions table={table}/>
                             </div>
                         </div>

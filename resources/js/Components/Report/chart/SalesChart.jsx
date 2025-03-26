@@ -9,7 +9,7 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
+} from "@/Components/ui/card"
 import {
     ChartContainer,
     ChartLegend,
@@ -23,7 +23,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
+} from "@/Components/ui/select"
 const chartData = [
     { date: "2024-04-01", paid: 222, unpaid: 150 },
     { date: "2024-04-02", paid: 97, unpaid: 180 },

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -10,22 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue
-} from "@/Components/ui/select.jsx";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/Components/ui/command";
-import { cn } from "@/lib/utils.js";
+} from "@/Components/ui/dialog";
 import {usePage} from "@inertiajs/react";
 import InvoiceItemsTable from "@/Components/Report/InvoiceItemsTable.jsx";
 
@@ -99,21 +83,9 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
         getCategories();
     }, []);
 
-    const handleChange = (e) => {
-        const { id, value } = e.target;
-        setData((prevData) => ({
-            ...prevData,
-            [id]: value,
-        }));
-    };
 
-    const handleSwitchChange = (checked) => {
-        setData((prevData) => ({
-            ...prevData,
-            is_tax: checked,
-            tax: checked ? prevData.tax : "" // Reset tax jika is_tax dimatikan
-        }));
-    };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -139,7 +111,6 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
 
             // Reset form setelah berhasil
             setSuccess(response.data.message)
-            resetForm();
         } catch (err) {
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
@@ -149,20 +120,6 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
         }
     };
 
-    const resetForm = () => {
-        setData({
-            kode_barang: "",
-            nama_barang: "",
-            kategori: "",
-            stok: "",
-            satuan: "",
-            harga: "",
-            is_tax: false,
-            tax: ""
-        });
-        setInputValue(""); // Reset inputValue untuk pencarian kategori
-        setSearchTerm(""); // Reset searchTerm
-    };
 
     return (
         <Dialog open={openDialog} onOpenChange={(openDialog) => { setOpenDialog(openDialog); if (!openDialog) resetForm(); }}>

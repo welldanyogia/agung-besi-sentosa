@@ -92,7 +92,7 @@ export default function Dashboard({auth}) {
                         <div className={'flex w-full gap-2'}>
                             <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
                                 <div>
-                                    Total Sales Hari ini
+                                    Total Penjualan Hari ini
                                 </div>
                                 <div>
                                     {new Intl.NumberFormat('id-ID', {

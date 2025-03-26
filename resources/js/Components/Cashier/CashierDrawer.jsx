@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/Components/ui/button"
 import {
     Drawer,
     DrawerClose,
@@ -12,8 +12,8 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from "@/components/ui/drawer"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card.jsx";
+} from "@/Components/ui/drawer"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/Components/ui/card.jsx";
 import DataTable from "@/Components/Cashier/table/data-table.jsx";
 import { columns } from "@/Components/Cashier/table/column.jsx";
 import { FinishTransactionDialog } from "@/Components/Cashier/FinishTransactionDialog.jsx";

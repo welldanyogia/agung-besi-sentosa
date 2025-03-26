@@ -4,7 +4,7 @@ import {
     Alert,
     AlertDescription,
     AlertTitle,
-} from "@/components/ui/alert"
+} from "@/Components/ui/alert"
 
 export function AlertDestructive({message}) {
     return (

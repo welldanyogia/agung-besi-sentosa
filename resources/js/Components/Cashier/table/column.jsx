@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import { Button } from "@/Components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/Components/ui/checkbox";
 import { Input } from "@/Components/ui/input.jsx";
 
 const columnHelper = createColumnHelper();

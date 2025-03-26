@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -10,10 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+} from "@/Components/ui/dialog";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { Switch } from "@/Components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -28,7 +28,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from "@/lib/utils.js";
 import {usePage} from "@inertiajs/react";
 
-export function DialogEditBarang({ barang,setError,setSuccess }) {
+export function DialogEditBarang({ barang }) {
     const {auth} = usePage().props
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
@@ -71,7 +71,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
     const handleSubmitCategory = async (e) => {
         e.preventDefault();
         setLoadingCategory(true);
-        setError(null);
+        // setError(null);
 
         const payload = {
             category_name: inputValue,
@@ -81,16 +81,16 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
         try {
             const response = await axios.post("/api/categories/store", payload);
 
-            setSuccess(response.data.message)
+            // setSuccess(response.data.message)
 
             // Reset form setelah berhasil
             // resetForm();
             // getCategories()
         } catch (err) {
-            setError(err.message || "Terjadi kesalahan");
+            // setError(err.message || "Terjadi kesalahan");
         } finally {
             getCategories()
-            setLoadingCategory(false);
+            // setLoadingCategory(false);
         }
     };
 
@@ -117,7 +117,6 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
 
         const payload = {
             item_code: data.kode_barang,
@@ -128,25 +127,25 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
             price: data.harga,
             is_tax: data.is_tax,
             tax: data.is_tax ? data.tax : null,
-            created_by: auth.user.id
+            updated_by: auth.user.id // Menyertakan siapa yang mengupdate
         };
-
+        console.log(payload)
 
         try {
-            const response = await axios.post("/api/inventory/store", payload);
+            const response = await axios.post(`/api/inventory/update/${data.kode_barang}`, payload);
+            console.log("Update success:", response.data);
 
-
-            // Reset form setelah berhasil
-            setSuccess(response.data.message)
-            resetForm();
+            // Setelah update berhasil, tutup dialog dan refresh data
+            setOpenDialog(false);
+            window.location.reload(); // Bisa diganti dengan cara yang lebih efisien jika menggunakan state management
         } catch (err) {
             console.error("Terjadi kesalahan:", err);
-            setError("Terjadi kesalahan Saat Menambahkan Barang");
+            // Tampilkan pesan error jika perlu
         } finally {
-            setOpenDialog(false)
             setLoading(false);
         }
     };
+
 
     const resetForm = () => {
         setData({
@@ -287,7 +286,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
                         <Label className="text-right">Pajak</Label>
                         <Switch checked={data.is_tax} onCheckedChange={handleSwitchChange} className="col-span-3" />
                     </div>
-                    {data.is_tax && (
+                    {data.is_tax === true && (
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="tax" className="text-right">
                                 Jumlah Pajak

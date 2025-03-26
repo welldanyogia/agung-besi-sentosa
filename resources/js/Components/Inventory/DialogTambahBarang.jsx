@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -10,10 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+} from "@/Components/ui/dialog";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { Switch } from "@/Components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -27,7 +27,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/Components/ui/command";
 import { cn } from "@/lib/utils.js";
 
-export function DialogTambahBarang({ auth,setError,setSuccess }) {
+export function DialogTambahBarang({ auth,setError,setSuccess,getData }) {
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [inputValue, setInputValue] = useState("");
@@ -140,17 +140,20 @@ export function DialogTambahBarang({ auth,setError,setSuccess }) {
         };
 
 
+
         try {
             const response = await axios.post("/api/inventory/store", payload);
 
 
             // Reset form setelah berhasil
             setSuccess(response.data.message)
+            getData()
             resetForm();
         } catch (err) {
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
         } finally {
+            getData()
             setOpenDialog(false)
             setLoading(false);
         }

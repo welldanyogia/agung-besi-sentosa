@@ -8,7 +8,7 @@ import {
     ChevronsRight,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/Components/ui/button';
 
 export function DataTablePagination({ table }) {
     return (

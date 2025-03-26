@@ -8,8 +8,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+} from "@/Components/ui/alert-dialog"
+import { Button } from "@/Components/ui/button"
 
 export function AlertDeleteDialog() {
     return (

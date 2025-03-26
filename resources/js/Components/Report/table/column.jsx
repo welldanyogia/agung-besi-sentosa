@@ -13,7 +13,7 @@ import {
 } from "@/Components/ui/dropdown-menu"
 import { AlertDeleteDialog } from "@/Components/Report/AlertDeleteDialog.jsx";
 import { AlertEditDialog } from "@/Components/Report/AlertEditDialog.jsx";
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/Components/ui/checkbox"
 import { Badge } from "@/Components/ui/badge.jsx";
 import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
 

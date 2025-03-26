@@ -94,7 +94,7 @@ export default function Dashboard({auth}) {
                     {/*</div>*/}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg mt-6">
                         <DataTable columns={columns} data={data} auth={auth} setError={setError}
-                                   setSuccess={setSuccess}/>
+                                   setSuccess={setSuccess} getData={getData}/>
                     </div>
                 </div>
             </div>
