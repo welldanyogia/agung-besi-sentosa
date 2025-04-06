@@ -33,13 +33,14 @@ Route::get('/inventory',[\App\Http\Controllers\InventoryController::class,'index
 Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin|superadmin'])->group(function () {
         Route::post('/users', [\App\Http\Controllers\SettingController::class, 'store']);
-        Route::get('/report', function () {
-            return Inertia::render('Report/Dashboard');
-        })->name('report');
         Route::get('/setting', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting');
 
     });
 });
+
+Route::get('/report', function () {
+    return Inertia::render('Report/Dashboard');
+})->name('report');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
