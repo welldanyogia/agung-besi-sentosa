@@ -20,7 +20,7 @@ return new class extends Migration
             $table->double('bayar');
             $table->double('kembalian');
             $table->enum('status', ['pending', 'paid', 'canceled'])->default('pending');
-            $table->uuid('created_by');
+            $table->unsignedBigInteger('created_by');
             $table->timestamps();
 
             $table->foreign('created_by')->references('id')->on('users')->cascadeOnDelete();

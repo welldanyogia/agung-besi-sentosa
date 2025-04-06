@@ -6,7 +6,15 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/login',  [AuthenticatedSessionController::class, 'create']);
+Route::get('/', function () {
+//    return Inertia::render('Auth/Login', [
+//        'canLogin' => Route::has('login'),
+//        'canRegister' => Route::has('register'),
+//        'laravelVersion' => Application::VERSION,
+//        'phpVersion' => PHP_VERSION,
+//    ]);
+    return redirect("/login");
+});
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
