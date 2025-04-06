@@ -71,7 +71,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
-//        Log::info('Authenticated user:', ['id' => $user->id, 'email' => $user->email]);
+        Log::info('Authenticated user:', ['id' => $user->id, 'email' => $user->email]);
 
         if ($user->hasRole('superadmin')) {
             Log::info('User is admin.');

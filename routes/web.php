@@ -1,18 +1,12 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Auth/Login', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/login',  [AuthenticatedSessionController::class, 'create']);
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
@@ -20,6 +14,8 @@ Route::get('/', function () {
 
 Route::get('/cashier',[\App\Http\Controllers\CashierController::class,'index'])->middleware(['auth'])->name('cashier');
 Route::get('/inventory',[\App\Http\Controllers\InventoryController::class,'index'])->middleware(['auth'])->name('inventory');
+Route::post('/users', [\App\Http\Controllers\SettingController::class, 'store']);
+Route::get('/setting', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting');
 //Route::get('/inventory', function () {
 //    return Inertia::render('Inventory/Dashboard');
 //})->middleware(['auth', 'verified'])->name('inventory');
@@ -32,8 +28,7 @@ Route::get('/inventory',[\App\Http\Controllers\InventoryController::class,'index
 
 Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin|superadmin'])->group(function () {
-        Route::post('/users', [\App\Http\Controllers\SettingController::class, 'store']);
-        Route::get('/setting', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting');
+
 
     });
 });
