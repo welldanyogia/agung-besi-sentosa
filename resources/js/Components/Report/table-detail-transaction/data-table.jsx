@@ -226,6 +226,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
     <div><span>Invoice:</span><span>${invoice.invoice_code}</span></div>
     <div><span>Kasir:</span><span>${invoice.created_by.name}</span></div>
     <div><span>Customer:</span><span>${invoice.customer_name}</span></div>
+    <div><span>Waktu:</span><span>${formatWaktuIndonesia(invoice.created_at)}</span></div>
   </div>
 
   <div class="line"></div>

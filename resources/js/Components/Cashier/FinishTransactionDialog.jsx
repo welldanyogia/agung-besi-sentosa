@@ -466,6 +466,18 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 //         printWindow.print();
 //         printWindow.close();
 //     };
+    function formatWaktuIndonesia(timestamp) {
+        return new Date(timestamp).toLocaleString("id-ID", {
+            weekday: "long",  // Nama hari (Senin, Selasa, dll.)
+            year: "numeric",  // Tahun (2024)
+            month: "long",  // Nama bulan (Januari, Februari, dll.)
+            day: "numeric",  // Tanggal (1, 2, 3, dll.)
+            hour: "2-digit",  // Jam (24 jam format)
+            minute: "2-digit",  // Menit
+            second: "2-digit",  // Detik
+            timeZone: "Asia/Jakarta"  // WIB (Waktu Indonesia Barat)
+        });
+    }
 
     const handlePrint = async () => {
         let printWindow = window.open('', '');
@@ -568,6 +580,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
     <div><span>Invoice:</span><span>${invoice_id.invoice_code}</span></div>
     <div><span>Kasir:</span><span>${invoice_id.created_by.name}</span></div>
     <div><span>Customer:</span><span>${customer}</span></div>
+    <div><span>Waktu:</span><span>${formatWaktuIndonesia(invoice.created_at)}</span></div>
   </div>
 
   <div class="line"></div>
