@@ -54,7 +54,7 @@ export function CashierDrawer({ storeInfo, invoice, auth, invoiceItems, setInvoi
                                         invoice={invoice}
                                         setError={setError}
                                         setSuccess={setSuccess}
-                                        getItems={getItems}
+                                        // getItems={getItems}
                                         getInvoice={getInvoice}
                                     />
                                 </div>
@@ -90,7 +90,7 @@ export function CashierDrawer({ storeInfo, invoice, auth, invoiceItems, setInvoi
                                 invoiceItems={invoiceItems}
                                 setError={setError}
                                 setSuccess={setSuccess}
-                                getItems={getItems()}
+                                // getItems={getItems()}
                             />
                         </DrawerClose>
                     </DrawerFooter>

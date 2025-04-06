@@ -17,7 +17,6 @@ import {Inertia} from "@inertiajs/inertia";
 export function AlertDeleteDialog({ id, onDeleteSuccess }) {
     const [loading, setLoading] = useState(false)
 
-    console.log(id)
     const handleDelete = async () => {
         setLoading(true)
         try {

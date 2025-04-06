@@ -11,7 +11,7 @@ class InvoiceItems extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'invoice_id', 'item_id', 'qty', 'price', 'discount', 'sub_total'
+        'invoice_id', 'item_id', 'qty', 'price', 'discount', 'sub_total', 'price_type'
     ];
 
     public function invoice()

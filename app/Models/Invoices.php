@@ -11,7 +11,7 @@ class Invoices extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'invoice_code', 'customer_name', 'total_price', 'payment', 'bayar', 'kembalian', 'status', 'created_by'
+        'invoice_code', 'customer_name', 'total_price', 'payment', 'bayar', 'kembalian', 'status', 'created_by', 'is_printed'
     ];
 
     public function createdBy()

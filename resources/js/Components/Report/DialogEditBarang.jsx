@@ -13,7 +13,7 @@ import {
 import {usePage} from "@inertiajs/react";
 import InvoiceItemsTable from "@/Components/Report/InvoiceItemsTable.jsx";
 
-export function DialogEditBarang({ barang,setError,setSuccess }) {
+export function DialogEditBarang({ barang,setError,setSuccess}) {
     const {auth} = usePage().props
     const [open, setOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
@@ -120,9 +120,8 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
         }
     };
 
-
     return (
-        <Dialog open={openDialog} onOpenChange={(openDialog) => { setOpenDialog(openDialog); if (!openDialog) resetForm(); }}>
+        <Dialog open={openDialog} onOpenChange={(openDialog) => { setOpenDialog(openDialog) }}>
             <DialogTrigger asChild>
                 <Button variant="secondary">Detail</Button>
             </DialogTrigger>
@@ -134,7 +133,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <InvoiceItemsTable items={barang.items} invoice={barang}/>
+                    <InvoiceItemsTable items={barang.items} invoice={barang} />
                     {/*<div className="grid grid-cols-4 items-center gap-4">*/}
                     {/*    <Label htmlFor="kode_barang" className="text-right">*/}
                     {/*        Kode Barang*/}

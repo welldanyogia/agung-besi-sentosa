@@ -5,7 +5,7 @@ import {columns} from "@/Components/Report/table-detail-transaction/column.jsx";
 const InvoiceItemsTable = ({ items,invoice }) => {
     return (
         <div className="overflow-x-auto">
-            <DataTable columns={columns} data={items} invoice={invoice}/>
+            <DataTable columns={columns} data={items} invoice={invoice} />
         </div>
     );
 };

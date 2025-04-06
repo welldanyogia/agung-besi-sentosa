@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +26,9 @@ Route::post('/inventory/show', [InventoryController::class, 'index'])->named('in
 Route::post('/inventory/update/{item_code}', [InventoryController::class, 'update'])->named('inventory.update'); // Tambah item baru
 Route::post('/items/{id}', [InventoryController::class, 'destroy'])->named('inventory.destroy'); // Tambah item baru
 Route::post('/categories/', [\App\Http\Controllers\CategoryController::class, 'index'])->named('categories.index'); // Tambah item baru
+Route::post('/satuans/', [\App\Http\Controllers\InventoryController::class, 'getSatuans'])->named('satuans.index'); // Tambah item baru
 Route::post('/categories/store', [\App\Http\Controllers\CategoryController::class, 'store'])->named('categories.store'); // Tambah item baru
+Route::post('/satuan/store', [\App\Http\Controllers\InventoryController::class, 'storeSatuan'])->named('satuan.store'); // Tambah item baru
 Route::post('/cashier/update-stock', [CashierController::class, 'updateStock']);
 Route::post('/cashier/restore-stock', [CashierController::class, 'restoreStock']);
 Route::post('/cashier/get-pending-inv', [CashierController::class, 'getPendingInvoice']);
@@ -35,6 +38,9 @@ Route::post('/invoices/{id}/update-status', [CashierController::class, 'updateSt
 Route::post('/report/show', [\App\Http\Controllers\ReportController::class, 'index'])->named('report.show'); // Tambah item baru
 Route::post('/storeinfo', [\App\Http\Controllers\SettingController::class, 'storeOrUpdate']);
 Route::get('/storeinfo', [\App\Http\Controllers\SettingController::class, 'getStoreInfo']);
+Route::post('/transactions', [\App\Http\Controllers\ReportController::class, 'getTransaction']);
+Route::post('/invoices/{id}/update-is-printed', [ReportController::class, 'updateIsPrinted']);
+
 
 
 Route::middleware('auth:sanctum')->group(function () {

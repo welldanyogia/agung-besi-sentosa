@@ -13,13 +13,14 @@ import {Input} from "@/Components/ui/input.jsx";
 import {useState} from "react";
 import {columns} from "@/Components/Cashier/table/column.jsx";
 import axios from "axios";
+import {Inertia} from "@inertiajs/inertia";
 
 const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,getItems,getInvoice}) => {
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState([]);
 
     const table = useReactTable({
-        data,
+        data: data ?? [],
         columns,
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
@@ -31,33 +32,47 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
     const handleMin = async (item) => {
         try {
-            // Kirim semua permintaan update stok dalam satu batch
+            // Tentukan jumlah pengurangan berdasarkan price_type
+            const quantityReduction = item.price_type === "eceran"
+                ? (1/item.item.retail_conversion || 1)  // Gunakan item.item.retail_conversion jika tersedia, default ke 1
+                : 1;
 
-            const respone= await axios.post("/api/cashier/restore-stock", {
-                invoice_id : item.invoice_id,
-                item_id : item.item_id,
-                quantity : 1,
-                user_id : auth.user.id
-            })
-
+            // Kirim permintaan untuk memperbarui stok
+            const response = await axios.post("/api/cashier/restore-stock", {
+                invoice_id: item.invoice_id,
+                item_id: item.item_id,
+                quantity: 1, // Gunakan jumlah yang sudah dihitung
+                user_id: auth.user.id
+            });
 
             setSuccess("Berhasil memperbarui QTY");
-            // setInvoiceItems([]);
+
+            // Perbarui state invoiceItems
+            setInvoiceItems((prevItems) =>
+                prevItems.map((i) =>
+                    i.item_id === item.item_id
+                        ? { ...i, quantity: i.quantity - 1 }
+                        : i
+                )
+            );
+
+            // Ambil ulang data
             getItems();
-            // getInvoice();
         } catch (error) {
-            console.error("Error restoring stock:", error);
+            console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
-            // getInvoice();
+            getInvoice();
         }
     };
+
     const handlePlus = async (item) => {
 
         try {
             // Kirim semua permintaan update stok dalam satu batch
 
             const respone= await axios.post("/api/cashier/update-stock", {
+                price_type: item.price_type,
                 // invoice_id : item.invoice_id,
                 item_id : item.item_id,
                 quantity : 1,
@@ -68,12 +83,16 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
             setSuccess("memperbarui QTY");
             // setInvoiceItems([]);
             getItems();
-            getInvoice();
+            // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+
+            // getInvoice();
         } catch (error) {
-            console.error("Error restoring stock:", error);
+            console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
-            getInvoice();
+            // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+
+            // getInvoice();
         }
     };
 
@@ -111,9 +130,8 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
             setSuccess("Berhasil menghapus item");
             // setRowSelection({});
             getItems();
-            getInvoice();
+            // getInvoice();
         } catch (error) {
-            console.error("Error deleting items:", error);
             setError("Gagal menghapus item");
         }
     };
@@ -161,6 +179,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
                                         <Button
                                             size="sm"
                                             className="rounded-full"
+                                            disabled={row.original.item?.stock===0}
                                             onClick={() => handleIncrement(row.original)}
                                         >
                                             +

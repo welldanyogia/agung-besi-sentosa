@@ -13,15 +13,14 @@ import {AlertDestructive} from "@/Components/AlertDestructive.jsx";
 
 export default function Dashboard({auth, users, storeInfo}) {
     const [storeInfor, setStoreInfor] = useState({
-        store_name: storeInfo.store_name,
-        address: storeInfo.address,
-        phone_number: storeInfo.phone_number,
+        store_name: storeInfo?.store_name || '',
+        address: storeInfo?.address || '',
+        phone_number: storeInfo?.phone_number || '',
     });
+
     const [error, setError] = useState(null)
     const [success, setSuccess] = useState(null)
     const [showAlert, setShowAlert] = useState(false);
-
-    console.log(users)
 
 
     // Handle form submission to create/update store info

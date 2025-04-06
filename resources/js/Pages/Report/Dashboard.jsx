@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Head} from '@inertiajs/react';
+import {Head, usePage} from '@inertiajs/react';
 import {useEffect, useState} from "react";
 import DataTable from "@/Components/Report/table/data-table.jsx";
 import {columns} from "@/Components/Report/table/column.jsx";
@@ -59,7 +59,6 @@ export default function Dashboard({auth}) {
             return () => clearTimeout(timer);
         }
     }, [error, success]);
-
 
     return (
         <AuthenticatedLayout

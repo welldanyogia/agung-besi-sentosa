@@ -1,8 +1,8 @@
 'use client';
 
-import { createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react"
-import { Button } from "@/Components/ui/button"
+import {createColumnHelper} from "@tanstack/react-table";
+import {MoreHorizontal} from "lucide-react"
+import {Button} from "@/Components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,10 +11,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
-import { AlertDeleteDialog } from "@/Components/Report/AlertDeleteDialog.jsx";
-import { AlertEditDialog } from "@/Components/Report/AlertEditDialog.jsx";
-import { Checkbox } from "@/Components/ui/checkbox"
-import { Badge } from "@/Components/ui/badge.jsx";
+import {AlertDeleteDialog} from "@/Components/Report/AlertDeleteDialog.jsx";
+import {AlertEditDialog} from "@/Components/Report/AlertEditDialog.jsx";
+import {Checkbox} from "@/Components/ui/checkbox"
+import {Badge} from "@/Components/ui/badge.jsx";
 import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
 
 const columnHelper = createColumnHelper();
@@ -23,24 +23,24 @@ export const columns = [
     columnHelper.accessor("no", {
         id: 'no',
         header: () => <div className="text-center">No</div>,
-        cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+        cell: ({row}) => <div className="text-center">{row.index + 1}</div>,
     }),
     columnHelper.accessor("invoice_code", {
         header: () => <div className="text-center">Kode Invoice</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center">{getValue()}</div>,
     }),
     columnHelper.accessor("customer_name", {
         header: () => <div className="text-center">Nama Pelanggan</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center">{getValue()}</div>,
     }),
     columnHelper.accessor("payment", {
         header: () => <div className="text-center">Metode Pembayaran</div>,
-        cell: ({ getValue }) => <div className="text-center capitalize">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center capitalize">{getValue()}</div>,
     }),
     columnHelper.accessor("total_price", {
         // id: "kategori",
         header: () => <div className="text-center">Total Harga</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const price = row.original.total_price;
             return (
                 <div className="text-center">
@@ -55,7 +55,7 @@ export const columns = [
     }),
     columnHelper.accessor("bayar", {
         header: () => <div className="text-center">Pembayaran</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const price = row.original.bayar;
             return (
                 <div className="text-center">
@@ -70,16 +70,16 @@ export const columns = [
     }),
     columnHelper.accessor("items", {
         header: () => <div className="text-center">Total Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue().length}</div>,
+        cell: ({getValue}) => <div className="text-center">{getValue().length}</div>,
     }),
     columnHelper.accessor("created_by", {
         header: () => <div className="text-center">Kasir</div>,
-        cell: ({ getValue }) => {
+        cell: ({getValue}) => {
             const isTax = getValue();
             return (
                 <div className="text-center">
                     {/*<Badge variant={isTax ? "destructive" : "secondary"}>*/}
-                        {getValue().name}
+                    {getValue().name}
                     {/*</Badge>*/}
                 </div>
             );
@@ -87,7 +87,7 @@ export const columns = [
     }),
     columnHelper.accessor("status", {
         header: () => <div className="text-center">Status</div>,
-        cell: ({ getValue }) => {
+        cell: ({getValue}) => {
             const status = getValue();
             const isPaid = status === "paid";
             const badgeVariant = isPaid ? "bg-teal-500" : status === "tax" ? "destructive" : "secondary";
@@ -100,10 +100,27 @@ export const columns = [
             );
         },
     }),
+    columnHelper.accessor("is_printed", {
+        header: () => <div className="text-center">Cetak</div>,
+        cell: ({getValue}) => {
+            const isPrinted = getValue();
+            const badgeVariant = isPrinted ? "bg-green-500" : "bg-orange-200";
+            const statusText = isPrinted ? "Sudah Dicetak" : "Belum Dicetak";
+
+            return (
+                <div className="text-center">
+                    <Badge variant={badgeVariant} className={badgeVariant}>
+                        {statusText}
+                    </Badge>
+                </div>
+            );
+        },
+    }),
+
 
     columnHelper.accessor("created_at", {
         header: () => <div className="text-center">Tanggal Transaksi</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const date = new Date(row.original.created_at);
             return (
                 <div className="text-center">
@@ -140,7 +157,7 @@ export const columns = [
     {
         id: "actions",
         header: () => <div className="text-center">Detail Transaksi</div>,
-        cell: ({ row }) => (
+        cell: ({row}) => (
             <div className="flex justify-center gap-2">
                 <DialogEditBarang barang={row.original}/>
             </div>

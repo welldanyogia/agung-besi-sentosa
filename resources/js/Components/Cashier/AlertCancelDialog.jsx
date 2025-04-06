@@ -32,11 +32,11 @@ export function AlertCancelDialog({setInvoiceItems,invoiceItems,setError,setSucc
 
             setSuccess("Stok berhasil dikembalikan untuk semua barang.");
             setInvoiceItems([]);
-            getItems();
+            // getItems();
         } catch (error) {
             console.error("Error restoring stock:", error);
             setError("Gagal mengembalikan stok barang!!!");
-            getItems();
+            // getItems();
         }
     };
     return (

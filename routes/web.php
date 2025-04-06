@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Auth/Login', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -14,16 +14,15 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+//Route::get('/dashboard', function () {
+//    return Inertia::render('Dashboard');
+//})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/cashier', function () {
-    return Inertia::render('Cashier/Dashboard');
-})->middleware(['auth', 'verified'])->name('cashier');
-Route::get('/inventory', function () {
-    return Inertia::render('Inventory/Dashboard');
-})->middleware(['auth', 'verified'])->name('inventory');
+Route::get('/cashier',[\App\Http\Controllers\CashierController::class,'index'])->middleware(['auth'])->name('cashier');
+Route::get('/inventory',[\App\Http\Controllers\InventoryController::class,'index'])->middleware(['auth'])->name('inventory');
+//Route::get('/inventory', function () {
+//    return Inertia::render('Inventory/Dashboard');
+//})->middleware(['auth', 'verified'])->name('inventory');
 //Route::get('/report', function () {
 //    return Inertia::render('Report/Dashboard');
 //})->middleware(['auth', 'verified'])->name('report');

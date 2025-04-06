@@ -16,6 +16,11 @@ import {useEffect, useState} from "react";
 import {Button} from "@/Components/ui/button.jsx";
 import {DialogTambahBarang} from "@/Components/Inventory/DialogTambahBarang.jsx";
 import {Input} from "@/Components/ui/input.jsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+import {saveAs} from "file-saver";
+import React from "react";
 
 import {
     ArrowDown,
@@ -28,6 +33,15 @@ import {
     Timer,
 } from "lucide-react"
 import {DataTableFacetedFilter} from "@/Components/Inventory/table/data-table-faceted-filter.jsx";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut, DropdownMenuSub,
+    DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger
+} from "@/Components/ui/dropdown-menu.jsx";
 
 export const labels = [
     {
@@ -56,7 +70,7 @@ export const statuses = [
     //     // icon: Circle,
     // },
 ]
-const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
+const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan}) => {
     const [rowSelection, setRowSelection] = useState({})
     const [columnFilters, setColumnFilters] = useState(
         []
@@ -75,6 +89,153 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         },
     });
     const [categories, setCategories] = useState([])
+
+    const columnTranslations = {
+        "no": "No",
+        "item_code": "Kode Barang",
+        "item_name": "Nama Barang",
+        "category.category_name": "Kategori",
+        "stock": "Stok",
+        "price": "Harga Modal",
+        "retail_price": "Harga Retail",
+        "wholesale_price": "Harga Grosir",
+        "eceran_price": "Harga Eceran",
+        "satuan": "Satuan",
+        "is_tax": "Pajak",
+        "created_at": "Dibuat Pada",
+        "updated_at": "Diperbarui Pada"
+    };
+    const extractText = (element) => {
+        if (typeof element === "string") return element; // Jika sudah string, langsung kembalikan
+        if (React.isValidElement(element)) return extractText(element.props.children); // Ambil children jika React element
+        return "";
+    };
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return "-";
+        const date = new Date(timestamp);
+        return date.toLocaleString("id-ID", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
+    };
+    const formatRupiah = (amount) => {
+        if (!amount) return "-";
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+    };
+
+    const downloadPDF = (columns, data) => {
+        if (!Array.isArray(columns) || !Array.isArray(data)) {
+            console.error("Columns atau data tidak valid:", { columns, data });
+            return;
+        }
+
+        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        doc.text("Inventory Data", 14, 10);
+
+        try {
+            // Ubah urutan kolom: pindahkan Satuan setelah Stok dan abaikan kolom 'select' dan 'actions'
+            const newColumns = columns.filter(col => col.id !== 'select' && col.id !== 'actions') // Mengabaikan kolom select dan actions
+                .map(col => col.accessorKey);
+
+            const stockIndex = newColumns.indexOf("stock");
+            const satuanIndex = newColumns.indexOf("satuan");
+
+            // Jika kolom Satuan ditemukan, pindahkan setelah Stok
+            if (stockIndex > -1 && satuanIndex > -1) {
+                newColumns.splice(stockIndex + 1, 0, newColumns.splice(satuanIndex, 1)[0]);
+            }
+
+            // Ambil teks header dari `accessorKey` lalu ubah ke bahasa Indonesia
+            const tableColumn = newColumns
+                .map(col => columnTranslations[col] || col); // Ubah ke Indonesia jika ada
+
+            // Ambil data berdasarkan `accessorKey`
+            const tableRows = data.map((row, index) =>
+                newColumns.map(col => {
+                    if (col === "no") return index + 1; // Tambahkan nomor urut
+                    if (col === "is_tax") return row[col] ? "Pajak" : "Tanpa Pajak"; // Ubah 1/0 menjadi Pajak/Tanpa Pajak
+                    if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
+                    if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
+                    return row[col] || "-"; // Isi data atau "-"
+                })
+            );
+
+            // Mendapatkan waktu saat download dilakukan
+            const currentTime = new Date().toISOString().replace(/[-:.]/g, ""); // Menghapus karakter yang tidak valid dalam nama file
+            const fileName = `stok_barang_cv_agung_besi_sentosa_${currentTime}.pdf`;
+
+            // Menggunakan autoTable untuk mendownload PDF
+            autoTable(doc, {
+                startY: 20,
+                head: [tableColumn],
+                body: tableRows,
+                margin: { top: 20, bottom: 10, left: 10, right: 10 },
+                styles: { fontSize: 8, cellPadding: 1, overflow: 'linebreak' },
+                columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 40 }, 2: { cellWidth: 'auto' } },
+                pageBreak: 'auto',
+                didDrawPage: function () {
+                    doc.text("Inventory Data", 14, 10);
+                }
+            });
+
+            // Menyimpan file dengan nama yang telah disesuaikan
+            doc.save(fileName);
+        } catch (error) {
+            console.error("Error saat generate PDF:", error);
+        }
+    };
+
+
+
+    const downloadExcel = (columns, data) => {
+        if (!Array.isArray(columns) || !Array.isArray(data)) {
+            console.error("Columns atau data tidak valid:", { columns, data });
+            return;
+        }
+
+        try {
+            // Ubah urutan kolom: pindahkan Satuan setelah Stok dan abaikan kolom 'select' dan 'actions'
+            const newColumns = columns.filter(col => col.id !== 'select' && col.id !== 'actions') // Mengabaikan kolom select dan actions
+                .map(col => col.accessorKey);
+
+            const stockIndex = newColumns.indexOf("stock");
+            const satuanIndex = newColumns.indexOf("satuan");
+
+            // Jika kolom Satuan ditemukan, pindahkan setelah Stok
+            if (stockIndex > -1 && satuanIndex > -1) {
+                newColumns.splice(stockIndex + 1, 0, newColumns.splice(satuanIndex, 1)[0]);
+            }
+
+            // Ambil teks header dari `accessorKey` lalu ubah ke bahasa Indonesia
+            const tableColumn = newColumns
+                .map(col => columnTranslations[col] || col); // Ubah ke Indonesia jika ada
+
+            // Ambil data berdasarkan `accessorKey`
+            const tableRows = data.map((row, index) =>
+                newColumns.map(col => {
+                    if (col === "no") return index + 1; // Tambahkan nomor urut
+                    if (col === "is_tax") return row[col] ? "Pajak" : "Tanpa Pajak"; // Ubah 1/0 menjadi Pajak/Tanpa Pajak
+                    if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
+                    if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
+                    return row[col] || "-"; // Isi data atau "-"
+                })
+            );
+
+            // Mendapatkan waktu saat download dilakukan
+            const currentTime = new Date().toISOString().replace(/[-:.]/g, ""); // Menghapus karakter yang tidak valid dalam nama file
+            const fileName = `stok_barang_cv_agung_besi_sentosa_${currentTime}.xlsx`;
+
+            // Membuat worksheet dan workbook untuk Excel
+            const ws = XLSX.utils.aoa_to_sheet([tableColumn, ...tableRows]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory Data");
+
+            // Menyimpan file Excel dengan nama yang telah disesuaikan
+            XLSX.writeFile(wb, fileName);
+        } catch (error) {
+            console.error("Error saat generate Excel:", error);
+        }
+    };
 
     const getCategories = async () => {
         try {
@@ -153,13 +314,32 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                                 </div>
                             </div>
                             <div className={'flex gap-2 '}>
-                                <DialogTambahBarang auth={auth} getData={getData} setSuccess={setSuccess} setError={setError}/>
+                                <DialogTambahBarang auth={auth} getData={getData} setSuccess={setSuccess}
+                                                    setError={setError} dataSatuan={satuan}/>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline">Download</Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56">
+                                        <DropdownMenuLabel>Download Data</DropdownMenuLabel>
+                                        <DropdownMenuSeparator/>
+                                        <DropdownMenuGroup>
+                                            <DropdownMenuItem
+                                                onClick={() => downloadPDF(columns, data)}>
+                                                PDF
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => downloadExcel(columns, data)}>
+                                                Excel
+                                            </DropdownMenuItem>
+                                        </DropdownMenuGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <DataTableViewOptions table={table}/>
                             </div>
                         </div>
                         <div className="rounded-md border">
                             <Table>
-                                <TableHeader>
+                                <TableHeader className={'bg-accent text-white border-2'}>
                                     {table.getHeaderGroups().map(headerGroup => (
                                         <TableRow key={headerGroup.id}>
                                             {headerGroup.headers.map(header => (

@@ -9,7 +9,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import {AlertDestructive} from "@/Components/AlertDestructive.jsx";
 import {AlertSuccess} from "@/Components/AlertSuccess.jsx";
 
-export default function Dashboard({auth}) {
+export default function Dashboard({auth,satuan,items}) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);  // State to handle loading status
     const [error, setError] = useState(null)
@@ -19,8 +19,8 @@ export default function Dashboard({auth}) {
     const getData = async () => {
         try {
             setLoading(true);  // Set loading to true before making the API call
-            const response = await axios.post('/api/inventory/show');  // Hit the /inventory/show endpoint
-            setData(response.data.items);  // Assuming response.data is the inventory data
+            // const response = await axios.post('/api/inventory/show');  // Hit the /inventory/show endpoint
+            setData(items);  // Assuming response.data is the inventory data
             setLoading(false);  // Set loading to false once data is fetched
         } catch (error) {
             setLoading(false);  // Set loading to false in case of success
@@ -42,6 +42,7 @@ export default function Dashboard({auth}) {
     const sortedData = [...data].sort((a, b) => b.stock - a.stock); // Sorting descending for top products
     const top5Products = sortedData.slice(0, 5); // Top 5 products
     const bottom5Products = sortedData.slice(-5); // Bottom 5 products
+
 
     return (
         <AuthenticatedLayout
@@ -94,7 +95,7 @@ export default function Dashboard({auth}) {
                     {/*</div>*/}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg mt-6">
                         <DataTable columns={columns} data={data} auth={auth} setError={setError}
-                                   setSuccess={setSuccess} getData={getData}/>
+                                   setSuccess={setSuccess} getData={getData} satuan={satuan}/>
                     </div>
                 </div>
             </div>

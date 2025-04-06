@@ -6,6 +6,7 @@ use App\Models\Items;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class InventoryController extends Controller
 {
@@ -16,79 +17,158 @@ class InventoryController extends Controller
     {
         // Ambil semua item, beserta relasi kategori dan creator
         $items = \App\Models\Items::with('category', 'createdBy')->get();
+        $satuan = \App\Models\Satuan::all();
 
-        return response()->json([
-            'message' => 'Daftar item berhasil diambil',
-            'items' => $items
-        ], 200);
+        return Inertia::render('Inventory/Dashboard', [
+            'items' => $items,
+            'satuan' => $satuan,
+        ]);
     }
 
 
     /**
      * Store a newly created resource in storage.
      */
+//    public function store(Request $request)
+//    {
+//        // Validasi input
+//        $request->validate([
+//            'item_name'   => 'required|string|unique:items,item_name',
+//            'item_code'   => 'required|string|unique:items,item_code',
+//            'stock'       => 'nullable|numeric|min:0',
+//            'price'       => 'required|numeric|min:0',
+//            'satuan'      => 'required',
+//            'category_name' => 'required|string',
+//            'created_by'   => 'required|string',
+//            'is_tax' => 'required|boolean',
+//            'tax' => 'nullable|integer',
+//        ]);
+//
+//        try {
+//            // Cek apakah kategori sudah ada berdasarkan nama, jika tidak ada maka buat kategori baru
+//            $category = \App\Models\Categories::firstOrCreate(
+//                ['category_name' => $request->category_name],
+//                ['id' => \Illuminate\Support\Str::uuid()]  // Membuat ID jika kategori baru
+//            );
+//
+//            // Debugging: Log kategori yang ditemukan atau dibuat
+//            Log::info('Category:', $category ? $category->toArray() : 'Kategori gagal dibuat atau ditemukan');
+//
+//            // Pastikan kategori ada sebelum digunakan
+//            if (!$category || !$category->id) {
+//                Log::error('Kategori gagal dibuat atau ditemukan.');
+//                return response()->json([
+//                    'message' => 'Gagal menambah kategori.',
+//                ], 500);
+//            }
+//
+//            // Jika kategori sudah ada, gunakan ID kategori yang ada
+//            // Jika kategori baru, ID sudah dibuat oleh firstOrCreate()
+//            $categoryId = $category->id;
+//
+//            // Simpan item baru
+//            $item = \App\Models\Items::create([
+//                'id'          => \Illuminate\Support\Str::uuid(),
+//                'item_name'   => $request->item_name,
+//                'item_code'   => $request->item_code,
+//                'stock'       => $request->stock ?? 0,
+//                'price'       => $request->price,
+//                'satuan'      => $request->satuan,
+//                'category_id' => $categoryId, // Pakai ID kategori yang ditemukan atau dibuat
+//                'created_by'  => $request->created_by,
+//                'is_tax'      => $request->is_tax ?? 0,
+//                'tax'         => request()->tax ?? 0,
+//            ]);
+//
+//            // Debugging: Log item yang berhasil disimpan
+//            Log::info('Item berhasil ditambahkan:', $item->toArray());
+//
+//            // Kembalikan response JSON
+//            return response()->json([
+//                'message' => 'Item berhasil ditambahkan',
+//                'item'    => $item,
+//                'category' => $category,
+//            ], 201);
+//        } catch (\Exception $e) {
+//            // Tangani exception dan log error
+//            Log::error('Terjadi kesalahan saat menambah item: ' . $e->getMessage(), [
+//                'error' => $e->getTraceAsString(),
+//            ]);
+//
+//            return response()->json([
+//                'message' => 'Terjadi kesalahan saat menambah item.',
+//                'error'   => $e->getMessage(),
+//            ], 500);
+//        }
+//    }
+
     public function store(Request $request)
     {
         // Validasi input
         $request->validate([
-            'item_name'   => 'required|string|unique:items,item_name',
-            'item_code'   => 'required|string|unique:items,item_code',
-            'stock'       => 'nullable|numeric|min:0',
-            'price'       => 'required|numeric|min:0',
-            'satuan'      => 'required|in:Kg,Meter,Batang',
-            'category_name' => 'required|string',
-            'created_by'   => 'required|string',
-            'is_tax' => 'required|boolean',
-            'tax' => 'nullable|integer',
+            'item_code'        => 'required|string|unique:items,item_code',
+            'item_name'        => 'required|string|unique:items,item_name',
+            'category_name'    => 'required|string',
+            'stock'            => 'nullable|numeric|min:0',
+            'satuan'           => 'required|string',
+            'price'            => 'required|numeric|min:0',
+            'wholesale_price'  => 'nullable|numeric|min:0',
+            'retail_price'     => 'nullable|numeric|min:0',
+            'eceran_price'     => 'nullable|numeric|min:0',
+            'retail_unit'      => 'nullable|string',
+            'bulk_unit'        => 'nullable|string',
+            'bulk_spec'        => 'nullable|string',
+            'retail_convertion'=> 'nullable|numeric|min:0',
+            'is_tax'           => 'required|boolean',
+            'tax'              => 'nullable|integer',
+            'created_by'       => 'required|string',
         ]);
 
         try {
-            // Cek apakah kategori sudah ada berdasarkan nama, jika tidak ada maka buat kategori baru
+            // Cek apakah kategori sudah ada, jika tidak buat baru
             $category = \App\Models\Categories::firstOrCreate(
                 ['category_name' => $request->category_name],
-                ['id' => \Illuminate\Support\Str::uuid()]  // Membuat ID jika kategori baru
+                ['id' => \Illuminate\Support\Str::uuid()]
             );
 
-            // Debugging: Log kategori yang ditemukan atau dibuat
-            Log::info('Category:', $category ? $category->toArray() : 'Kategori gagal dibuat atau ditemukan');
-
-            // Pastikan kategori ada sebelum digunakan
             if (!$category || !$category->id) {
                 Log::error('Kategori gagal dibuat atau ditemukan.');
-                return response()->json([
-                    'message' => 'Gagal menambah kategori.',
-                ], 500);
+                return response()->json(['message' => 'Gagal menambah kategori.'], 500);
             }
 
-            // Jika kategori sudah ada, gunakan ID kategori yang ada
-            // Jika kategori baru, ID sudah dibuat oleh firstOrCreate()
-            $categoryId = $category->id;
-
             // Simpan item baru
+            $taxMultiplier = $request->is_tax ? (1 + ($request->tax / 100)) : 1;
+
             $item = \App\Models\Items::create([
-                'id'          => \Illuminate\Support\Str::uuid(),
-                'item_name'   => $request->item_name,
-                'item_code'   => $request->item_code,
-                'stock'       => $request->stock ?? 0,
-                'price'       => $request->price,
-                'satuan'      => $request->satuan,
-                'category_id' => $categoryId, // Pakai ID kategori yang ditemukan atau dibuat
-                'created_by'  => $request->created_by,
-                'is_tax'      => $request->is_tax ?? 0,
-                'tax'         => request()->tax ?? 0,
+                'id'               => \Illuminate\Support\Str::uuid(),
+                'item_code'        => $request->item_code,
+                'item_name'        => $request->item_name,
+                'category_id'      => $category->id,
+                'stock'            => $request->stock ?? 0,
+                'satuan'           => $request->satuan,
+                'price'            => $request->price,
+                'wholesale_price'  => $request->wholesale_price ? $request->wholesale_price * $taxMultiplier : null,
+                'retail_price'     => $request->retail_price ? $request->retail_price * $taxMultiplier : null,
+                'eceran_price'     => $request->eceran_price ? $request->eceran_price * $taxMultiplier : null,
+                'retail_unit'      => $request->retail_unit ?? null,
+                'bulk_unit'        => $request->bulk_unit ?? null,
+                'bulk_spec'        => $request->bulk_spec ?? null,
+                'retail_conversion'=> $request->retail_convertion ?? null,
+                'is_tax'           => $request->is_tax,
+                'tax'              => $request->is_tax ? $request->tax : null,
+                'created_by'       => $request->created_by,
             ]);
 
-            // Debugging: Log item yang berhasil disimpan
+
             Log::info('Item berhasil ditambahkan:', $item->toArray());
 
-            // Kembalikan response JSON
             return response()->json([
-                'message' => 'Item berhasil ditambahkan',
-                'item'    => $item,
+                'message'  => 'Item berhasil ditambahkan',
+                'item'     => $item,
                 'category' => $category,
             ], 201);
+
         } catch (\Exception $e) {
-            // Tangani exception dan log error
             Log::error('Terjadi kesalahan saat menambah item: ' . $e->getMessage(), [
                 'error' => $e->getTraceAsString(),
             ]);
@@ -99,6 +179,7 @@ class InventoryController extends Controller
             ], 500);
         }
     }
+
 
 
 
@@ -234,5 +315,76 @@ class InventoryController extends Controller
                 'error'   => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function storeSatuan(Request $request)
+    {
+        $request->validate([
+            'satuan_name'   => 'required|string|unique:satuans,name',
+        ]);
+        try {
+            // Cek apakah kategori sudah ada berdasarkan nama, jika tidak ada maka buat kategori baru
+            $satuan = \App\Models\Satuan::firstOrCreate(
+                ['name' => $request->satuan_name],
+                ['id' => \Illuminate\Support\Str::uuid()]  // Membuat ID jika kategori baru
+            );
+
+            // Debugging: Log kategori yang dkategoriukan atau dibuat
+            Log::info('Satuan:', $satuan ? $satuan->toArray() : 'Kategori gagal dibuat atau dkategoriukan');
+
+            // Pastikan kategori ada sebelum digunakan
+            if (!$satuan || !$satuan->id) {
+                Log::error('Satuan gagal dibuat atau dkategoriukan.');
+                return response()->json([
+                    'message' => 'Gagal menambah Satuan.',
+                ], 500);
+            }
+
+            // Jika kategori sudah ada, gunakan ID kategori yang ada
+            // Jika kategori baru, ID sudah dibuat oleh firstOrCreate()
+//            $categoryId = $satuan->id;
+//
+//            // Simpan kategori baru
+//            $kategori = \App\Models\kategoris::create([
+//                'id'          => \Illuminate\Support\Str::uuid(),
+//                'kategori_name'   => $request->kategori_name,
+//                'kategori_code'   => $request->kategori_code,
+//                'stock'       => $request->stock ?? 0,
+//                'price'       => $request->price,
+//                'satuan'      => $request->satuan,
+//                'category_id' => $categoryId, // Pakai ID kategori yang dkategoriukan atau dibuat
+//                'created_by'  => $request->created_by,
+//            ]);
+//
+//            // Debugging: Log kategori yang berhasil disimpan
+//            Log::info('kategori berhasil ditambahkan:', $kategori->toArray());
+
+            // Kembalikan response JSON
+            return response()->json([
+                'message' => 'Satuan berhasil ditambahkan',
+                'satuan' => $satuan,
+            ], 201);
+        } catch (\Exception $e) {
+            // Tangani exception dan log error
+            Log::error('Terjadi kesalahan saat menambah satuan: ' . $e->getMessage(), [
+                'error' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menambah satuan.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getSatuans()
+    {
+        $satuan = \App\Models\Satuan::all();
+
+        return response()->json([
+            'message' => 'Daftar kategori berhasil diambil',
+            'satuan' => $satuan,
+            'length' => count($satuan),
+        ], 200);
     }
 }

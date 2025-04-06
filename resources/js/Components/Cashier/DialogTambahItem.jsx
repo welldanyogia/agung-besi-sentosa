@@ -34,12 +34,22 @@ import {
 } from "@/Components/ui/command";
 import {cn} from "@/lib/utils.js";
 import {usePage} from "@inertiajs/react";
-import {Card} from "@/Components/ui/card.jsx";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/Components/ui/card.jsx";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/Components/ui/tabs.jsx";
 
 export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, setError, getItems, getInvoice}) {
     const [openDialog, setOpenDialog] = useState(false);
     const [loading, setLoading] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const availableTabs = [
+        {key: 'retail', label: 'Retail', price: product.retail_price},
+        {key: 'grosir', label: 'Grosir', price: product.wholesale_price},
+        {key: 'eceran', label: 'Eceran', price: product.eceran_price}
+    ].filter(tab => tab.price !== null); // Filter hanya yang memiliki harga
+
+    const defaultValue = availableTabs.length > 0 ? availableTabs[0].key : ''; // Ambil yang pertama
+    const [selectedTab, setSelectedTab] = useState(defaultValue);
+
 
     const handleIncrease = () => {
         if (quantity < product.stock) {
@@ -64,12 +74,31 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         }
     };
 
+
     const handleAddItem = async () => {
         setLoading(true);
 
-        // Check if item with the same id already exists in the invoiceItems
+        // Tentukan price_type berdasarkan tab yang dipilih
+        const priceType = selectedTab || "retail"; // Default ke "retail" jika tidak ada
+
+        // Tentukan harga berdasarkan price_type
+        let itemPrice;
+        switch (priceType) {
+            case "eceran":
+                itemPrice = product.eceran_price;
+                break;
+            case "grosir":
+                itemPrice = product.wholesale_price;
+                break;
+            case "retail":
+            default:
+                itemPrice = product.retail_price;
+                break;
+        }
+
+        // Tambahkan item ke dalam invoice
         setInvoiceItems((prevItems) => {
-            const itemIndex = prevItems.findIndex((item) => item.id === product.id);
+            const itemIndex = prevItems?.findIndex((item) => item.id === product.id);
 
             if (itemIndex > -1) {
                 const updatedItems = [...prevItems];
@@ -78,10 +107,11 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             } else {
                 const newItem = {
                     id: product.id,
-                    item_name: product.item_name,
-                    price: product.price + ((product.tax/100)*product.price),
+                    item_name: priceType === "eceran" ? `${product.item_name} (Eceran)` : product.item_name,
+                    price: itemPrice , // Harga dengan pajak
                     satuan: product.satuan,
                     qty: quantity,
+                    price_type: priceType, // Tambahkan price_type ke item
                 };
                 return [...prevItems, newItem];
             }
@@ -92,14 +122,13 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                 item_id: product.id,
                 quantity: quantity,
                 user_id: auth.user.id,
+                price_type: priceType, // Kirim price_type ke API
             });
 
             setSuccess(response.data.message);
-            getItems();
         } catch (error) {
-            console.error("Error fetching inventory data:", error);
+            console.log(error)
             setError("Gagal menambahkan barang!!!");
-            getItems();
         }
 
         setTimeout(() => {
@@ -111,6 +140,8 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     };
 
 
+
+
     const formatRupiah = (number) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
@@ -119,8 +150,16 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         }).format(number);
     };
 
+    const gridColsClass = {
+        1: 'grid-cols-1',
+        2: 'grid-cols-2',
+        3: 'grid-cols-3',
+        4: 'grid-cols-4',
+        5: 'grid-cols-5',
+    }[availableTabs.length] || 'grid-cols-1'; // fallback jika tidak cocok
+
     return (
-        <Dialog open={openDialog && product.stock > 0}  onOpenChange={(openDialog) => setOpenDialog(openDialog)}>
+        <Dialog open={openDialog && product.stock > 0} onOpenChange={(openDialog) => setOpenDialog(openDialog)}>
             <DialogTrigger asChild disabled={product.stock <= 0} onClick={() => {
                 if (product.stock <= 0) {
                     setError("Stok Habis"); // Set error jika stok 0
@@ -128,26 +167,32 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             }}>
                 <Card
                     key={product.id}
-                    className="flex flex-col justify-center p-4 rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:cursor-pointer"
+                    className="relative flex flex-col justify-center py-6 px-4  rounded-lg shadow-md transition-all duration-300 hover:scale-105 hover:cursor-pointer"
                 >
-                    {/*<div className="w-full h-24 bg-gray-300 rounded-md flex items-center justify-center">*/}
-                    {/*    {product.image ? (*/}
-                    {/*        <img*/}
-                    {/*            src={product.image}*/}
-                    {/*            alt={product.name}*/}
-                    {/*            className="w-full h-full object-cover rounded-md"*/}
-                    {/*        />*/}
-                    {/*    ) : (*/}
-                    {/*        <span className="text-gray-600 text-sm">Gambar</span>*/}
-                    {/*    )}*/}
-                    {/*</div>*/}
+                    {/* Pita Pajak */}
+                    {product.is_tax === 1 && (
+                        <div
+                            className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">
+                            + Pajak
+                        </div>
+                    )}
+                    {product.eceran_price !== null && (
+                        <div
+                            className="absolute top-0 left-0 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-br-lg rounded-tl-lg">
+                            Eceran
+                        </div>
+                    )}
+
                     <p className="font-semibold">{product.item_name}</p>
                     <p className="">{product.item_code}</p>
-                    <p className="text-sm text-gray-700">{formatRupiah(product.price+((product.tax/100)*product.price))}</p>
+                    <p className="text-sm text-gray-700">
+                        {formatRupiah(product.retail_price)}
+                    </p>
                     <p className={`text-sm ${product.stock === 0 ? "text-red-500" : "text-green-500"}`}>
                         {product.stock === 0 ? "Stok Habis" : `Stok: ${product.stock}`}
                     </p>
                 </Card>
+
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-[425px]">
@@ -158,25 +203,83 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
                 <div className="grid py-4 gap-2">
                     <div className="flex flex-col gap-2">
-                        <div className="w-full flex justify-between">
-                            <div>
-                                <div className="font-bold">{product.item_name}</div>
-                                <div>{product.item_code}</div>
-                            </div>
-                            <div className="text-md">
-                                <div>
-                                    {formatRupiah(product.price+((product.tax/100)*product.price))}/{product.satuan}
+                        <div className="w-full justify-between">
+                            <div className={'flex justify-between w-full p-2'}>
+                                <div className={'flex flex-col justify-center p-2 text-center'}>
+                                    <div className={'font-bold'}>Nama Barang</div>
+                                    <div>{product.item_name}</div>
                                 </div>
-                                <div><strong>Stok : </strong>{product.stock}</div>
+                                <div className={'flex flex-col justify-center p-2 text-center'}>
+                                    <div className={'font-bold'}>Kode Barang</div>
+                                    <div>{product.item_code}</div>
+                                </div>
+                                <div className={'flex flex-col justify-center p-2 text-center'}>
+                                    <strong>Stok</strong>{product.stock}</div>
+                            </div>
+                            <div className="text-md w-full">
+                                <Tabs value={selectedTab} onValueChange={(newValue) => setSelectedTab(newValue)}
+                                      className="w-full">
+                                    <TabsList className={`grid w-full ${gridColsClass}`}>
+                                        {availableTabs.map(tab => (
+                                            <TabsTrigger key={tab.key} value={tab.key}>
+                                                {tab.label}
+                                            </TabsTrigger>
+                                        ))}
+                                    </TabsList>
+
+                                    <TabsContent value="retail">
+                                        <div className={'w-full flex flex-col'}>
+                                            <div className={'justify-center text-center font-bold'}>
+                                                Harga : {formatRupiah(product.retail_price)}
+                                            </div>
+                                            <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
+                                                <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
+                                                <Input value={quantity} onChange={handleChange}
+                                                       className="w-16 text-center"
+                                                       disabled={product.stock === 0}/>
+                                                <span className={'-ml-6'}>/{product.satuan}</span>
+                                                <Button onClick={handleIncrease}
+                                                        disabled={quantity >= product.stock}>+</Button>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+                                    <TabsContent value="grosir">
+                                        <div className={'w-full flex flex-col'}>
+                                            <div className={'justify-center text-center font-bold'}>
+                                                Harga : {formatRupiah(product.wholesale_price)}
+                                            </div>
+                                            <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
+                                                <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
+                                                <Input value={quantity} onChange={handleChange}
+                                                       className="w-16 text-center"
+                                                       disabled={product.stock === 0}/>
+                                                <span className={'-ml-6'}>/{product.satuan}</span>
+                                                <Button onClick={handleIncrease}
+                                                        disabled={quantity >= product.stock}>+</Button>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+                                    <TabsContent value="eceran">
+                                        <div className={'w-full flex flex-col'}>
+                                            <div className={'justify-center text-center font-bold'}>
+                                                Harga : {formatRupiah(product.eceran_price)}
+                                            </div>
+                                            <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
+                                                <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
+                                                <Input value={quantity} onChange={handleChange}
+                                                       className="w-16 text-center"
+                                                       disabled={product.stock === 0}/>
+                                                <span className={'-ml-6'}>/{product.retail_unit}</span>
+                                                <Button onClick={handleIncrease}
+                                                        disabled={quantity >= product.stock}>+</Button>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
+
                             </div>
                         </div>
 
-                        <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
-                            <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
-                            <Input value={quantity} onChange={handleChange} className="w-16 text-center" disabled={product.stock === 0}/>
-                            <span className={'-ml-6'}>/{product.satuan}</span>
-                            <Button onClick={handleIncrease} disabled={quantity >= product.stock}>+</Button>
-                        </div>
                     </div>
                 </div>
 

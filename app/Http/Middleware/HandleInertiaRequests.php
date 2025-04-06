@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\StoreInfo;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,6 +36,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],
             ],
+            'storeInfo' => StoreInfo::first(),
+
         ];
     }
 }

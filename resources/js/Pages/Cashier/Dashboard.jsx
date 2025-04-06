@@ -39,11 +39,11 @@ function useIsMobile() {
 
     return isMobile
 }
-export default function Dashboard({auth}) {
+export default function Dashboard({auth,items,kategoris}) {
     const isMobile = useIsMobile()
     const [currentTime, setCurrentTime] = useState("");
     const [categories, setCategories] = useState([]);
-    const [items, setItems] = useState([]);
+    // const [items, setItems] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [invoiceItems, setInvoiceItems] = useState([])
@@ -79,34 +79,25 @@ export default function Dashboard({auth}) {
         }
 
         // Cek items jika belum ada
-        if (items.length === 0) {
-            getItems();
-            getCategories()
-        }
+        // if (items.length === 0) {
+        //     getItems();
+        //     getCategories()
+        // }
 
+        const formattedCategories = kategoris.map(category => ({
+            id: category.id,
+            label: category.category_name,
+            value: category.category_name,
+            icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
+        }));
+
+        setCategories(formattedCategories);
         const totalAmount = invoiceItems.reduce((acc, item) => acc + (item.sub_total + ((item?.item?.tax / 100) * item.sub_total)), 0);
         setTotal(formatRupiah(totalAmount));
         setSubTotal(formatRupiah(totalAmount));
 
     }, [invoice, storeInfo, invoiceItems, items]); // Menambahkan dependensi yang sesuai untuk memastikan hanya mengambil data jika diperlukan
 
-    const getCategories = async () => {
-        try {
-            const response = await axios.post("/api/categories/");
-
-            // Format ulang data agar sesuai dengan priorities
-            const formattedCategories = response.data.categories.map(category => ({
-                id: category.id,
-                label: category.category_name,
-                value: category.category_name,
-                icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
-            }));
-
-            setCategories(formattedCategories);
-        } catch (error) {
-            // console.error("Error fetching inventory data:", error);
-        }
-    };
 
 
     const getInvoice = async ()=>{
@@ -135,6 +126,7 @@ export default function Dashboard({auth}) {
             //     value: category.category_name,
             //     icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
             // }));
+            console.log(response)
 
             setItems(response.data.items);
         } catch (error) {
@@ -142,6 +134,7 @@ export default function Dashboard({auth}) {
         }
     };
 
+    console.log("items :",items)
 
     const filteredItems = items.filter((product) => {
         const matchesCategory =

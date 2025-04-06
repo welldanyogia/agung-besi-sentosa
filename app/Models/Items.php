@@ -11,7 +11,13 @@ class Items extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'item_name', 'item_code', 'stock', 'price', 'satuan', 'category_id', 'created_by', 'is_tax', 'tax'
+        'item_name', 'item_code', 'stock', 'price', 'satuan', 'category_id', 'created_by', 'is_tax', 'tax','wholesale_price',
+        'retail_price',
+        'eceran_price',
+        'retail_unit',
+        'bulk_unit',
+        'bulk_spec',
+        'retail_conversion'
     ];
 
     public function category()

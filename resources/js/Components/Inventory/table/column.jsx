@@ -72,17 +72,58 @@ export const columns = [
         header: () => <div className="text-center">Harga</div>,
         cell: ({ row }) => {
             const price = row.original.price;
-            const tax = row.original.tax; // Assuming you have the 'tax' value in the row data
-
-            // Calculate price with tax (e.g., if tax is 10%, price * 1.1)
-            const priceWithTax = tax ? (price * (tax / 100))+price : price;
 
             return (
                 <div className="text-center">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
-                    }).format(priceWithTax)}
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("retail_price", {
+        header: () => <div className="text-center">Harga Retail</div>,
+        cell: ({ row }) => {
+            const price = row.original.retail_price;
+
+            return (
+                <div className="text-center">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("wholesale_price", {
+        header: () => <div className="text-center">Harga Grosir</div>,
+        cell: ({ row }) => {
+            const price = row.original.wholesale_price;
+
+            return (
+                <div className="text-center">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("eceran_price", {
+        header: () => <div className="text-center">Harga Eceran</div>,
+        cell: ({ row }) => {
+            const price = row.original.eceran_price;
+
+            return (
+                <div className="text-center">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
                 </div>
             );
         },
@@ -91,6 +132,20 @@ export const columns = [
         header: () => <div className="text-center">Satuan</div>,
         cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
     }),
+    columnHelper.accessor("retail_conversion", {
+        header: () => <div className="text-center">Spesifikasi</div>,
+        cell: ({ row }) => {
+            const conversion = row.original.retail_conversion;
+            const satuan = row.original.satuan || 'satuan';
+            const satuanEceran = row.original.retail_unit || 'satuan';
+            return (
+                <div className="text-center">
+                    1 {satuan} = {conversion} {satuanEceran}
+                </div>
+            );
+        },
+    }),
+
     columnHelper.accessor("is_tax", {
         header: () => <div className="text-center">Pajak</div>,
         cell: ({ getValue }) => {
