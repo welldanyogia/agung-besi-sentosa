@@ -92,7 +92,23 @@ export default function Dashboard({auth,items,kategoris}) {
         }));
 
         setCategories(formattedCategories);
-        const totalAmount = invoiceItems.reduce((acc, item) => acc + (item.sub_total + ((item?.item?.tax / 100) * item.sub_total)), 0);
+        const totalAmount = invoiceItems.reduce((acc, item) => {
+            let selectedPrice = 0;
+
+            if (item.price_type === 'eceran') {
+                selectedPrice = item.item?.eceran_price || 0;
+            } else if (item.price_type === 'retail') {
+                selectedPrice = item.item?.retail_price || 0;
+            } else {
+                selectedPrice = item.item?.price || 0;
+            }
+
+            const subTotal = selectedPrice * item.qty;
+            const taxAmount = (item.item?.tax || 0) / 100 * subTotal;
+
+            return acc + subTotal;
+        }, 0);
+
         setTotal(formatRupiah(totalAmount));
         setSubTotal(formatRupiah(totalAmount));
 

@@ -341,7 +341,7 @@ class CashierController extends Controller
         $invoice = Invoices::where('created_by', $request->user_id)
             ->where('status', 'pending')
             ->latest()
-            ->with('items.item')
+            ->with('items.item','createdBy')
             ->first(); // Ambil invoice terakhir yang masih pending
 
         if (!$invoice) {

@@ -49,19 +49,30 @@ export const columns = [
     columnHelper.accessor("price", {
         header: () => <div className="text-center">Harga</div>,
         cell: ({ row }) => {
-            const price = row.original.price;
+            const item = row.original.item;
+            const priceType = row.original.price_type;
 
+            let selectedPrice = 0;
+
+            if (priceType === 'eceran') {
+                selectedPrice = item?.eceran_price;
+            } else if (priceType === 'retail') {
+                selectedPrice = item?.retail_price;
+            } else {
+                selectedPrice = item?.wholesale_price; // grosir
+            }
 
             return (
                 <div className="text-center">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
-                    }).format(price)}
+                    }).format(selectedPrice ?? 0)}
                 </div>
             );
         },
     }),
+
 
     columnHelper.accessor("item.satuan", {
         header: () => <div className="text-center">Satuan</div>,

@@ -124,6 +124,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
         }).format(number);
     };
 
+
     const handlePrint = async () => {
         let printWindow = window.open('', '');
 
@@ -236,14 +237,24 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
     <div class="col-subtotal">Subtotal</div>
   </div>
 
-  ${data.map(item =>
-            `<div class="table-row">
-      <div class="col-item">${item.item.item_name}</div>
-      <div class="col-price">${formatRupiah(item.price)}</div>
+  ${data.map(item => {
+            let selectedPrice = 0;
+            if (item.price_type === 'eceran') {
+                selectedPrice = item.item.eceran_price;
+            } else if (item.price_type === 'retail') {
+                selectedPrice = item.item.retail_price;
+            } else {
+                selectedPrice = item.item.wholesale_price; // grosir
+            }
+
+            return `
+    <div class="table-row">
+      <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : item.price_type === 'retail' ? '(Retail)' : ''}</div>
+      <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-qty">${item.qty}</div>
-      <div class="col-subtotal">${formatRupiah(item.price * item.qty)}</div>
-    </div>`
-        ).join('')}
+      <div class="col-subtotal">${formatRupiah(selectedPrice * item.qty)}</div>
+    </div>`;
+        }).join('')}
 
   <div class="line"></div>
 

@@ -565,9 +565,9 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 <!--  </div>-->
 
   <div class="info">
-    <div><span>Invoice:</span><span>${invoice.invoice_code}</span></div>
-    <div><span>Kasir:</span><span>${invoice.created_by.name}</span></div>
-    <div><span>Customer:</span><span>${invoice.customer_name}</span></div>
+    <div><span>Invoice:</span><span>${invoice_id.invoice_code}</span></div>
+    <div><span>Kasir:</span><span>${invoice_id.created_by.name}</span></div>
+    <div><span>Customer:</span><span>${customer}</span></div>
   </div>
 
   <div class="line"></div>
@@ -579,29 +579,60 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
     <div class="col-subtotal">Subtotal</div>
   </div>
 
-  ${data.map(item =>
-            `<div class="table-row">
-      <div class="col-item">${item.item.item_name}</div>
-      <div class="col-price">${formatRupiah(item.price)}</div>
+  ${invoiceItems.map(item => {
+            let selectedPrice = 0;
+            if (item.price_type === 'eceran') {
+                selectedPrice = item.item.eceran_price;
+            } else if (item.price_type === 'retail') {
+                selectedPrice = item.item.retail_price;
+            } else {
+                selectedPrice = item.item.wholesale_price; // grosir
+            }
+
+            return `
+    <div class="table-row">
+      <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : item.price_type === 'retail' ? '(Retail)' : ''}</div>
+      <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-qty">${item.qty}</div>
-      <div class="col-subtotal">${formatRupiah(item.price * item.qty)}</div>
-    </div>`
-        ).join('')}
+      <div class="col-subtotal">${formatRupiah(selectedPrice * item.qty)}</div>
+    </div>`;
+        }).join('')}
+
 
   <div class="line"></div>
 
   <div class="totals">
     <div class="table-row">
       <div class="col-item">Total</div>
-      <div class="col-subtotal">${formatRupiah(invoice.total_price)}</div>
+      <div class="col-subtotal">${
+            formatRupiah(
+                invoice_id.items.reduce((acc, item) => {
+                    let selectedPrice = 0;
+
+                    if (item.price_type === 'eceran') {
+                        selectedPrice = item.item?.eceran_price || 0;
+                    } else if (item.price_type === 'retail') {
+                        selectedPrice = item.item?.retail_price || 0;
+                    } else {
+                        selectedPrice = item.item?.price || 0;
+                    }
+
+                    const tax = (item.item?.tax || 0) / 100;
+                    const totalWithTax = selectedPrice * item.qty;
+
+                    return acc + totalWithTax;
+                }, 0)
+            )
+        }</div>
+
     </div>
     <div class="table-row">
       <div class="col-item">Bayar</div>
-      <div class="col-subtotal">${formatRupiah(invoice.bayar)}</div>
+      <div class="col-subtotal">${formatRupiah(cashPaid)}</div>
     </div>
     <div class="table-row">
       <div class="col-item">Kembali</div>
-      <div class="col-subtotal">${formatRupiah(invoice.kembalian)}</div>
+      <div class="col-subtotal">${formatRupiah(kembalian)}</div>
     </div>
   </div>
 
@@ -614,7 +645,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 </body>
 </html>
 `);
-        await updateIsPrinted(invoice.id, true);
+        await updateIsPrinted(invoice_id.id, true);
         printWindow.document.close();
         printWindow.print();
         printWindow.close();
@@ -880,7 +911,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
             return response.data; // Mengembalikan data response
         } catch (error) {
-            console.error("Gagal update status is_printed:", error.response?.data || error.message);
+            // console.error("Gagal update status is_printed:", error.response?.data || error.message);
             throw error;
         }
     };
@@ -904,7 +935,23 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
         setCashPaid(value);
 
-        const totalAmount = invoiceItems.reduce((acc, item) => acc + (item.price + ((item.item.tax / 100) * item.price)) * item.qty, 0);
+        const totalAmount = invoiceItems.reduce((acc, item) => {
+            let selectedPrice = 0;
+
+            if (item.price_type === 'eceran') {
+                selectedPrice = item.item?.eceran_price || 0;
+            } else if (item.price_type === 'retail') {
+                selectedPrice = item.item?.retail_price || 0;
+            } else {
+                selectedPrice = item.item?.price || 0;
+            }
+
+            const tax = (item.item?.tax || 0) / 100;
+            const totalWithTax = selectedPrice * item.qty;
+
+            return acc + totalWithTax;
+        }, 0);
+
         setTotal(totalAmount);
         setKembalian(value >= totalAmount ? value - totalAmount : 0);
     };
@@ -968,17 +1015,48 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                             <TableCell>
                                                 {item?.price_type === 'eceran' ? item?.item?.retail_unit : item?.item?.satuan}
                                             </TableCell>
-                                            <TableCell>{formatRupiah(item?.price)}</TableCell>
+                                            <TableCell>
+                                                {item?.price_type === 'eceran'
+                                                    ? formatRupiah(item?.item?.eceran_price)
+                                                    : item?.price_type === 'retail'
+                                                        ? formatRupiah(item?.item?.retail_price)
+                                                        : formatRupiah(item?.item?.price)}
+                                            </TableCell>
+
 
                                             <TableCell>{item?.qty}</TableCell>
-                                            <TableCell>{formatRupiah(item?.sub_total)}</TableCell>
+                                            <TableCell>
+                                                {item?.price_type === 'eceran'
+                                                    ? formatRupiah(item?.qty * item?.item?.eceran_price)
+                                                    : item?.price_type === 'retail'
+                                                        ? formatRupiah(item?.qty * item?.item?.retail_price)
+                                                        : formatRupiah(item?.qty * item?.item?.wholesale_price)}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         </div>
                         <div className="invoice-footer total font-bold">
-                            Total: {formatRupiah(invoiceItems?.reduce((acc, item) => acc + ((item.price + ((item?.item?.tax / 100) * item.price)) * item.qty), 0))}
+                            Total: {formatRupiah(
+                            invoiceItems?.reduce((acc, item) => {
+                                let selectedPrice = 0;
+
+                                if (item.price_type === 'eceran') {
+                                    selectedPrice = item.item?.eceran_price || 0;
+                                } else if (item.price_type === 'retail') {
+                                    selectedPrice = item.item?.retail_price || 0;
+                                } else {
+                                    selectedPrice = item.item?.price || 0;
+                                }
+
+                                const subTotal = selectedPrice * item.qty;
+                                const taxAmount = ((item.item?.tax || 0) / 100) * subTotal;
+
+                                return acc + subTotal;
+                            }, 0)
+                        )}
+
                         </div>
                         <div className="mt-4 gap-2 flex flex-col">
                             <div className={'flex gap-4 items-center justify-between w-2/3'}>
