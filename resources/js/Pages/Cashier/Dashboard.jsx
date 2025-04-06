@@ -151,10 +151,22 @@ export default function Dashboard({auth,items,kategoris}) {
 
     // console.log("items :",items)
 
+    // const filteredItems = items.filter((product) => {
+    //     const matchesCategory =
+    //         activeCategory === null || product.category_id === activeCategory;  // Filter by category
+    //     const matchesSearch = product.item_name.toLowerCase().includes(searchQuery.toLowerCase());  // Filter by search query
+    //     return matchesCategory && matchesSearch;
+    // });
+
     const filteredItems = items.filter((product) => {
         const matchesCategory =
-            activeCategory === null || product.category_id === activeCategory;  // Filter by category
-        const matchesSearch = product.item_name.toLowerCase().includes(searchQuery.toLowerCase());  // Filter by search query
+            activeCategory === null || product.category_id === activeCategory;
+
+        const lowerSearch = searchQuery.toLowerCase();
+        const matchesSearch =
+            product.item_name.toLowerCase().includes(lowerSearch) ||
+            product.item_code.toLowerCase().includes(lowerSearch); // Tambahkan pencarian berdasarkan item_code
+
         return matchesCategory && matchesSearch;
     });
 
