@@ -21,13 +21,16 @@ class SettingController extends Controller
 
         // Jika pengguna yang login adalah Superadmin, ambil semua pengguna
         // Jika pengguna yang login adalah Admin, ambil pengguna yang role-nya 'employee'
-        if (auth()->user()->hasRole('superadmin')) {
-            $users = User::withCount('invoices')->with('roles')->get(); // Ambil semua user beserta jumlah invoice mereka
-        } elseif (auth()->user()->hasRole('admin')) {
+        if (auth()->check() && auth()->user()->hasRole('superadmin')) {
+            $users = User::withCount('invoices')->with('roles')->get();
+        } elseif (auth()->check() && auth()->user()->hasRole('admin')) {
             $users = User::withCount('invoices')->with('roles')->whereHas('roles', function ($query) {
-                $query->where('name', 'employee'); // Ambil hanya user yang role-nya 'employee'
+                $query->where('name', 'employee');
             })->get();
+        } else {
+            $users = collect(); // atau redirect, atau tampilkan error
         }
+
 
         $storeInfo = StoreInfo::first();
 
