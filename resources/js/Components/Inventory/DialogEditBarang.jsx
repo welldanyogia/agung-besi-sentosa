@@ -129,17 +129,17 @@ export function DialogEditBarang({ barang }) {
             tax: data.is_tax ? data.tax : null,
             updated_by: auth.user.id // Menyertakan siapa yang mengupdate
         };
-        console.log(payload)
+        // console.log(payload)
 
         try {
             const response = await axios.post(`/api/inventory/update/${data.kode_barang}`, payload);
-            console.log("Update success:", response.data);
+            // console.log("Update success:", response.data);
 
             // Setelah update berhasil, tutup dialog dan refresh data
             setOpenDialog(false);
             window.location.reload(); // Bisa diganti dengan cara yang lebih efisien jika menggunakan state management
         } catch (err) {
-            console.error("Terjadi kesalahan:", err);
+            // console.error("Terjadi kesalahan:", err);
             // Tampilkan pesan error jika perlu
         } finally {
             setLoading(false);

@@ -108,10 +108,10 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
                 is_printed: isPrinted
             });
 
-            console.log("Berhasil update status is_printed:", response.data);
+            // console.log("Berhasil update status is_printed:", response.data);
             return response.data; // Mengembalikan data response
         } catch (error) {
-            console.error("Gagal update status is_printed:", error.response?.data || error.message);
+            // console.error("Gagal update status is_printed:", error.response?.data || error.message);
             throw error;
         }
     };

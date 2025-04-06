@@ -133,7 +133,7 @@ export default function Dashboard({auth,items,kategoris}) {
         }
     };
 
-    console.log("items :",items)
+    // console.log("items :",items)
 
     const filteredItems = items.filter((product) => {
         const matchesCategory =
