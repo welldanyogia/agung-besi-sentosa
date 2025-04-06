@@ -6,7 +6,7 @@ import {Link, usePage} from '@inertiajs/react';
 import {useState} from 'react';
 
 export default function AuthenticatedLayout({header, children,auth}) {
-    const user = auth.user;
+    const user = auth?.user;
     console.log(auth)
     const role = user.roles[0].name;
 
