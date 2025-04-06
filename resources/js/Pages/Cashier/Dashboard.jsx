@@ -126,7 +126,6 @@ export default function Dashboard({auth,items,kategoris}) {
             //     value: category.category_name,
             //     icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
             // }));
-            console.log(response)
 
             setItems(response.data.items);
         } catch (error) {
