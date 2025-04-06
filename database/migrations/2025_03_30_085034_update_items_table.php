@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('items', function (Blueprint $table) {
-            $table->uuid('satuan_id')->nullable();
-
-            $table->foreign('satuan_id')->references('id')->on('satuans')->cascadeOnDelete();
-        });
+//        Schema::table('items', function (Blueprint $table) {
+////            $table->uuid('satuan_id')->nullable();
+////
+////            $table->foreign('satuan_id')->references('id')->on('satuans')->cascadeOnDelete();
+//        });
     }
 
     /**
@@ -23,10 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('items', function (Blueprint $table) {
-            $table->dropColumn([
-                'satuan_id'
-            ]);
-        });
+//        Schema::table('items', function (Blueprint $table) {
+//            $table->dropColumn([
+//                'satuan_id'
+//            ]);
+//        });
     }
 };
