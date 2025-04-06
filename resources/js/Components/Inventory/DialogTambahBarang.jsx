@@ -289,8 +289,8 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
         } finally {
-            Inertia.reload()
-            setOpenDialog(false)
+            // Inertia.reload()
+            // setOpenDialog(false)
             setLoading(false);
         }
     };

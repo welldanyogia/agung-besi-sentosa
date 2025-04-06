@@ -121,7 +121,7 @@ class InventoryController extends Controller
             'retail_convertion'=> 'nullable|numeric|min:0',
             'is_tax'           => 'required|boolean',
             'tax'              => 'nullable|integer',
-            'created_by'       => 'required|string',
+            'created_by'        => 'required|exists:users,id',
         ]);
 
         try {
