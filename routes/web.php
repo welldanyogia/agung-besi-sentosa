@@ -6,15 +6,24 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
 Route::get('/', function () {
-//    return Inertia::render('Auth/Login', [
-//        'canLogin' => Route::has('login'),
-//        'canRegister' => Route::has('register'),
-//        'laravelVersion' => Application::VERSION,
-//        'phpVersion' => PHP_VERSION,
-//    ]);
-    return redirect("/login");
+    if (auth()->check()) {
+        return redirect()->route('cashier'); // Redirect ke cashier jika sudah login
+    }
+
+    return redirect()->route('login'); // Redirect ke login jika belum login
 });
+
+//Route::get('/', function () {
+////    return Inertia::render('Auth/Login', [
+////        'canLogin' => Route::has('login'),
+////        'canRegister' => Route::has('register'),
+////        'laravelVersion' => Application::VERSION,
+////        'phpVersion' => PHP_VERSION,
+////    ]);
+//    return redirect("/login");
+//});
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
