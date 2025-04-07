@@ -604,7 +604,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
             return `
     <div class="table-row">
-      <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : item.price_type === 'retail' ? '(Retail)' : ''}</div>
+      <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-qty">${item.qty}</div>
       <div class="col-subtotal">${formatRupiah(selectedPrice * item.qty)}</div>
