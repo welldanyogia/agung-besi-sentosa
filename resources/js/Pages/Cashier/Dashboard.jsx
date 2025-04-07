@@ -330,11 +330,11 @@ export default function Dashboard({auth,items,kategoris}) {
                                                                          setInvoceItems={setInvoiceItems}
                                                                          storeInfo={storeInfo}/>
                                             </div>
-                                            <div className={'w-full flex p-2 gap-2'}>
-                                                <AlertCancelDialog setInvoiceItems={setInvoiceItems}
-                                                                   invoiceItems={invoiceItems} setError={setError}
-                                                                   setSuccess={setSuccess} getItems={getItems()}/>
-                                            </div>
+                                            {/*<div className={'w-full flex p-2 gap-2'}>*/}
+                                            {/*    <AlertCancelDialog setInvoiceItems={setInvoiceItems}*/}
+                                            {/*                       invoiceItems={invoiceItems} setError={setError}*/}
+                                            {/*                       setSuccess={setSuccess} getItems={getItems()}/>*/}
+                                            {/*</div>*/}
                                         </Card>
                                     </div>
                                 )
