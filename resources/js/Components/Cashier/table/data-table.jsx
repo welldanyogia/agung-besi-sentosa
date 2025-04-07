@@ -136,6 +136,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
         } catch (error) {
             setError("Gagal menghapus item");
         } finally {
+            getInvoice()
             setIsDeleting(false); // selesai loading
         }
     };
