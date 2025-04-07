@@ -18,6 +18,8 @@ import {Inertia} from "@inertiajs/inertia";
 const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,getItems,getInvoice}) => {
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState([]);
+    const [isDeleting, setIsDeleting] = useState(false);
+
 
     const table = useReactTable({
         data: data ?? [],
@@ -121,6 +123,8 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
         const selectedItems = Object.keys(rowSelection).map((key) => data[key]);
         const itemIds = selectedItems.map(item => item.item_id);
 
+        setIsDeleting(true); // mulai loading
+
         try {
             await axios.post("/api/cashier/delete-items", {
                 invoice_id: invoice.id,
@@ -128,13 +132,14 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
                 user_id: auth.user.id
             });
             setSuccess("Berhasil menghapus item");
-            // setRowSelection({});
             getItems();
-            // getInvoice();
         } catch (error) {
             setError("Gagal menghapus item");
+        } finally {
+            setIsDeleting(false); // selesai loading
         }
     };
+
 
     return (
         <div>
@@ -206,9 +211,11 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
                         variant={'destructive'}
                         className="w-full sm:w-auto mt-2 sm:mt-0"
                         onClick={handleDeleteSelected}
+                        disabled={isDeleting}
                     >
-                        Hapus
+                        {isDeleting ? "Menghapus..." : "Hapus"}
                     </Button>
+
                 </div>
             )}
         </div>
