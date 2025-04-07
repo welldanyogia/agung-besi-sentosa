@@ -580,7 +580,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
     <div><span>Invoice:</span><span>${invoice_id.invoice_code}</span></div>
     <div><span>Kasir:</span><span>${invoice_id.created_by.name}</span></div>
     <div><span>Customer:</span><span>${customer}</span></div>
-    <div><span>Waktu:</span><span>${formatWaktuIndonesia(invoice.created_at)}</span></div>
+    <div><span>Waktu:</span><span>${formatWaktuIndonesia(invoice_id.created_at)}</span></div>
   </div>
 
   <div class="line"></div>
