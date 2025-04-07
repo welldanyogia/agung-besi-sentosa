@@ -32,7 +32,10 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
         state: {rowSelection, columnFilters},
     });
 
+
     const handleMin = async (item) => {
+        const step = ["batang", "lembar"].includes(item.item.satuan.toLowerCase()) ? 0.5 : 1;
+
         try {
             // Tentukan jumlah pengurangan berdasarkan price_type
             const quantityReduction = item.price_type === "eceran"
@@ -43,7 +46,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
             const response = await axios.post("/api/cashier/restore-stock", {
                 invoice_id: item.invoice_id,
                 item_id: item.item_id,
-                quantity: 1, // Gunakan jumlah yang sudah dihitung
+                quantity: step, // Gunakan jumlah yang sudah dihitung
                 user_id: auth.user.id
             });
 
@@ -53,67 +56,85 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
             setInvoiceItems((prevItems) =>
                 prevItems.map((i) =>
                     i.item_id === item.item_id
-                        ? { ...i, quantity: i.quantity - 1 }
+                        ? { ...i, quantity: i.quantity - step }
                         : i
                 )
             );
 
             // Ambil ulang data
             getItems();
+            getInvoice()
         } catch (error) {
-            // console.log(error)
+            console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
-            getInvoice();
+            // getInvoice();
+        } finally {
+            getInvoice()
+            // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+            Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+
+
         }
     };
 
     const handlePlus = async (item) => {
-
+        const step = ["batang", "lembar"].includes(item.item.satuan.toLowerCase()) ? 0.5 : 1;
         try {
             // Kirim semua permintaan update stok dalam satu batch
 
-            const respone= await axios.post("/api/cashier/update-stock", {
+            const response= await axios.post("/api/cashier/update-stock", {
                 price_type: item.price_type,
                 // invoice_id : item.invoice_id,
                 item_id : item.item_id,
-                quantity : 1,
+                quantity : step,
                 user_id : auth.user.id
             })
 
-
             setSuccess("memperbarui QTY");
+            setInvoiceItems((prevItems) =>
+                prevItems.map((i) =>
+                    i.item_id === item.item_id
+                        ? { ...i, quantity: i.quantity - step }
+                        : i
+                )
+            );
             // setInvoiceItems([]);
             getItems();
             // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
 
-            // getInvoice();
+            getInvoice();
         } catch (error) {
-            // console.log(error)
+            console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
             // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
 
-            // getInvoice();
+            getInvoice();
+        }finally {
+            Inertia.get("/cashier", {}, { preserveState: true, replace: true });
         }
     };
 
     // Increment and Decrement handlers
     const handleIncrement = (product) => {
+        const step = ["batang", "lembar"].includes(product.item.satuan.toLowerCase()) ? 0.5 : 1;
         handlePlus(product)
         setInvoiceItems((prevItems) => {
             return prevItems.map((item) =>
-                item.id === product.id ? {...item, qty: item.qty + 1} : item
+                item.id === product.id ? {...item, qty: item.qty + step} : item
             );
         });
     };
 
     const handleDecrement = (product) => {
+        const step = ["batang", "lembar"].includes(product.item.satuan.toLowerCase()) ? 0.5 : 1;
+
         handleMin(product)
         setInvoiceItems((prevItems) => {
             return prevItems
                 .map((item) =>
-                    item.id === product.id ? {...item, qty: item.qty - 1} : item
+                    item.id === product.id ? {...item, qty: item.qty - step} : item
                 )
                 .filter((item) => item.qty > 0); // Remove item if qty = 0
         });
@@ -173,15 +194,21 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
                                             size="sm"
                                             className="rounded-full"
                                             onClick={() => handleDecrement(row.original)}
-                                            disabled={row.original.qty <= 1}
-                                        >
+                                            disabled={
+                                                ['lembar', 'batang'].includes(row.original.item?.satuan?.toLowerCase())
+                                                    ? row.original.qty <= 0.5
+                                                    : row.original.qty <= 1
+                                            }                                        >
                                             -
                                         </Button>
                                         <Input
-                                            value={row.original.qty}
+                                            value={row.original.price_type === 'eceran'
+                                                ? (row.original.qty * row.original.item?.retail_conversion || 1)
+                                                : row.original.qty}
                                             readOnly={true}
                                             className="w-12 text-center"
                                         />
+
                                         <Button
                                             size="sm"
                                             className="rounded-full"

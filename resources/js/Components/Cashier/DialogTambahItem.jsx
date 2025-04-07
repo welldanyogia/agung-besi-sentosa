@@ -36,11 +36,13 @@ import {cn} from "@/lib/utils.js";
 import {usePage} from "@inertiajs/react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/Components/ui/card.jsx";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/Components/ui/tabs.jsx";
+import {Inertia} from "@inertiajs/inertia";
 
 export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, setError, getItems, getInvoice}) {
     const [openDialog, setOpenDialog] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [quantity, setQuantity] = useState(1);
+    const initialQuantity = ["batang", "lembar"].includes(product.satuan.toLowerCase()) ? 0.5 : 1;
+    const [quantity, setQuantity] = useState(initialQuantity);
     const availableTabs = [
         {key: 'retail', label: 'Retail', price: product.retail_price},
         {key: 'grosir', label: 'Grosir', price: product.wholesale_price},
@@ -49,30 +51,41 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
     const defaultValue = availableTabs.length > 0 ? availableTabs[0].key : ''; // Ambil yang pertama
     const [selectedTab, setSelectedTab] = useState(defaultValue);
+    const step = ["batang", "lembar"].includes(product.satuan.toLowerCase()) ? 0.5 : 1;
+
 
 
     const handleIncrease = () => {
-        if (quantity < product.stock) {
-            setQuantity((prevQuantity) => prevQuantity + 1);
+        if (quantity + step <= product.stock) {
+            setQuantity(prevQuantity => parseFloat((prevQuantity + step).toFixed(2)));
         }
     };
 
     const handleDecrease = () => {
-        if (quantity > 1) {
-            setQuantity((prevQuantity) => prevQuantity - 1);
+        if (quantity - step >= step) {
+            setQuantity(prevQuantity => parseFloat((prevQuantity - step).toFixed(2)));
         }
     };
 
     const handleChange = (e) => {
-        const value = Number(e.target.value);
+        let value = parseFloat(e.target.value);
+
+        if (isNaN(value)) return;
+
         if (value > product.stock) {
             setQuantity(product.stock);
-        } else if (value < 1) {
-            setQuantity(1);
+        } else if (value < step) {
+            setQuantity(step);
         } else {
-            setQuantity(value);
+            // Pastikan hanya kelipatan step
+            const remainder = value % step;
+            if (remainder !== 0) {
+                value = Math.round(value / step) * step;
+            }
+            setQuantity(parseFloat(value.toFixed(2)));
         }
     };
+
 
 
     const handleAddItem = async () => {
@@ -127,8 +140,11 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
             setSuccess(response.data.message);
         } catch (error) {
-            // console.log(error)
+            console.log(error)
             setError("Gagal menambahkan barang!!!");
+        }finally {
+            Inertia.reload()
+            // getItems()
         }
 
         setTimeout(() => {
@@ -157,6 +173,12 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         4: 'grid-cols-4',
         5: 'grid-cols-5',
     }[availableTabs.length] || 'grid-cols-1'; // fallback jika tidak cocok
+
+    useEffect(() => {
+        const defaultQty = ["batang", "lembar"].includes(product.satuan.toLowerCase()) ? 0.5 : 1;
+        setQuantity(defaultQty);
+    }, [product]);
+
 
     return (
         <Dialog open={openDialog && product.stock > 0} onOpenChange={(openDialog) => setOpenDialog(openDialog)}>

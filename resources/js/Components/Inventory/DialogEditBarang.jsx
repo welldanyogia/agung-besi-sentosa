@@ -307,8 +307,6 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         }
 
     }
-
-    console.log(data)
     const handleSwitchEceranChange = (checked) => {
         setData((prevData) => ({
             ...prevData,

@@ -23,7 +23,7 @@ Route::post('/login', [\App\Http\Controllers\Auth\AuthenticatedSessionController
 
 Route::post('/inventory/store', [InventoryController::class, 'store'])->named('inventory.store'); // Tambah item baru
 Route::post('/inventory/show', [InventoryController::class, 'index'])->named('inventory.show'); // Tambah item baru
-Route::post('/inventory/update/{item_code}', [InventoryController::class, 'update'])->named('inventory.update'); // Tambah item baru
+Route::post('/inventory/update/{id}', [InventoryController::class, 'update'])->named('inventory.update'); // Tambah item baru
 Route::post('/items/{id}', [InventoryController::class, 'destroy'])->named('inventory.destroy'); // Tambah item baru
 Route::post('/categories/', [\App\Http\Controllers\CategoryController::class, 'index'])->named('categories.index'); // Tambah item baru
 Route::post('/satuans/', [\App\Http\Controllers\InventoryController::class, 'getSatuans'])->named('satuans.index'); // Tambah item baru

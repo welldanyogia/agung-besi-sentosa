@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import {usePage} from "@inertiajs/react";
 import axios from "axios";
+import {Inertia} from "@inertiajs/inertia";
 export const labels = [
     {
         value: "bug",
@@ -113,6 +114,10 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
         } catch (error) {
             // console.error("Gagal update status is_printed:", error.response?.data || error.message);
             throw error;
+        } finally {
+            // Inertia.get('/report',[preve])
+            Inertia.get("/report", {}, { preserveState: true, replace: true });
+
         }
     };
 
@@ -253,7 +258,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
       <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-qty">${item.qty}</div>
-      <div class="col-subtotal">${formatRupiah(selectedPrice * item.qty)}</div>
+      <div class="col-subtotal">${formatRupiah(item.sub_total)}</div>
     </div>`;
         }).join('')}
 

@@ -300,14 +300,20 @@ class CashierController extends Controller
 
         // Kurangi qty atau hapus item dari invoice
         if ($invoiceItem->qty > $request->quantity) {
-            Log::info("Mengurangi qty item dalam invoice ID: {$invoice->id}");
+            Log::info($invoiceItem);
+            Log::info("Mengurangi qty {$request->quantity} item dalam invoice ID: {$invoice->id}");
             $invoiceItem->qty -= $request->quantity;
+            Log::info("invoiceItem->qty : {$invoiceItem->qty}");
             $invoiceItem->sub_total = $invoiceItem->qty * $invoiceItem->price;
+            Log::info("invoiceItem->sub_total : {$invoiceItem->sub_total}");
+            Log::info("invoiceItem->price : {$invoiceItem->price}");
+
             $invoiceItem->save();
-        } else {
-            Log::info("Menghapus item dari invoice ID: {$invoice->id} karena qty habis.");
-            $invoiceItem->delete();
         }
+//        else {
+//            Log::info("Menghapus item dari invoice ID: {$invoice->id} karena qty habis.");
+//            $invoiceItem->delete();
+//        }
 
         // Hitung ulang total harga invoice
         $totalPrice = InvoiceItems::where('invoice_id', $invoice->id)->sum('sub_total');
@@ -317,10 +323,10 @@ class CashierController extends Controller
         $invoice->save();
 
         // Jika invoice kosong, hapus invoice
-        if ($totalPrice == 0) {
-            Log::info("Menghapus invoice ID: {$invoice->id} karena tidak ada item tersisa.");
-            $invoice->delete();
-        }
+//        if ($totalPrice == 0) {
+//            Log::info("Menghapus invoice ID: {$invoice->id} karena tidak ada item tersisa.");
+//            $invoice->delete();
+//        }
 
         return response()->json([
             'success' => true,
