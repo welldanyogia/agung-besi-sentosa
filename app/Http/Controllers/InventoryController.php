@@ -111,7 +111,7 @@ class InventoryController extends Controller
             'category_name'    => 'required|string',
             'stock'            => 'nullable|numeric|min:0',
             'satuan'           => 'required|string',
-            'price'            => 'required|numeric|min:0',
+            'price'            => 'nullable|numeric|min:0',
             'wholesale_price'  => 'nullable|numeric|min:0',
             'retail_price'     => 'nullable|numeric|min:0',
             'eceran_price'     => 'nullable|numeric|min:0',
