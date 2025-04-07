@@ -52,29 +52,29 @@ export const columns = [
         cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
     }),
     columnHelper.accessor("item_code", {
-        header: () => <div className="text-center">Kode Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        header: () => <div className="text-center min-w-[100px]">Kode Barang</div>,
+        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("item_name", {
-        header: () => <div className="text-center">Nama Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        header: () => <div className="text-center min-w-[100px]">Nama Barang</div>,
+        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("category.category_name", {
         id: "kategori",
-        header: () => <div className="text-center">Kategori</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        header: () => <div className="text-center min-w-[100px]">Kategori</div>,
+        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("stock", {
-        header: () => <div className="text-center">Stok Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        header: () => <div className="text-center min-w-[100px]">Stok Barang</div>,
+        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("price", {
-        header: () => <div className="text-center">Harga</div>,
+        header: () => <div className="text-center min-w-[100px]">Harga</div>,
         cell: ({ row }) => {
             const price = row.original.price;
 
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
@@ -84,12 +84,12 @@ export const columns = [
         },
     }),
     columnHelper.accessor("retail_price", {
-        header: () => <div className="text-center">Harga Retail</div>,
+        header: () => <div className="text-center min-w-[100px]">Harga Retail</div>,
         cell: ({ row }) => {
             const price = row.original.retail_price;
 
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
@@ -99,12 +99,12 @@ export const columns = [
         },
     }),
     columnHelper.accessor("wholesale_price", {
-        header: () => <div className="text-center">Harga Grosir</div>,
+        header: () => <div className="text-center min-w-[100px]">Harga Grosir</div>,
         cell: ({ row }) => {
             const price = row.original.wholesale_price;
 
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
@@ -114,12 +114,12 @@ export const columns = [
         },
     }),
     columnHelper.accessor("eceran_price", {
-        header: () => <div className="text-center">Harga Eceran</div>,
+        header: () => <div className="text-center min-w-[100px]">Harga Eceran</div>,
         cell: ({ row }) => {
             const price = row.original.eceran_price;
 
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
@@ -129,17 +129,17 @@ export const columns = [
         },
     }),
     columnHelper.accessor("satuan", {
-        header: () => <div className="text-center">Satuan</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        header: () => <div className="text-center min-w-[100px]">Satuan</div>,
+        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("retail_conversion", {
-        header: () => <div className="text-center">Spesifikasi</div>,
+        header: () => <div className="text-center min-w-[100px]">Spesifikasi</div>,
         cell: ({ row }) => {
             const conversion = row.original.retail_conversion;
             const satuan = row.original.satuan || 'satuan';
             const satuanEceran = row.original.retail_unit || 'satuan';
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     1 {satuan} = {conversion} {satuanEceran}
                 </div>
             );
@@ -147,11 +147,11 @@ export const columns = [
     }),
 
     columnHelper.accessor("is_tax", {
-        header: () => <div className="text-center">Pajak</div>,
+        header: () => <div className="text-center min-w-[100px]">Pajak</div>,
         cell: ({ getValue }) => {
             const isTax = getValue();
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     <Badge variant={isTax ? "destructive" : "secondary"}>
                         {isTax ? "Pajak" : "Non Pajak"}
                     </Badge>
@@ -160,11 +160,11 @@ export const columns = [
         },
     }),
     columnHelper.accessor("created_at", {
-        header: () => <div className="text-center">Tanggal Input</div>,
+        header: () => <div className="text-center min-w-[100px]">Tanggal Input</div>,
         cell: ({ row }) => {
             const date = new Date(row.original.created_at);
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {date.toLocaleString('id-ID', {
                         timeZone: 'Asia/Jakarta',
                         year: 'numeric',
@@ -178,11 +178,11 @@ export const columns = [
         },
     }),
     columnHelper.accessor("updated_at", {
-        header: () => <div className="text-center">Terakhir diupdate</div>,
+        header: () => <div className="text-center min-w-[100px]">Terakhir diupdate</div>,
         cell: ({ row }) => {
             const date = new Date(row.original.updated_at);
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {date.toLocaleString('id-ID', {
                         timeZone: 'Asia/Jakarta',
                         year: 'numeric',
@@ -195,14 +195,4 @@ export const columns = [
             );
         },
     }),
-    {
-        id: "actions",
-        header: () => <div className="text-center">Aksi</div>,
-        cell: ({ row }) => (
-            <div className="flex justify-center gap-2">
-                <DialogEditBarang barang={row.original}/>
-                <AlertDeleteDialog id={row.original} />
-            </div>
-        ),
-    },
 ];

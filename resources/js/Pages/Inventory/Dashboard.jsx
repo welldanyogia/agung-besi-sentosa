@@ -44,6 +44,7 @@ export default function Dashboard({auth,satuan,items}) {
     const bottom5Products = sortedData.slice(-5); // Bottom 5 products
 
 
+
     return (
         <AuthenticatedLayout
             header={
@@ -95,7 +96,7 @@ export default function Dashboard({auth,satuan,items}) {
                     {/*</div>*/}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg mt-6">
                         <DataTable columns={columns} data={data} auth={auth} setError={setError}
-                                   setSuccess={setSuccess} getData={getData} satuan={satuan}/>
+                                   setSuccess={setSuccess} getData={getData} satuan={satuan} role={auth.roles[0]}/>
                     </div>
                 </div>
             </div>

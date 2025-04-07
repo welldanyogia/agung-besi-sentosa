@@ -42,6 +42,8 @@ import {
     DropdownMenuShortcut, DropdownMenuSub,
     DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger
 } from "@/Components/ui/dropdown-menu.jsx";
+import {DialogEditBarang} from "@/Components/Inventory/DialogEditBarang.jsx";
+import {AlertDeleteDialog} from "@/Components/Inventory/AlertDeleteDialog.jsx";
 
 export const labels = [
     {
@@ -70,7 +72,7 @@ export const statuses = [
     //     // icon: Circle,
     // },
 ]
-const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan}) => {
+const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, role}) => {
     const [rowSelection, setRowSelection] = useState({})
     const [columnFilters, setColumnFilters] = useState(
         []
@@ -120,16 +122,16 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan})
     };
     const formatRupiah = (amount) => {
         if (!amount) return "-";
-        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+        return new Intl.NumberFormat('id-ID', {style: 'currency', currency: 'IDR'}).format(amount);
     };
 
     const downloadPDF = (columns, data) => {
         if (!Array.isArray(columns) || !Array.isArray(data)) {
-            console.error("Columns atau data tidak valid:", { columns, data });
+            console.error("Columns atau data tidak valid:", {columns, data});
             return;
         }
 
-        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        const doc = new jsPDF({orientation: "landscape", unit: "mm", format: "a4"});
         doc.text("Inventory Data", 14, 10);
 
         try {
@@ -169,9 +171,9 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan})
                 startY: 20,
                 head: [tableColumn],
                 body: tableRows,
-                margin: { top: 20, bottom: 10, left: 10, right: 10 },
-                styles: { fontSize: 8, cellPadding: 1, overflow: 'linebreak' },
-                columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 40 }, 2: { cellWidth: 'auto' } },
+                margin: {top: 20, bottom: 10, left: 10, right: 10},
+                styles: {fontSize: 8, cellPadding: 1, overflow: 'linebreak'},
+                columnStyles: {0: {cellWidth: 20}, 1: {cellWidth: 40}, 2: {cellWidth: 'auto'}},
                 pageBreak: 'auto',
                 didDrawPage: function () {
                     doc.text("Inventory Data", 14, 10);
@@ -186,10 +188,9 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan})
     };
 
 
-
     const downloadExcel = (columns, data) => {
         if (!Array.isArray(columns) || !Array.isArray(data)) {
-            console.error("Columns atau data tidak valid:", { columns, data });
+            console.error("Columns atau data tidak valid:", {columns, data});
             return;
         }
 
@@ -347,6 +348,12 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan})
                                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                 </TableHead>
                                             ))}
+                                            <TableHead
+                                                className="sticky sm:right-0 text-center bg-indigo-400"
+                                                style={{zIndex: 1}}
+                                            >
+                                                Aksi
+                                            </TableHead>
                                         </TableRow>
                                     ))}
                                 </TableHeader>
@@ -360,6 +367,17 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan})
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 ))}
+                                                <TableCell
+                                                    className="sticky sm:right-0 flex gap-2 items-center bg-white"
+                                                    style={{zIndex: 1}}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {/*<EditAlatKerjaDialog data={row.original} projects={projects}/>*/}
+                                                    {/*<DeleteAlatKerjaDialog data={row}/>*/}
+                                                    <DialogEditBarang barang={row.original} dataSatuan={satuan} setError={setError}/>
+                                                    <AlertDeleteDialog id={row.original}/>
+                                                </TableCell>
+
                                             </TableRow>
                                         ))
                                     ) : (

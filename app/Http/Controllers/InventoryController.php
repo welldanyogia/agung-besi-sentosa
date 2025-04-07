@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\Items;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class InventoryController extends Controller
@@ -209,65 +212,82 @@ class InventoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $item_code)
-    {
-        // Log permintaan update
-        Log::info('Memulai proses update item', ['item_code' => $item_code, 'request_data' => $request->all()]);
 
-        // Validasi input
-        $request->validate([
-//            'item_name'   => 'required|string|unique:items,item_name,' . $item_code . ',item_code',
-            'stock'       => 'nullable|numeric|min:0',
-            'price'       => 'required|numeric|min:0',
-            'satuan'      => 'required|in:Kg,Meter,Batang',
-            'category_name' => 'required|string',
-//            'created_by'   => 'required|string',
-            'is_tax' => 'required|boolean',
-            'tax' => 'integer',
-        ]);
+    public function update(Request $request, string $id)
+    {
+        Log::info('Memulai proses update item', ['item_code' => $id, 'request_data' => $request->all()]);
 
         try {
-            // Cek apakah item ada
-            $item = \App\Models\Items::where('item_code', $item_code)->first();
+            $item = Items::findOrFail($id);
 
-            if (!$item) {
-                Log::warning('Item tidak ditemukan', ['item_code' => $item_code]);
-                return response()->json([
-                    'message' => 'Item tidak ditemukan.',
-                ], 404);
+            // Rules dinamis untuk validasi update
+            $rules = [];
+
+            if ($request->has('item_code')) {
+                $rules['item_code'] = ['string', Rule::unique('items')->ignore($id)];
             }
 
-            // Cek apakah kategori sudah ada berdasarkan nama, jika tidak ada maka buat kategori baru
-            $category = \App\Models\Categories::firstOrCreate(
-                ['category_name' => $request->category_name],
-                ['id' => \Illuminate\Support\Str::uuid()]
-            );
+            if ($request->has('item_name')) {
+                $rules['item_name'] = ['string', Rule::unique('items')->ignore($id)];
+            }
 
-            // Debugging: Log kategori yang ditemukan atau dibuat
-            Log::info('Category ditemukan atau dibuat', $category->toArray());
+            if ($request->has('category_name')) {
+                $rules['category_name'] = ['string'];
+            }
 
-            // Update data item
-            $item->update([
-                'item_name'   => $request->item_name,
-                'stock'       => $request->stock ?? 0,
-                'price'       => $request->price,
-                'satuan'      => $request->satuan,
-                'category_id' => $category->id,
-//                'created_by'  => $request->created_by,
-                'is_tax'      => $request->is_tax ?? 0,
-                'tax'         => $request->tax ?? 0,
-            ]);
+            $rules += [
+                'stock'              => ['nullable', 'numeric', 'min:0'],
+                'satuan'             => ['sometimes', 'string'],
+                'price'              => ['nullable', 'numeric', 'min:0'],
+                'wholesale_price'    => ['nullable', 'numeric', 'min:0'],
+                'retail_price'       => ['nullable', 'numeric', 'min:0'],
+                'eceran_price'       => ['nullable', 'numeric', 'min:0'],
+                'retail_unit'        => ['nullable', 'string'],
+                'bulk_unit'          => ['nullable', 'string'],
+                'bulk_spec'          => ['nullable', 'string'],
+                'retail_convertion'  => ['nullable', 'numeric', 'min:0'],
+                'is_tax'             => ['sometimes', 'boolean'],
+                'tax'                => ['nullable', 'integer'],
+                'created_by'         => ['nullable'], // Optional
+            ];
 
-            // Debugging: Log item yang berhasil diperbarui
+            $validated = $request->validate($rules);
+
+            // Update kategori jika dikirim
+            if ($request->has('category_name')) {
+                $category = Categories::firstOrCreate(
+                    ['category_name' => $request->category_name],
+                    ['id' => Str::uuid()]
+                );
+                $validated['category_id'] = $category->id;
+
+                Log::info('Category ditemukan atau dibuat', $category->toArray());
+            }
+
+            // Kalikan harga dengan tax jika is_tax true
+//            $taxMultiplier = ($request->is_tax ?? false) ? (1 + ($request->tax / 100)) : 1;
+
+            foreach (['wholesale_price', 'retail_price', 'eceran_price'] as $priceField) {
+                if ($request->has($priceField)) {
+                    $validated[$priceField] = $request->$priceField;
+                }
+            }
+
+            // Jika ada field 'tax' tapi is_tax false, kosongkan nilainya
+            if ($request->has('is_tax') && !$request->is_tax) {
+                $validated['tax'] = null;
+            }
+
+            $item->update($validated);
+
             Log::info('Item berhasil diperbarui', ['item' => $item->toArray()]);
 
             return response()->json([
-                'message' => 'Item berhasil diperbarui',
-                'item'    => $item,
-                'category' => $category,
-            ], 200);
+                'message'  => 'Item berhasil diperbarui',
+                'item'     => $item,
+                'category' => $category ?? null,
+            ]);
         } catch (\Exception $e) {
-            // Tangani exception dan log error
             Log::error('Terjadi kesalahan saat memperbarui item', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -279,6 +299,7 @@ class InventoryController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

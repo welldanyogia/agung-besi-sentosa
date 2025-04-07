@@ -533,7 +533,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                         <Switch checked={data.is_eceran} onCheckedChange={handleSwitchEceranChange}
                                 className="col-span-3"/>
                     </div>
-                    {data.is_eceran && (
+                    {data.is_eceran === true && (
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="kategori" className="text-right">
                                 Satuan Eceran
