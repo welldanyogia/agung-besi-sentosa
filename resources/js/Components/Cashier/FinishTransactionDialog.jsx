@@ -995,7 +995,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                     }
                 }}>Selesaikan Transaksi</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px] max-sm:max-w-[80vh] max-sm:max-h-[80vh] max-sm:text-xs">
+            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] max-sm:max-w-[80vh] max-h-[90vh] overflow-auto max-sm:text-xs">
                 <DialogHeader>
                     <DialogTitle>Finish Transaction</DialogTitle>
                     <DialogDescription>
@@ -1011,11 +1011,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                             <div className={'mx-auto'}>Telp: {storeInfo?.phone_number || 'Store Phone'}</div>
                             <Separator/>
                         </div>
-                        <div className="max-h-[6.5rem] overflow-y-auto">
+                        <div className="max-h-[calc(2.5rem*5)] overflow-y-auto">
                             <Table className="invoice-table">
                                 <TableHeader className={'bg-indigo-200'}>
                                     <TableRow>
-                                        <TableHead className={'w-auto'}>Item</TableHead>
+                                        <TableHead>Item</TableHead>
                                         <TableHead>Satuan</TableHead>
                                         <TableHead>Harga</TableHead>
                                         <TableHead>Qty</TableHead>
