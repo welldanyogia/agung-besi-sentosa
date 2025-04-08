@@ -995,7 +995,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                     }
                 }}>Selesaikan Transaksi</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px] max-sm:max-w-[80vh] max-sm:max-h-[80vh]">
+            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px] max-sm:max-w-[80vh] max-sm:max-h-[80vh] max-sm:text-xs">
                 <DialogHeader>
                     <DialogTitle>Finish Transaction</DialogTitle>
                     <DialogDescription>
@@ -1011,11 +1011,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                             <div className={'mx-auto'}>Telp: {storeInfo?.phone_number || 'Store Phone'}</div>
                             <Separator/>
                         </div>
-                        <div className="">
+                        <div className="max-h-[6.5rem] overflow-y-auto">
                             <Table className="invoice-table">
                                 <TableHeader className={'bg-indigo-200'}>
                                     <TableRow>
-                                        <TableHead>Item</TableHead>
+                                        <TableHead className={'w-auto'}>Item</TableHead>
                                         <TableHead>Satuan</TableHead>
                                         <TableHead>Harga</TableHead>
                                         <TableHead>Qty</TableHead>
@@ -1025,7 +1025,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                 <TableBody>
                                     {invoiceItems?.map((item) => (
                                         <TableRow key={item?.id}>
-                                            <TableCell>
+                                            <TableCell className={'w-auto'}>
                                                 {item?.item?.item_name} {item?.price_type === 'eceran' ? '(Eceran)' : ''}
                                             </TableCell>
                                             <TableCell>
