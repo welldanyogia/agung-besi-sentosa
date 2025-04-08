@@ -995,7 +995,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                     }
                 }}>Selesaikan Transaksi</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px]">
+            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px] max-sm:max-w-[80vh] max-sm:max-h-[80vh]">
                 <DialogHeader>
                     <DialogTitle>Finish Transaction</DialogTitle>
                     <DialogDescription>
@@ -1057,7 +1057,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
                         </div>
                         <div className="mt-4 gap-2 flex flex-col">
-                            <div className={'flex gap-4 items-center justify-between w-2/3'}>
+                            <div className={'flex gap-4 items-center justify-between w-2/3 max-sm:w-full'}>
                                 <label htmlFor="customer" className="block text-sm font-bold">Nama Customer</label>
                                 <Input
                                     type="text"
@@ -1068,7 +1068,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                     placeholder="Masukkan nama customer"
                                 />
                             </div>
-                            <div className={'flex gap-4 items-center justify-between w-2/3'}>
+                            <div className={'flex gap-4 items-center justify-between w-2/3 max-sm:w-full'}>
                                 <label htmlFor="payment" className="block text-sm font-bold">Metode Pembayaran</label>
                                 <Select value={paymentMethode} onValueChange={handlePaymentChange}>
                                     <SelectTrigger className="w-[210px]">
@@ -1084,7 +1084,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                 </Select>
 
                             </div>
-                            <div className={'flex gap-4 items-center justify-between w-2/3'}>
+                            <div className={'flex gap-4 items-center justify-between w-2/3 max-sm:w-full'}>
                                 <label htmlFor="cash-paid" className="block text-sm font-bold">Nominal Pembayaran
                                     (Cash)</label>
                                 <Input
@@ -1104,7 +1104,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                     </div>
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className={'gap-2'}>
                     <Button onClick={async ()=>{await updateInvoiceStatus(invoice_id.id,false)}}>
                         Selesai
                     </Button>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Plus } from "lucide-react"
+import { ShoppingCart } from "lucide-react"
 import { Button } from "@/Components/ui/button"
 import {
     Drawer,
@@ -24,7 +24,7 @@ export function CashierDrawer({ storeInfo, invoice, auth, invoiceItems, setInvoi
         <Drawer>
             <DrawerTrigger asChild>
                 <button className="fixed bottom-5 right-5 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition">
-                    <Plus size={24} />
+                    <ShoppingCart size={24}/>
                 </button>
             </DrawerTrigger>
             <DrawerContent>
@@ -59,7 +59,7 @@ export function CashierDrawer({ storeInfo, invoice, auth, invoiceItems, setInvoi
                                     />
                                 </div>
                             </CardContent>
-                            <CardFooter className="bg-gray-200 text-xs p-2 flex flex-col max-sm:w-2/3"> {/* mx-5 bisa menyebabkan elemen keluar dari Card */}
+                            <CardFooter className="bg-gray-200 text-xs p-2 flex flex-col max-sm:w-4/5"> {/* mx-5 bisa menyebabkan elemen keluar dari Card */}
                                 <div className="flex justify-between w-full">
                                     <span>Item(s)</span>
                                     <span>{invoiceItems.length}</span>
@@ -84,15 +84,15 @@ export function CashierDrawer({ storeInfo, invoice, auth, invoiceItems, setInvoi
                             setInvoiceItems={setInvoiceItems}
                             storeInfo={storeInfo}
                         />
-                        <DrawerClose asChild>
-                            <AlertCancelDialog
-                                setInvoiceItems={setInvoiceItems}
-                                invoiceItems={invoiceItems}
-                                setError={setError}
-                                setSuccess={setSuccess}
-                                // getItems={getItems()}
-                            />
-                        </DrawerClose>
+                        {/*<DrawerClose asChild>*/}
+                        {/*    <AlertCancelDialog*/}
+                        {/*        setInvoiceItems={setInvoiceItems}*/}
+                        {/*        invoiceItems={invoiceItems}*/}
+                        {/*        setError={setError}*/}
+                        {/*        setSuccess={setSuccess}*/}
+                        {/*        // getItems={getItems()}*/}
+                        {/*    />*/}
+                        {/*</DrawerClose>*/}
                     </DrawerFooter>
                 </div>
             </DrawerContent>
