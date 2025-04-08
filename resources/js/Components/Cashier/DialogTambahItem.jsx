@@ -68,23 +68,34 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     };
 
     const handleChange = (e) => {
-        let value = parseFloat(e.target.value);
+        let raw = e.target.value;
+        let value = parseFloat(raw);
 
         if (isNaN(value)) return;
 
+        // Jika value awal 0 dan user input angka tanpa koma, ubah langsung jadi integer biasa
+        if (quantity === 0 && !raw.includes('.') && !raw.includes(',')) {
+            setQuantity(parseInt(raw));
+            return;
+        }
+
         if (value > product.stock) {
             setQuantity(product.stock);
-        } else if (value < step) {
-            setQuantity(step);
         } else {
-            // Pastikan hanya kelipatan step
-            const remainder = value % step;
-            if (remainder !== 0) {
-                value = Math.round(value / step) * step;
+            // Boleh input dengan desimal, dan dibulatkan ke kelipatan step jika perlu
+            const isMultipleOfStep = Math.abs(value % step) < 0.0001;
+
+            if (!isMultipleOfStep) {
+                const multiplier = Math.round(value / step);
+                value = multiplier * step;
             }
+
             setQuantity(parseFloat(value.toFixed(2)));
         }
     };
+
+
+
 
 
 
@@ -255,10 +266,16 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                                 Harga : {formatRupiah(product.retail_price)}
                                             </div>
                                             <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
-                                                <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
-                                                <Input value={quantity} onChange={handleChange}
-                                                       className="w-16 text-center"
-                                                       disabled={product.stock === 0}/>
+                                                <Button onClick={handleDecrease} disabled={quantity <= step}>-</Button>
+                                                <Input
+                                                    type="number"
+                                                    value={quantity}
+                                                    step={step}
+                                                    onChange={handleChange}
+                                                    className="w-16 text-center"
+                                                    disabled={product.stock === 0}
+                                                />
+
                                                 <span className={'-ml-6'}>/{product.satuan}</span>
                                                 <Button onClick={handleIncrease}
                                                         disabled={quantity >= product.stock}>+</Button>
@@ -271,10 +288,15 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                                 Harga : {formatRupiah(product.wholesale_price)}
                                             </div>
                                             <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
-                                                <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
-                                                <Input value={quantity} onChange={handleChange}
-                                                       className="w-16 text-center"
-                                                       disabled={product.stock === 0}/>
+                                                <Button onClick={handleDecrease} disabled={quantity <= step}>-</Button>
+                                                <Input
+                                                    type="number"
+                                                    value={quantity}
+                                                    step={step}
+                                                    onChange={handleChange}
+                                                    className="w-16 text-center"
+                                                    disabled={product.stock === 0}
+                                                />
                                                 <span className={'-ml-6'}>/{product.satuan}</span>
                                                 <Button onClick={handleIncrease}
                                                         disabled={quantity >= product.stock}>+</Button>
@@ -287,10 +309,15 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                                 Harga : {formatRupiah(product.eceran_price)}
                                             </div>
                                             <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
-                                                <Button onClick={handleDecrease} disabled={quantity <= 1}>-</Button>
-                                                <Input value={quantity} onChange={handleChange}
-                                                       className="w-16 text-center"
-                                                       disabled={product.stock === 0}/>
+                                                <Button onClick={handleDecrease} disabled={quantity <= step}>-</Button>
+                                                <Input
+                                                    type="number"
+                                                    value={quantity}
+                                                    step={step}
+                                                    onChange={handleChange}
+                                                    className="w-16 text-center"
+                                                    disabled={product.stock === 0}
+                                                />
                                                 <span className={'-ml-6'}>/{product.retail_unit}</span>
                                                 <Button onClick={handleIncrease}
                                                         disabled={quantity >= product.stock}>+</Button>
@@ -307,7 +334,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
                 <DialogFooter>
                     <Button
-                        disabled={loading || product.stock <= 0}
+                        disabled={loading || product.stock <= step}
                         onClick={handleAddItem}
                     >
                         {loading ? "Menambahkan..." : "Tambah"}

@@ -159,6 +159,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
         } finally {
             getInvoice()
             setIsDeleting(false); // selesai loading
+            Inertia.get("/cashier",{},{preserveState:true, replace:true})
         }
     };
 

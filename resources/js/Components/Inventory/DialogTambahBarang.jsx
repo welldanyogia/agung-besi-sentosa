@@ -326,8 +326,8 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             <DialogTrigger asChild>
                 <Button>Tambah Barang</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
                     <DialogTitle>Tambah Barang</DialogTitle>
                     <DialogDescription>
                         Isi data barang dengan lengkap. Klik tambah untuk menyimpan.

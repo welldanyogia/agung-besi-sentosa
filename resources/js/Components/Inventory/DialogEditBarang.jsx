@@ -318,8 +318,9 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
             <DialogTrigger asChild>
                 <Button variant="outline">Edit</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+
+            <DialogHeader>
                     <DialogTitle>Edit Barang</DialogTitle>
                     <DialogDescription>
                         Isi data barang dengan lengkap. Klik simpan untuk menyimpan.
