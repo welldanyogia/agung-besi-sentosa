@@ -204,7 +204,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
                                         </Button>
                                         <Input
                                             value={row.original.price_type === 'eceran'
-                                                ? (row.original.qty * row.original.item?.retail_conversion || 1)
+                                                ? (row.original.qty || 1)
                                                 : row.original.qty}
                                             readOnly={true}
                                             className="w-12 text-center"

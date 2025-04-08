@@ -50,7 +50,7 @@ class SettingController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', Rules\Password::defaults()],
             'role' => 'required|in:superadmin,admin,employee', // Validate the role
-            'phone_number' => 'required|string|max:15', // Validate phone number
+            'phone_number' => 'nullable|string|max:15', // Validate phone number
         ]);
 
         // Create the user
@@ -84,7 +84,7 @@ class SettingController extends Controller
         $validatedData = $request->validate([
             'store_name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
+            'phone_number' => 'nullable|string|max:15',
         ]);
 
         // Check if store info already exists, if so, update it; otherwise, create a new one

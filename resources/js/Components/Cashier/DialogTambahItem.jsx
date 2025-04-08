@@ -150,6 +150,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             });
 
             setSuccess(response.data.message);
+            console.log(response)
         } catch (error) {
             console.log(error)
             setError("Gagal menambahkan barang!!!");
