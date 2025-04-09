@@ -82,8 +82,12 @@ function classifyTransactionsByDate(data) {
         }
     });
 
+    // Sort by date ascending (oldest to newest)
+    transactionSummary.sort((a, b) => new Date(a.date) - new Date(b.date));
+
     return transactionSummary;
 }
+
 
 
 // function classifyTransactionsByDate(data) {
@@ -202,6 +206,8 @@ export function SalesChart({data}) {
 
         return date >= new Date(formattedStartDate);
     });
+
+    console.log(data)
 
 
 

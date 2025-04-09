@@ -89,11 +89,11 @@ export default function Dashboard({auth}) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 gap-4 flex flex-col space-y-6">
                     <div className={'w-full flex flex-col gap-2'}>
                         <div className={'flex w-full gap-2'}>
-                            <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
-                                <div>
+                            <Card className={'w-full p-10 flex flex-col'}>
+                                <div className={'text-xl'}>
                                     Total Penjualan Hari ini
                                 </div>
-                                <div>
+                                <div className={'font-bold lg:text-2xl'}>
                                     {new Intl.NumberFormat('id-ID', {
                                         style: 'currency',
                                         currency: 'IDR',
@@ -101,19 +101,19 @@ export default function Dashboard({auth}) {
                                     }).format(totalSales)}
                                 </div>
                             </Card>
-                            <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
-                                <div>
+                            <Card className={'w-full p-10 flex flex-col'}>
+                                <div className={'text-xl'}>
                                     Total Order Hari ini
                                 </div>
-                                <div>
+                                <div className={'font-bold lg:text-2xl'}>
                                     {totalOrders}
                                 </div>
                             </Card>
-                            <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
-                                <div>
+                            <Card className={'w-full p-10 flex flex-col'}>
+                                <div className={'text-xl'}>
                                     Total Produk Terjual Hari ini
                                 </div>
-                                <div>
+                                <div className={'font-bold lg:text-2xl'}>
                                     {totalProductsSold}
                                 </div>
                             </Card>

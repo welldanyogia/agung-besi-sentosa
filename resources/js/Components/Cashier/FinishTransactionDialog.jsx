@@ -40,7 +40,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
         try {
             const response = await axios.post(`/api/invoices/${invoiceId}/update-status`, {
                 payment: paymentMethode,
-                customer_name: customer,
+                customer_name: customer || "pelanggan", // Default ke "pelanggan" jika null/empty
                 is_printed: is_printed,
                 bayar: cashPaid,
                 total: total
@@ -52,12 +52,13 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
             setCashPaid(0);
         } catch (error) {
             console.log(error)
-            setError("Gagal menambahkan barang!!!");
+            setError("Gagal menyelesaikan transaksi!!!");
         } finally {
             setDialogOpen(false)
             Inertia.reload()
         }
     };
+
 
 
     // const handlePrint = () => {
