@@ -72,6 +72,37 @@ export const columns = [
         header: () => <div className="text-center">Total Barang</div>,
         cell: ({getValue}) => <div className="text-center">{getValue().length}</div>,
     }),
+    columnHelper.accessor("is_shipment", {
+        header: () => <div className="text-center">Layanan Pengiriman</div>,
+        cell: ({getValue}) => {
+            const status = getValue();
+            const isShipment = status === 1;
+            const badgeVariant = isShipment ? "bg-teal-500" : status === 0 ? "destructive" : "secondary";
+            const statusText = isShipment ? "Ya" : "Tidak";
+
+            return (
+                <div className="text-center text-white">
+                    <Badge variant={badgeVariant} className={badgeVariant}>{statusText}</Badge>
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("shipment", {
+        // id: "kategori",
+        header: () => <div className="text-center">Biaya Pengiriman</div>,
+        cell: ({row}) => {
+            const price = row.original.shipment;
+            return (
+                <div className="text-center">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        maximumFractionDigits: 0
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
     columnHelper.accessor("created_by", {
         header: () => <div className="text-center">Kasir</div>,
         cell: ({getValue}) => {
@@ -94,7 +125,7 @@ export const columns = [
             const statusText = isPaid ? "Berhasil" : status;
 
             return (
-                <div className="text-center">
+                <div className="text-center text-white">
                     <Badge variant={badgeVariant} className={badgeVariant}>{statusText}</Badge>
                 </div>
             );
@@ -108,7 +139,7 @@ export const columns = [
             const statusText = isPrinted ? "Sudah Dicetak" : "Belum Dicetak";
 
             return (
-                <div className="text-center">
+                <div className={`text-center ${isPrinted ? "text-white" : "text-black"}`}>
                     <Badge variant={badgeVariant} className={badgeVariant}>
                         {statusText}
                     </Badge>

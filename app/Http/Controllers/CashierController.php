@@ -424,6 +424,8 @@ class CashierController extends Controller
             'customer_name' => 'required|string',
             'is_printed' => 'required|boolean',
             'total' => 'required|integer',
+            'is_shipment' => 'required|boolean',
+            'shipment' => 'required|integer',
 //            'item_ids.*' => 'exists:items,id',
         ]);
 
@@ -438,6 +440,8 @@ class CashierController extends Controller
         $invoice->total_price = $request->total;
         $invoice->is_printed = $request->is_printed;
         $invoice->bayar = $request->bayar;
+        $invoice->is_shipment = $request->is_shipment;
+        $invoice->shipment = $request->shipment;
         $invoice->kembalian = $invoice->bayar - $invoice->total_price;
         $invoice->save();
 

@@ -19,6 +19,7 @@ import {
 import {usePage} from "@inertiajs/react";
 import axios from "axios";
 import {Inertia} from "@inertiajs/inertia";
+
 export const labels = [
     {
         value: "bug",
@@ -47,7 +48,7 @@ export const statuses = [
     },
 ]
 const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
-    const { storeInfo } = usePage().props;
+    const {storeInfo} = usePage().props;
 
     const [rowSelection, setRowSelection] = useState({})
     const [columnFilters, setColumnFilters] = useState(
@@ -116,7 +117,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
             throw error;
         } finally {
             // Inertia.get('/report',[preve])
-            Inertia.get("/report", {}, { preserveState: true, replace: true });
+            Inertia.get("/report", {}, {preserveState: true, replace: true});
 
         }
     };
@@ -265,6 +266,12 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
   <div class="line"></div>
 
   <div class="totals">
+  ${invoice.is_shipment ? `
+    <div class="table-row">
+      <div class="col-item">Biaya Layanan Pengiriman</div>
+      <div class="col-subtotal">${formatRupiah(invoice.shipment || 0)}</div>
+    </div>
+    ` : ''}
     <div class="table-row">
       <div class="col-item">Total</div>
       <div class="col-subtotal">${formatRupiah(invoice.total_price)}</div>

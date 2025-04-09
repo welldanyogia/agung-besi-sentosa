@@ -35,6 +35,9 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
     );
     const [paymentMethode, setPaymentMethod] = useState('')
     const [customer, setCustomer] = useState('')
+    const [isShipment,setIsShipment] = useState(invoice_id?.is_shipment)
+    const [shipment,setShipment] = useState('')
+
 
     const updateInvoiceStatus = async (invoiceId, is_printed) => {
         try {
@@ -43,7 +46,9 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                 customer_name: customer || "pelanggan", // Default ke "pelanggan" jika null/empty
                 is_printed: is_printed,
                 bayar: cashPaid,
-                total: total
+                total: total,
+                is_shipment: isShipment,
+                shipment: shipment,
             });
 
             setInvoice(null);
@@ -619,27 +624,18 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
   <div class="line"></div>
 
   <div class="totals">
+     ${isShipment ? `
     <div class="table-row">
+      <div class="col-item">Biaya Layanan Pengiriman</div>
+      <div class="col-subtotal">${formatRupiah(shipment || 0)}</div>
+    </div>
+    ` : ''}
+     <div class="table-row">
       <div class="col-item">Total</div>
       <div class="col-subtotal">${
             formatRupiah(
-                invoice_id.items.reduce((acc, item) => {
-                    let selectedPrice = 0;
-
-                    if (item.price_type === 'eceran') {
-                        selectedPrice = item.item?.eceran_price || 0;
-                    } else if (item.price_type === 'retail') {
-                        selectedPrice = item.item?.retail_price || 0;
-                    } else {
-                        selectedPrice = item.item?.price || 0;
-                    }
-
-                    const tax = (item.item?.tax || 0) / 100;
-                    const totalWithTax = selectedPrice * item.qty;
-
-                    return acc + totalWithTax;
-                }, 0)
-            )
+                invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) +
+                (isShipment ? (shipment || 0) : 0))
         }</div>
 
     </div>
@@ -970,8 +966,35 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
         // }, 0);
         //
         // setTotal(totalAmount);
-        setKembalian(value >= invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) ? value - invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) : 0);
+        const totalWithShipment = invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) +
+            (isShipment ? (shipment || 0) : 0);
+
+        setKembalian(value >= totalWithShipment ? value - totalWithShipment : 0);
+
     };
+
+    const handleShipmentChange = (event) => {
+        let value = event.target.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+
+        // If the input is empty, set value to 0
+        if (value === '') {
+            setShipment(0);
+            // setKembalian(0); // Reset the change as well
+            return;
+        }
+
+        // Check if the value is a valid number
+        if (!value || isNaN(value)) {
+            setShipment(0)
+            return; // Do nothing if the value is invalid or NaN
+        }
+
+        value = parseInt(value, 10); // Convert to a number
+
+        setShipment(value);
+
+    };
+
 
     const handleCustomerChange = (e) => {
         e.preventDefault()
@@ -985,6 +1008,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
             setCashPaid("");
         }
     };
+    const handleIsShipmentChange = (value) => {
+        setIsShipment(value);
+    };
+
+
 
     return (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -1006,15 +1034,9 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
                 <div className="py-4">
                     <div className="invoice-preview" ref={printRef}>
-                        <div className="w-full justify-center flex flex-col">
-                            <div className={'mx-auto'}>{storeInfo?.store_name || 'Store Name'}</div>
-                            <div className={'mx-auto'}>{storeInfo?.address || 'Store Address'}</div>
-                            <div className={'mx-auto'}>Telp: {storeInfo?.phone_number || 'Store Phone'}</div>
-                            <Separator/>
-                        </div>
                         <div className="max-h-[calc(2.5rem*5)] overflow-y-auto">
                             <Table className="invoice-table">
-                                <TableHeader className={'bg-indigo-200'}>
+                                <TableHeader className="bg-indigo-200 sticky top-0 z-10">
                                     <TableRow>
                                         <TableHead>Item</TableHead>
                                         <TableHead>Satuan</TableHead>
@@ -1026,7 +1048,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                 <TableBody>
                                     {invoiceItems?.map((item) => (
                                         <TableRow key={item?.id}>
-                                            <TableCell className={'w-auto'}>
+                                            <TableCell className="w-auto">
                                                 {item?.item?.item_name} {item?.price_type === 'eceran' ? '(Eceran)' : ''}
                                             </TableCell>
                                             <TableCell>
@@ -1037,42 +1059,41 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                                     ? formatRupiah(item?.item?.eceran_price)
                                                     : item?.price_type === 'retail'
                                                         ? formatRupiah(item?.item?.retail_price)
-                                                        : formatRupiah(item?.item?.price)}
+                                                        : formatRupiah(item?.item?.wholesale_price)}
                                             </TableCell>
-
-
                                             <TableCell>{item?.qty}</TableCell>
-                                            <TableCell>
-                                                {formatRupiah(item?.sub_total)}
-                                            </TableCell>
+                                            <TableCell>{formatRupiah(item?.sub_total)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         </div>
-                        <div className="invoice-footer total font-bold">
+
+                        <div className="invoice-footer total font-bold max-sm:text-lg">
                             Total: {formatRupiah(
-                            invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0)
+                            invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) +
+                            (isShipment ? (shipment || 0) : 0)
                         )}
-
-
                         </div>
+
                         <div className="mt-4 gap-2 flex flex-col">
-                            <div className={'flex gap-4 items-center justify-between w-2/3 max-sm:w-full'}>
-                                <label htmlFor="customer" className="block text-sm font-bold">Nama Customer</label>
+                            <div className={'flex gap-4 items-center justify-between w-full max-sm:w-full'}>
+                                <label htmlFor="customer" className="block text-sm font-bold max-sm:text-xs">Nama
+                                    Customer</label>
                                 <Input
                                     type="text"
                                     id="customer"
-                                    className="w-1/3 p-2 mt-2 border rounded"
+                                    className="w-1/3 p-2 mt-2 border rounded max-sm:text-xs max-sm:w-2/3"
                                     value={customer}
                                     onChange={handleCustomerChange}
                                     placeholder="Masukkan nama customer"
                                 />
                             </div>
-                            <div className={'flex gap-4 items-center justify-between w-2/3 max-sm:w-full'}>
-                                <label htmlFor="payment" className="block text-sm font-bold">Metode Pembayaran</label>
+                            <div className={'flex gap-4 items-center justify-between w-full max-sm:w-full'}>
+                                <label htmlFor="payment" className="block text-sm font-bold max-sm:text-xs">Metode
+                                    Pembayaran</label>
                                 <Select value={paymentMethode} onValueChange={handlePaymentChange}>
-                                    <SelectTrigger className="w-[210px]">
+                                    <SelectTrigger className="w-1/3 max-sm:text-xs max-sm:w-2/3">
                                         <SelectValue placeholder="Pilih Metode Pembayaran"/>
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1085,20 +1106,55 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                 </Select>
 
                             </div>
-                            <div className={'flex gap-4 items-center justify-between w-2/3 max-sm:w-full'}>
-                                <label htmlFor="cash-paid" className="block text-sm font-bold">Nominal Pembayaran
+                            <div className={'flex gap-4 items-center justify-between w-full max-sm:w-full'}>
+                                <label htmlFor="is_shipment" className="block text-sm font-bold max-sm:text-xs">Layanan
+                                    Pengiriman</label>
+                                <Select value={isShipment} onValueChange={handleIsShipmentChange}>
+                                    <SelectTrigger className="w-1/3 max-sm:text-xs max-sm:w-2/3">
+                                        <SelectValue placeholder="Pilih Layanan Pengiriman"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Layanan Pengiriman</SelectLabel>
+                                            <SelectItem value={true}>YA</SelectItem>
+                                            <SelectItem value={false}>TIDAK</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
+                            </div>
+                            {
+                                isShipment === true && (
+                                    <div className={'flex gap-4 items-center justify-between w-full max-sm:w-full'}>
+                                        <label htmlFor="shipment" className="block text-sm font-bold max-sm:text-xs">
+                                            Biaya Layanan Pengiriman
+                                        </label>
+                                        <Input
+                                            type="text"
+                                            id="shipemnt"
+                                            className="w-1/3 p-2 mt-2 border rounded max-sm:text-xs max-sm:w-2/3"
+                                            value={formatRupiah(shipment)}
+                                            onChange={handleShipmentChange}
+                                            placeholder="Masukkan biaya pengiriman"
+                                        />
+                                    </div>
+                                )
+                            }
+                            <div className={'flex gap-4 items-center justify-between w-full max-sm:w-full'}>
+                                <label htmlFor="cash-paid" className="block text-sm font-bold max-sm:text-xs">Nominal
+                                    Pembayaran
                                     (Cash)</label>
                                 <Input
                                     type="text"
                                     id="cash-paid"
-                                    className="w-1/3 p-2 mt-2 border rounded"
+                                    className="w-1/3 p-2 mt-2 border rounded max-sm:text-xs max-sm:w-2/3"
                                     value={formatRupiah(cashPaid)}
                                     onChange={handleCashPaidChange}
                                     placeholder="Masukkan jumlah uang"
                                     disabled={paymentMethode !== "tunai"}
                                 />
                             </div>
-                            <div className="mt-2">
+                            <div className="mt-2 max-sm:text-lg">
                                 <strong>Kembalian: {formatRupiah(kembalian)}</strong>
                             </div>
                         </div>
@@ -1106,15 +1162,14 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                 </div>
 
                 <DialogFooter className={'gap-2'}>
-                    <Button onClick={async ()=>{await updateInvoiceStatus(invoice_id.id,false)}}>
+                    <Button onClick={async () => {
+                        await updateInvoiceStatus(invoice_id.id, false)
+                    }}>
                         Selesai
                     </Button>
                     <Button variant="outline" className={'w-full'} onClick={handlePrint}>
                         Print Invoice
                     </Button>
-                    <Button onClick={() => {
-                        setDialogOpen(false);
-                    }}>Cancel</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

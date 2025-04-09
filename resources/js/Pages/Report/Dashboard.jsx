@@ -26,10 +26,6 @@ export default function Dashboard({auth}) {
             const response = await axios.post('/api/report/show');
             setData(response.data.transaction);
             setLoading(false);
-
-
-            console.log(response.data.transaction)
-
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
         } catch (error) {

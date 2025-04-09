@@ -11,7 +11,7 @@ class Invoices extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'invoice_code', 'customer_name', 'total_price', 'payment', 'bayar', 'kembalian', 'status', 'created_by', 'is_printed'
+        'invoice_code', 'customer_name', 'total_price', 'payment', 'bayar', 'kembalian', 'status', 'created_by', 'is_printed','is_shipment','shipment'
     ];
 
     protected static function booted()
@@ -23,7 +23,7 @@ class Invoices extends Model
             }
 
             // Hitung total harga
-            $invoice->total_price = $invoice->items->sum('sub_total');
+            $invoice->total_price = $invoice->items->sum('sub_total') + $invoice->shipment;
 
             // Hitung kembalian jika nilai bayar sudah ada
             $invoice->kembalian = ($invoice->bayar ?? 0) - $invoice->total_price;
