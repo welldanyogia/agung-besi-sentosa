@@ -71,11 +71,14 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         let raw = e.target.value;
         let value = parseFloat(raw);
 
-        if (isNaN(value)) return;
-
         // Jika value awal 0 dan user input angka tanpa koma, ubah langsung jadi integer biasa
         if (quantity === 0 && !raw.includes('.') && !raw.includes(',')) {
             setQuantity(parseInt(raw));
+            return;
+        }
+
+        if (isNaN(value)) {
+            setQuantity(quantity === 0 ? 0 : step); // Kalau belum pernah input (masih 0), set ke 0. Kalau sudah, fallback ke step
             return;
         }
 
@@ -93,6 +96,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             setQuantity(parseFloat(value.toFixed(2)));
         }
     };
+
 
 
 
@@ -335,7 +339,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
                 <DialogFooter>
                     <Button
-                        disabled={loading || product.stock <= step}
+                        disabled={loading || product.stock <= step|| quantity < step || quantity === 0 || isNaN(quantity)}
                         onClick={handleAddItem}
                     >
                         {loading ? "Menambahkan..." : "Tambah"}
