@@ -27,6 +27,9 @@ export default function Dashboard({auth}) {
             setData(response.data.transaction);
             setLoading(false);
 
+
+            console.log(response.data.transaction)
+
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
         } catch (error) {
@@ -35,21 +38,38 @@ export default function Dashboard({auth}) {
     };
 
     const calculateTotals = (transactions) => {
-        let sales = 0;
-        let orders = transactions.length;
+        let sales = 0; // Sekarang ini jumlah transaksi hari ini
+        let orders = 0; // Total nominal dari transaksi 'paid' hari ini
         let productsSold = 0;
 
+        const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
+
         transactions.forEach((transaction) => {
-            transaction.items.forEach((item) => {
-                sales += item.price * item.qty; // Total sales
-                productsSold += item.qty; // Total products sold
-            });
+            const transactionDate = new Date(transaction.created_at).toISOString().split("T")[0];
+
+            if (transactionDate === today) {
+                orders += 1; // Hitung 1 transaksi hari ini
+
+                // Hitung produk terjual hari ini
+                transaction.items.forEach((item) => {
+                    productsSold += item.qty;
+                });
+
+                // Hitung total order hanya untuk yang 'paid'
+                if (transaction.status === 'paid') {
+                    sales += transaction.total_price;
+                }
+            }
         });
 
-        setTotalSales(sales);
+        setTotalSales(sales); // Sekarang ini adalah jumlah transaksi hari ini
         setTotalOrders(orders);
         setTotalProductsSold(productsSold);
     };
+
+
+
+
 
     useEffect(() => {
         getData();  // Fetch the inventory data when the component mounts
@@ -59,6 +79,7 @@ export default function Dashboard({auth}) {
             return () => clearTimeout(timer);
         }
     }, [error, success]);
+
 
     return (
         <AuthenticatedLayout
