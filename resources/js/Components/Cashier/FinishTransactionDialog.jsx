@@ -48,8 +48,10 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                 bayar: cashPaid,
                 total: total,
                 is_shipment: isShipment,
-                shipment: shipment,
+                shipment: shipment || 0,
             });
+
+            console.log(response)
 
             setInvoice(null);
             setInvoceItems([]);
