@@ -96,16 +96,16 @@ export function DataTableFacetedFilter({ column, title, options }) {
                                 );
                             })}
                         </CommandGroup>
-                        {selectedValues.size > 0 && (
-                            <>
-                                <CommandSeparator />
-                                <CommandGroup>
-                                    <CommandItem onSelect={() => setSelectedValues(new Set())} className="justify-center text-center">
-                                        Clear filters
-                                    </CommandItem>
-                                </CommandGroup>
-                            </>
-                        )}
+                        {/*{selectedValues.size > 0 && (*/}
+                        {/*    <>*/}
+                        {/*        <CommandSeparator />*/}
+                        {/*        <CommandGroup>*/}
+                        {/*            <CommandItem onSelect={() => setSelectedValues(new Set())} className="justify-center text-center">*/}
+                        {/*                Clear filters*/}
+                        {/*            </CommandItem>*/}
+                        {/*        </CommandGroup>*/}
+                        {/*    </>*/}
+                        {/*)}*/}
                     </CommandList>
                 </Command>
             </PopoverContent>

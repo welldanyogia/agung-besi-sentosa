@@ -94,7 +94,7 @@ export default function Dashboard({auth,satuan,items}) {
                     {/*        </ul>*/}
                     {/*    </Card>*/}
                     {/*</div>*/}
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg mt-6">
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg mt-6 max-sm:p-2">
                         <DataTable columns={columns} data={data} auth={auth} setError={setError}
                                    setSuccess={setSuccess} getData={getData} satuan={satuan} role={auth.roles[0]}/>
                     </div>

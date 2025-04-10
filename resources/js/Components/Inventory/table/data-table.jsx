@@ -261,15 +261,16 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
 
     return (
         <>
-            <Card className={'p-6 space-y-2'}>
+            <Card className={'p-6 space-y-2 max-sm:text-sm'}>
                 <CardTitle>
                     Inventory
                 </CardTitle>
 
                 <CardContent>
                     <div className={'flex flex-col space-y-2'}>
-                        <div className={'p-2 flex justify-between'}>
-                            <div className={'grid gap-2'}>
+                        <div className={'p-2 flex gap-2 w-full lg:justify-between max-md:grid'}>
+                            <div
+                                className={'grid gap-2 max-md:w-full max-md:grid-cols-2 max-sm:grid-cols-1'}>
                                 {
                                     table.getFilteredSelectedRowModel().rows.length > 0 && (
                                         <div className={''}>
@@ -279,19 +280,22 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
                                         </div>
                                     )
                                 }
-                                <div className={'flex gap-4'}>
-                                    <div className="flex items-center">
+                                <div className={'flex gap-4 max-md:w-full max-md:col-span-2 max-sm:grid'}>
+                                    <div className="flex items-center w-full">
                                         <Input
                                             placeholder="Cari berdasarkan Nama atau Kode Barang..."
                                             value={table.getState().globalFilter ?? ""}
                                             onChange={(event) => table.setGlobalFilter(event.target.value)}
-                                            className="max-w-sm"
+                                            className="w-auto"
                                         />
                                     </div>
-                                    <DataTableFacetedFilter column={table.getColumn("kategori")} options={categories}
-                                                            title={"Kategori"}/>
-                                    <DataTableFacetedFilter column={table.getColumn("is_tax")} options={statuses}
-                                                            title={"Pajak"}/>
+                                    <div className={'flex gap-2'}>
+                                        <DataTableFacetedFilter column={table.getColumn("kategori")}
+                                                                options={categories}
+                                                                title={"Kategori"}/>
+                                        <DataTableFacetedFilter column={table.getColumn("is_tax")} options={statuses}
+                                                                title={"Pajak"}/>
+                                    </div>
                                 </div>
                                 <div className="flex items-center space-x-2 ">
                                     <p className="text-sm font-medium">Rows per page</p>
@@ -314,7 +318,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
                                     </Select>
                                 </div>
                             </div>
-                            <div className={'flex gap-2 '}>
+                            <div className={'flex gap-2'}>
                                 <DialogTambahBarang auth={auth} getData={getData} setSuccess={setSuccess}
                                                     setError={setError} dataSatuan={satuan}/>
                                 <DropdownMenu>
@@ -374,7 +378,8 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
                                                 >
                                                     {/*<EditAlatKerjaDialog data={row.original} projects={projects}/>*/}
                                                     {/*<DeleteAlatKerjaDialog data={row}/>*/}
-                                                    <DialogEditBarang barang={row.original} dataSatuan={satuan} setError={setError}/>
+                                                    <DialogEditBarang barang={row.original} dataSatuan={satuan}
+                                                                      setError={setError}/>
                                                     <AlertDeleteDialog id={row.original}/>
                                                 </TableCell>
 
