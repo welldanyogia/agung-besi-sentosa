@@ -81,11 +81,11 @@ export default function Dashboard({auth}) {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Inventory
+                    Report
                 </h2>
             }
         >
-            <Head title="Inventory"/>
+            <Head title="Report"/>
 
             <AnimatePresence>
                 {showAlert && (

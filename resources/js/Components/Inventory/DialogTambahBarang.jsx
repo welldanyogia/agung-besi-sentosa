@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {Check, ChevronsUpDown} from "lucide-react";
+import {Check, ChevronsUpDown,Calendar,Smile, Calculator,User,CreditCard,Settings} from "lucide-react";
 import {Button} from "@/Components/ui/button";
 import {
     Dialog,
@@ -24,7 +24,15 @@ import {
     SelectValue
 } from "@/Components/ui/select.jsx";
 import {Popover, PopoverContent, PopoverTrigger} from "@/Components/ui/popover";
-import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/Components/ui/command";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator, CommandShortcut
+} from "@/Components/ui/command";
 import {cn} from "@/lib/utils.js";
 import {Inertia} from "@inertiajs/inertia";
 
@@ -34,6 +42,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
     const [openSatuanEcerean, setOpenSatuanEcerean] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [inputValue, setInputValue] = useState("");
+    const [inputSatuanValue, setInputSatuanValue] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [data, setData] = useState({
         kode_barang: "",
@@ -318,6 +327,13 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
         setSearchTerm(""); // Reset searchTerm
     };
 
+    const isExactMatch = categories.some(
+        (category) => category.label.toLowerCase() === inputValue.trim().toLowerCase()
+    );
+
+    console.log("isExactMatch :", isExactMatch)
+
+
     return (
         <Dialog open={openDialog} onOpenChange={(openDialog) => {
             setOpenDialog(openDialog);
@@ -367,7 +383,11 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                                 </Button>
                             </PopoverTrigger>
 
-                            <PopoverContent className="col-span-3 p-0">
+                            <PopoverContent
+                                className="col-span-3 p-0 z-50 w-[--radix-popover-trigger-width]"
+                                side="bottom"
+                                align="start"
+                            >
                                 <Command>
                                     <CommandInput
                                         placeholder="Search or create category..."
@@ -375,42 +395,49 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                                         value={inputValue}
                                         onValueChange={setInputValue}
                                     />
-                                    <CommandList>
-                                        <CommandEmpty>
-                                            Kategori <strong>{inputValue}</strong> tidak ditemukan.<br/>
-                                            <Button
-                                                onClick={handleSubmitCategory} disabled={loadingCategory}
-                                            >{loading ? "Memproses..." : `Tambahkan kategori ${inputValue}`}</Button>
-                                        </CommandEmpty>
+                                    <div className="max-h-[300px] overflow-y-auto touch-auto overscroll-contain">
+                                        <CommandList
+                                            className="max-h-[200px] overflow-y-auto overscroll-contain touch-auto">
+                                            {
+                                                !isExactMatch && inputValue.trim() !== "" && (
+                                                    <div
+                                                        className="flex flex-col items-center justify-center text-center space-y-2 py-4">
+                                                        <div>
+                                                            Kategori <strong>{inputValue}</strong> tidak ditemukan.
+                                                        </div>
+                                                        <Button onClick={handleSubmitCategory} disabled={loadingCategory}>
+                                                            {loading ? "Memproses..." : `Tambahkan kategori "${inputValue}"`}
+                                                        </Button>
+                                                    </div>
+                                                )
+                                            }
 
-                                        <CommandGroup>
-                                            {categories
-                                                .filter(category => category.label.toLowerCase().includes(searchTerm.toLowerCase())) // Filter categories based on searchTerm
-                                                .map((category) => (
-                                                    <CommandItem
-                                                        key={category.value}
-                                                        value={category.value}
-                                                        onSelect={(currentValue) => {
-                                                            setData((prevData) => ({
-                                                                ...prevData,
-                                                                kategori: currentValue === prevData.kategori ? "" : currentValue,
-                                                            }));
-                                                            setOpen(false);
-                                                        }}
-                                                    >
-                                                        {category.label}
-                                                        <Check
-                                                            className={cn(
-                                                                "ml-auto",
-                                                                data.kategori === category.value ? "opacity-100" : "opacity-0"
-                                                            )}
-                                                        />
-                                                    </CommandItem>
-                                                ))}
-                                        </CommandGroup>
-                                    </CommandList>
+                                            <CommandGroup>
+                                                {categories
+                                                    .filter(category => category.label.toLowerCase().includes(searchTerm.toLowerCase()))
+                                                    .map((category) => (
+                                                        <CommandItem
+                                                            key={category.value}
+                                                            value={category.value}
+                                                            onSelect={(currentValue) => {
+                                                                setData((prevData) => ({
+                                                                    ...prevData,
+                                                                    kategori: currentValue === prevData.kategori ? "" : currentValue,
+                                                                }));
+                                                                setOpen(false);
+                                                            }}
+                                                        >
+                                                            {category.label}
+                                                            <Check
+                                                                className={cn("ml-auto", data.kategori === category.value ? "opacity-100" : "opacity-0")}/>
+                                                        </CommandItem>
+                                                    ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </div>
                                 </Command>
                             </PopoverContent>
+
                         </Popover>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -444,15 +471,15 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                                     <CommandInput
                                         placeholder="Cari or tambahkan satuan baru..."
                                         className="h-9"
-                                        value={inputValue}
-                                        onValueChange={setInputValue}
+                                        value={inputSatuanValue}
+                                        onValueChange={setInputSatuanValue}
                                     />
                                     <CommandList>
                                         <CommandEmpty>
-                                            Satuan <strong>{inputValue}</strong> tidak ditemukan.<br/>
+                                            Satuan <strong>{inputSatuanValue}</strong> tidak ditemukan.<br/>
                                             <Button
                                                 onClick={handleSubmitSatuan} disabled={loadingCategory}
-                                            >{loading ? "Memproses..." : `Tambahkan satuan ${inputValue}`}</Button>
+                                            >{loading ? "Memproses..." : `Tambahkan satuan ${inputSatuanValue}`}</Button>
                                         </CommandEmpty>
 
                                         <CommandGroup>
@@ -558,15 +585,15 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                                         <CommandInput
                                             placeholder="Cari or tambahkan satuan baru..."
                                             className="h-9"
-                                            value={inputValue}
-                                            onValueChange={setInputValue}
+                                            value={inputSatuanValue}
+                                            onValueChange={setInputSatuanValue}
                                         />
                                         <CommandList>
                                             <CommandEmpty>
-                                                Satuan <strong>{inputValue}</strong> tidak ditemukan.<br/>
+                                                Satuan <strong>{inputSatuanValue}</strong> tidak ditemukan.<br/>
                                                 <Button
                                                     onClick={handleSubmitSatuan} disabled={loadingCategory}
-                                                >{loading ? "Memproses..." : `Tambahkan satuan ${inputValue}`}</Button>
+                                                >{loading ? "Memproses..." : `Tambahkan satuan ${inputSatuanValue}`}</Button>
                                             </CommandEmpty>
 
                                             <CommandGroup>
