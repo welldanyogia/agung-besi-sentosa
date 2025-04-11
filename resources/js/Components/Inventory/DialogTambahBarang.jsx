@@ -126,7 +126,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
         setError(null);
 
         const payload = {
-            satuan_name: inputValue,
+            satuan_name: inputSatuanValue,
         };
 
 
@@ -139,6 +139,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             // resetForm();
             // getCategories()
         } catch (err) {
+            // console.log(err)
             setError(err.message || "Terjadi kesalahan");
         } finally {
             getSatuan()
@@ -331,7 +332,6 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
         (category) => category.label.toLowerCase() === inputValue.trim().toLowerCase()
     );
 
-    console.log("isExactMatch :", isExactMatch)
 
 
     return (
