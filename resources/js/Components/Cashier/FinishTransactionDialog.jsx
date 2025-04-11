@@ -626,30 +626,53 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
   <div class="line"></div>
 
   <div class="totals">
-     ${isShipment ? `
+  ${isShipment ? `
     <div class="table-row">
       <div class="col-item">Biaya Layanan Pengiriman</div>
       <div class="col-subtotal">${formatRupiah(shipment || 0)}</div>
     </div>
-    ` : ''}
-     <div class="table-row">
-      <div class="col-item">Total</div>
-      <div class="col-subtotal">${
+  ` : ''}
+
+  <div class="table-row">
+    <div class="col-item">Total</div>
+    <div class="col-subtotal">${
             formatRupiah(
                 invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) +
-                (isShipment ? (shipment || 0) : 0))
+                (isShipment ? (shipment || 0) : 0)
+            )
         }</div>
-
-    </div>
-    <div class="table-row">
-      <div class="col-item">Bayar</div>
-      <div class="col-subtotal">${formatRupiah(cashPaid)}</div>
-    </div>
-    <div class="table-row">
-      <div class="col-item">Kembali</div>
-      <div class="col-subtotal">${formatRupiah(kembalian)}</div>
-    </div>
   </div>
+
+  <div class="table-row">
+    <div class="col-item">Bayar</div>
+    <div class="col-subtotal">${formatRupiah(cashPaid)}</div>
+  </div>
+
+  ${
+            cashPaid >= (
+                invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) +
+                (isShipment ? (shipment || 0) : 0)
+            )
+                ? `
+      <div class="table-row">
+        <div class="col-item">Kembali</div>
+        <div class="col-subtotal">${formatRupiah(kembalian)}</div>
+      </div>
+    `
+                : `
+      <div class="table-row">
+        <div class="col-item">Kekurangan Pembayaran</div>
+        <div class="col-subtotal">${formatRupiah(
+                    (
+                        invoiceItems?.reduce((acc, item) => acc + (item.sub_total || 0), 0) +
+                        (isShipment ? (shipment || 0) : 0)
+                    ) - cashPaid
+                )}</div>
+      </div>
+    `
+        }
+</div>
+
 
   <div class="line"></div>
 

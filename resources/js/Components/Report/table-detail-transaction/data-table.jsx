@@ -271,20 +271,37 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
       <div class="col-item">Biaya Layanan Pengiriman</div>
       <div class="col-subtotal">${formatRupiah(invoice.shipment || 0)}</div>
     </div>
-    ` : ''}
-    <div class="table-row">
-      <div class="col-item">Total</div>
-      <div class="col-subtotal">${formatRupiah(invoice.total_price)}</div>
-    </div>
-    <div class="table-row">
-      <div class="col-item">Bayar</div>
-      <div class="col-subtotal">${formatRupiah(invoice.bayar)}</div>
-    </div>
-    <div class="table-row">
-      <div class="col-item">Kembali</div>
-      <div class="col-subtotal">${formatRupiah(invoice.kembalian)}</div>
-    </div>
+  ` : ''}
+
+  <div class="table-row">
+    <div class="col-item">Total</div>
+    <div class="col-subtotal">${formatRupiah(invoice.total_price)}</div>
   </div>
+
+  <div class="table-row">
+    <div class="col-item">Bayar</div>
+    <div class="col-subtotal">${formatRupiah(invoice.bayar)}</div>
+  </div>
+
+  ${
+            invoice.bayar >= invoice.total_price
+                ? `
+      <div class="table-row">
+        <div class="col-item">Kembali</div>
+        <div class="col-subtotal">${formatRupiah(invoice.bayar)}</div>
+      </div>
+    `
+                : `
+      <div class="table-row">
+        <div class="col-item">Kekurangan Pembayaran</div>
+        <div class="col-subtotal">${formatRupiah(
+                    invoice.total_price - invoice.bayar
+                )}</div>
+      </div>
+    `
+        }
+</div>
+
 
   <div class="line"></div>
 
