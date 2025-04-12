@@ -1176,7 +1176,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                     value={formatRupiah(cashPaid)}
                                     onChange={handleCashPaidChange}
                                     placeholder="Masukkan jumlah uang"
-                                    disabled={paymentMethode !== "tunai"}
+                                    // disabled={paymentMethode !== "tunai"}
                                 />
                             </div>
                             <div className="mt-2 max-sm:text-lg">
