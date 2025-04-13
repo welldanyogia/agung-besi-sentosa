@@ -69,12 +69,20 @@ export default function Dashboard({auth}) {
 
     useEffect(() => {
         getData();  // Fetch the inventory data when the component mounts
+
         if (error || success) {
             setShowAlert(true);
-            const timer = setTimeout(() => setShowAlert(false), 8000);
+
+            const timer = setTimeout(() => {
+                setShowAlert(false);
+                setError(null);
+                setSuccess(null);
+            }, 8000);
+
             return () => clearTimeout(timer);
         }
     }, [error, success]);
+
 
 
     return (
@@ -142,7 +150,7 @@ export default function Dashboard({auth}) {
                     </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <DataTable columns={columns} data={data} auth={auth} setError={setError}
-                                   setSuccess={setSuccess}/>
+                                   setSuccess={setSuccess} getData={getData}/>
                     </div>
                 </div>
             </div>

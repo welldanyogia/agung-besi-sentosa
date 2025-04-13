@@ -175,7 +175,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
       .info div {
         display: flex;
         justify-content: space-between;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
       }
 
@@ -188,7 +188,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
       .table-row {
         display: flex;
         justify-content: space-between;
-        font-size: 18px;
+        font-size: 14px;
       }
 
       .table-head {
@@ -197,8 +197,8 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
         padding-bottom: 4px;
       }
 
-      .col-code { width: 20%; text-align: left; margin-left: 20px }
-      .col-item { width: 35%; text-align: left;}
+      .col-code { width: 15%; text-align: left; margin-left: 20px }
+      .col-item { width: 40%; text-align: left;}
       .col-price { width: 15%; text-align: right; }
       .col-qty { width: 10%; text-align: right; }
       .col-subtotal { width: 20%; text-align: right; margin-right: 20px; }
@@ -293,7 +293,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
                 ? `
       <div class="table-row">
         <div class="col-item">Kembali</div>
-        <div class="col-subtotal">${formatRupiah(invoice.bayar)}</div>
+        <div class="col-subtotal">${formatRupiah(invoice.bayar-invoice.total_price)}</div>
       </div>
     `
                 : `

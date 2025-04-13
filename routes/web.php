@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -60,6 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/report', function () {
         return Inertia::render('Report/Dashboard');
     })->name('report');
+
 });
+
 
 require __DIR__.'/auth.php';

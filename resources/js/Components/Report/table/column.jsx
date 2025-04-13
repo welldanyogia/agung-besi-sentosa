@@ -185,13 +185,23 @@ export const columns = [
     //         );
     //     },
     // }),
-    {
-        id: "actions",
-        header: () => <div className="text-center">Detail Transaksi</div>,
-        cell: ({row}) => (
-            <div className="flex justify-center gap-2">
-                <DialogEditBarang barang={row.original}/>
-            </div>
-        ),
-    },
+    // {
+    //     id: "actions",
+    //     header: () => (
+    //         <div className="text-center bg-accent z-10" style={{ position: 'sticky', right: 0 }}>
+    //             Detail Transaksi
+    //         </div>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div
+    //             className="flex justify-center gap-2 bg-white z-10"
+    //             style={{ position: 'sticky', right: 0 }}
+    //             onClick={(e) => e.stopPropagation()}
+    //         >
+    //             <DialogEditBarang barang={row.original} />
+    //         </div>
+    //     ),
+    // },
+
+
 ];

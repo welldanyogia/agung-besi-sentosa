@@ -40,6 +40,8 @@ Route::post('/storeinfo', [\App\Http\Controllers\SettingController::class, 'stor
 Route::get('/storeinfo', [\App\Http\Controllers\SettingController::class, 'getStoreInfo']);
 Route::post('/transactions', [\App\Http\Controllers\ReportController::class, 'getTransaction']);
 Route::post('/invoices/{id}/update-is-printed', [ReportController::class, 'updateIsPrinted']);
+Route::post('/invoices/{id}', [ReportController::class, 'destroy'])->name('invoices.destroy');
+
 
 
 

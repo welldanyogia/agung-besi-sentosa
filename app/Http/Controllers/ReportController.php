@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoices;
+use App\Models\Items;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -75,10 +77,62 @@ class ReportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    /**
+     * Remove the specified resource from storage.
+     */
+
     public function destroy(string $id)
     {
-        //
+        try {
+            // Log mulai proses penghapusan
+            Log::info("Menghapus invoice dengan ID: $id");
+
+            // Cari invoice berdasarkan ID
+            $invoice = Invoices::findOrFail($id);
+
+            // Log detail invoice yang ditemukan
+            Log::info("Invoice ditemukan: ", $invoice->toArray());
+
+            // Hapus invoice_items terkait dan kembalikan stok
+            foreach ($invoice->items as $invoiceItem) {
+                // Cari item terkait
+                $item = Items::find($invoiceItem->item_id);
+
+                // Log sebelum mengembalikan stok
+                Log::info("Mengembalikan stok item: " . $item->item_name . " sebelum stok: " . $item->stock);
+
+                // Kembalikan stok item
+                $item->stock += $invoiceItem->qty;
+                $item->save();
+
+                // Log setelah mengembalikan stok
+                Log::info("Stok item berhasil dikembalikan: " . $item->item_name . " setelah stok: " . $item->stock);
+
+                // Hapus invoice_item terkait
+                $invoiceItem->delete();
+                Log::info("Invoice item dengan ID: {$invoiceItem->id} berhasil dihapus");
+            }
+
+            // Hapus invoice
+            $invoice->delete();
+            Log::info("Invoice berhasil dihapus: ID $id");
+
+            return response()->json([
+                'message' => 'Invoice berhasil dihapus beserta item terkait',
+            ], 200);
+        } catch (\Exception $e) {
+            // Log jika terjadi error
+            Log::error("Gagal menghapus invoice dengan ID $id: " . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghapus invoice',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
+
+
 
     public function updateIsPrinted(Request $request, $id)
     {

@@ -42,6 +42,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
+import {AlertDeleteDialog} from "@/Components/Report/AlertDeleteDialog.jsx";
 
 export const labels = [
     {
@@ -70,7 +72,7 @@ export const statuses = [
         // icon: Circle,
     },
 ]
-const DataTable = ({columns, data, auth,setError, setSuccess}) => {
+const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
     const [rowSelection, setRowSelection] = useState({})
     const [columnFilters, setColumnFilters] = useState(
         []
@@ -757,9 +759,10 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                                 <DataTableViewOptions table={table}/>
                             </div>
                         </div>
-                        <div className="rounded-md border">
+                        <div className="rounded-md border overflow-x-auto">
+
                             <Table>
-                                <TableHeader>
+                                <TableHeader className={'bg-accent '}>
                                     {table.getHeaderGroups().map(headerGroup => (
                                         <TableRow key={headerGroup.id}>
                                             {headerGroup.headers.map(header => (
@@ -767,6 +770,10 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                 </TableHead>
                                             ))}
+                                            <TableHead className="sticky right-0 bg-accent z-10">
+                                                {/*<DialogEditBarang barang={table.getRowModel.} />*/}
+                                                Aksi
+                                            </TableHead>
                                         </TableRow>
                                     ))}
                                 </TableHeader>
@@ -780,6 +787,15 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 ))}
+                                                <TableCell className="sticky right-0 bg-white z-10 space-y-2">
+                                                    <DialogEditBarang barang={row.original} />
+                                                    {
+                                                        auth?.user?.roles[0]?.name === 'superadmin' && (
+                                                            <AlertDeleteDialog invoice={row.original} getData={getData} setError={setError} setSuccess={setSuccess}/>
+                                                        )
+                                                    }
+                                                </TableCell>
+
                                             </TableRow>
                                         ))
                                     ) : (
