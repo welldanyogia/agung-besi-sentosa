@@ -160,7 +160,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
 
       .header, .footer {
         text-align: center;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: bold;
         margin-bottom: 4px;
         margin-top: 4px;
@@ -197,11 +197,11 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
         padding-bottom: 4px;
       }
 
-      .col-code { width: 15%; text-align: left; margin-left: 20px }
-      .col-item { width: 40%; text-align: left;}
-      .col-price { width: 15%; text-align: right; }
-      .col-qty { width: 10%; text-align: right; }
-      .col-subtotal { width: 20%; text-align: right; margin-right: 20px; }
+      /*.col-code { width: 15%; text-align: left; margin-left: 20px }*/
+      .col-item { width: 40%; text-align: left; margin-left: 20px}
+      .col-price { width: 20%; text-align: right; }
+      .col-qty { width: 15%; text-align: right; }
+      .col-subtotal { width: 25%; text-align: right; margin-right: 20px; }
 
       .totals {
         margin-top: 6px;
@@ -241,7 +241,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
   <div class="line"></div>
 
   <div class="table-head">
-    <div class="col-code">Kode Barang</div>
+<!--    <div class="col-code">Kode Barang</div>-->
     <div class="col-item">Item</div>
     <div class="col-price">Harga</div>
     <div class="col-qty">Qty</div>
@@ -260,7 +260,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
 
             return `
     <div class="table-row">
-      <div class="col-code">${item.item.item_code}</div>
+      <!--     <div class="col-code">${item.item.item_code}</div> -->
       <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-qty">${item.qty}</div>
