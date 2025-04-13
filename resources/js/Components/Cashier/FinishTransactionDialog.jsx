@@ -519,7 +519,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
       .header, .footer {
         text-align: center;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: bold;
         margin-bottom: 4px;
         margin-top: 4px;
@@ -534,7 +534,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
       .info div {
         display: flex;
         justify-content: space-between;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
       }
 
@@ -547,7 +547,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
       .table-row {
         display: flex;
         justify-content: space-between;
-        font-size: 18px;
+        font-size: 14px;
       }
 
       .table-head {
@@ -556,11 +556,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
         padding-bottom: 4px;
       }
 
-      .col-code { width: 20%; text-align: left; margin-left: 20px }
-      .col-item { width: 35%; text-align: left;}
-      .col-price { width: 15%; text-align: right; }
-      .col-qty { width: 10%; text-align: right; }
-      .col-subtotal { width: 20%; text-align: right; margin-right: 20px; }
+      /*.col-code { width: 15%; text-align: left; margin-left: 20px }*/
+      .col-item { width: 40%; text-align: left; margin-left: 20px}
+      .col-price { width: 20%; text-align: right; }
+      .col-qty { width: 15%; text-align: right; }
+      .col-subtotal { width: 25%; text-align: right; margin-right: 20px; }
 
       .totals {
         margin-top: 6px;
@@ -600,7 +600,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
   <div class="line"></div>
 
   <div class="table-head">
-    <div class="col-code">Kode Barang</div>
+<!--    <div class="col-code">Kode Barang</div>-->
     <div class="col-item">Item</div>
     <div class="col-price">Harga</div>
     <div class="col-qty">Qty</div>
@@ -619,7 +619,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
             return `
     <div class="table-row">
-      <div class="col-code">${item.item.item_code}</div>
+<!--      <div class="col-code">${item.item.item_code}</div>-->
       <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-qty">${item.qty}</div>
