@@ -120,6 +120,11 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
             hour: "2-digit", minute: "2-digit", second: "2-digit"
         });
     };
+    const formatUppercase = (string) => {
+        return typeof string === 'string' ? string.toUpperCase() : '';
+    };
+
+
     const formatRupiah = (amount) => {
         if (!amount) return "-";
         return new Intl.NumberFormat('id-ID', {style: 'currency', currency: 'IDR'}).format(amount);
@@ -156,6 +161,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
                 newColumns.map(col => {
                     if (col === "no") return index + 1; // Tambahkan nomor urut
                     if (col === "is_tax") return row[col] ? "Pajak" : "Tanpa Pajak"; // Ubah 1/0 menjadi Pajak/Tanpa Pajak
+                    if (col === "category.category_name") return formatUppercase(data[index].category?.category_name);
                     if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
                     if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
                     return row[col] || "-"; // Isi data atau "-"
@@ -213,13 +219,17 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData, satuan, 
 
             // Ambil data berdasarkan `accessorKey`
             const tableRows = data.map((row, index) =>
-                newColumns.map(col => {
-                    if (col === "no") return index + 1; // Tambahkan nomor urut
-                    if (col === "is_tax") return row[col] ? "Pajak" : "Tanpa Pajak"; // Ubah 1/0 menjadi Pajak/Tanpa Pajak
-                    if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
-                    if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
-                    return row[col] || "-"; // Isi data atau "-"
-                })
+                    newColumns.map(col => {
+                        // console.log(col)
+                        if (col === "no") return index + 1; // Tambahkan nomor urut
+                        if (col === "is_tax") return row[col] ? "Pajak" : "Tanpa Pajak"; // Ubah 1/0 menjadi Pajak/Tanpa Pajak
+                        if (col === "category.category_name") return formatUppercase(data[index].category?.category_name);
+
+                            // return row[col]; // Format timestamp
+                        if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
+                        if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
+                        return row[col] || "-"; // Isi data atau "-"
+                    })
             );
 
             // Mendapatkan waktu saat download dilakukan
