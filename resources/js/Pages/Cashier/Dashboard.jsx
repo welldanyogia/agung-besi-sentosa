@@ -84,14 +84,17 @@ export default function Dashboard({auth,items,kategoris}) {
         //     getCategories()
         // }
 
-        const formattedCategories = kategoris.map(category => ({
-            id: category.id,
-            label: category.category_name,
-            value: category.category_name,
-            icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
-        }));
+        const formattedCategories = kategoris
+            .sort((a, b) => a.category_name.localeCompare(b.category_name))
+            .map(category => ({
+                id: category.id,
+                label: category.category_name,
+                value: category.category_name,
+                icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
+            }));
 
         setCategories(formattedCategories);
+
         const totalAmount = invoiceItems.reduce((acc, item) => {
             return acc + (item.sub_total || 0);
         }, 0);

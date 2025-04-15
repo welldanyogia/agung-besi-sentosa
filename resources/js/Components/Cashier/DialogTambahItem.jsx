@@ -41,7 +41,7 @@ import {Inertia} from "@inertiajs/inertia";
 export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, setError, getItems, getInvoice}) {
     const [openDialog, setOpenDialog] = useState(false);
     const [loading, setLoading] = useState(false);
-    const initialQuantity = ["batang", "lembar"].includes(product.satuan.toLowerCase()) ? 0.5 : 1;
+    const initialQuantity = ["ornamen"].includes(product.category?.category_name.toLowerCase()) ? 1 : 0.5;
     const [quantity, setQuantity] = useState(initialQuantity);
     const availableTabs = [
         {key: 'retail', label: 'Retail', price: product.retail_price},
@@ -51,7 +51,8 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
     const defaultValue = availableTabs.length > 0 ? availableTabs[0].key : ''; // Ambil yang pertama
     const [selectedTab, setSelectedTab] = useState(defaultValue);
-    const step = ["batang", "lembar"].includes(product.satuan.toLowerCase()) ? 0.5 : 1;
+    // console.log()
+    const step = ["ornamen"].includes(product?.category?.category_name.toLowerCase()) ? 1 : 0.5;
 
 
 
@@ -191,7 +192,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     }[availableTabs.length] || 'grid-cols-1'; // fallback jika tidak cocok
 
     useEffect(() => {
-        const defaultQty = ["batang", "lembar"].includes(product.satuan.toLowerCase()) ? 0.5 : 1;
+        const defaultQty = ["ornamen"].includes(product.category?.category_name.toLowerCase()) ? 1 : 0.5;
         setQuantity(defaultQty);
     }, [product]);
 

@@ -34,7 +34,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
 
     const handleMin = async (item) => {
-        const step = ["batang", "lembar"].includes(item.item.satuan.toLowerCase()) ? 0.5 : 1;
+        const step = ["ornamen"].includes(item.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
 
         try {
             // Tentukan jumlah pengurangan berdasarkan price_type
@@ -79,7 +79,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
     };
 
     const handlePlus = async (item) => {
-        const step = ["batang", "lembar"].includes(item.item.satuan.toLowerCase()) ? 0.5 : 1;
+        const step = ["ornamen"].includes(item.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
         try {
             // Kirim semua permintaan update stok dalam satu batch
 
@@ -118,7 +118,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
     // Increment and Decrement handlers
     const handleIncrement = (product) => {
-        const step = ["batang", "lembar"].includes(product.item.satuan.toLowerCase()) ? 0.5 : 1;
+        const step = ["ornamen"].includes(product.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
         handlePlus(product)
         setInvoiceItems((prevItems) => {
             return prevItems.map((item) =>
@@ -128,7 +128,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
     };
 
     const handleDecrement = (product) => {
-        const step = ["batang", "lembar"].includes(product.item.satuan.toLowerCase()) ? 0.5 : 1;
+        const step = ["ornamen"].includes(product.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
 
         handleMin(product)
         setInvoiceItems((prevItems) => {
