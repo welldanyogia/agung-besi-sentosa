@@ -35,6 +35,7 @@ import {
 } from "@/Components/ui/command";
 import {cn} from "@/lib/utils.js";
 import {Inertia} from "@inertiajs/inertia";
+import {router} from "@inertiajs/react";
 
 export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
     const [open, setOpen] = useState(false);
@@ -299,7 +300,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
         } finally {
-            Inertia.reload()
+            router.reload()
             setOpenDialog(false)
             setLoading(false);
         }

@@ -153,7 +153,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
         font-family: "Courier New", monospace;
         font-size: 12px;
         color: #000;
-        margin-top: 50px;
+        margin-top: 20px;
         /*margin-left: 2px;*/
         /*margin-right: 2px;*/
       }
@@ -180,7 +180,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
       }
 
       .line {
-        border-top: 1px dashed #000;
+        border-top: 1px solid #000;
         margin: 4px 0;
       }
 
@@ -198,14 +198,14 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
       }
 
       /*.col-code { width: 15%; text-align: left; margin-left: 20px }*/
-      .col-item { width: 40%; text-align: left; margin-left: 20px}
+      .col-item { width: 45%; text-align: left;}
       .col-price { width: 20%; text-align: right; }
-      .col-qty { width: 15%; text-align: right; }
+      .col-qty { width: 10%; text-align: left;  margin-left: 20px}
       .col-subtotal { width: 25%; text-align: right; margin-right: 20px; }
 
       .totals {
         margin-top: 6px;
-        margin-left: 20px;
+        margin-left: 15px;
       }
 
       .totals .table-row {
@@ -242,9 +242,9 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
 
   <div class="table-head">
 <!--    <div class="col-code">Kode Barang</div>-->
+    <div class="col-qty">QTY</div>
     <div class="col-item">Item</div>
     <div class="col-price">Harga</div>
-    <div class="col-qty">Qty</div>
     <div class="col-subtotal">Subtotal</div>
   </div>
 
@@ -261,9 +261,9 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
             return `
     <div class="table-row">
       <!--     <div class="col-code">${item.item.item_code}</div> -->
+      <div class="col-qty">${item.qty}</div>
       <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
-      <div class="col-qty">${item.qty}</div>
       <div class="col-subtotal">${formatRupiah(item.sub_total)}</div>
     </div>`;
         }).join('')}

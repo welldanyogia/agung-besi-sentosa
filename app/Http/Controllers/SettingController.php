@@ -118,4 +118,39 @@ class SettingController extends Controller
             'data' => null
         ], 404);
     }
+
+    public function destroy(string $id)
+    {
+        // Cek apakah user yang login memiliki izin untuk menghapus user lain
+        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('admin')) {
+            return response()->json([
+                'message' => 'You are not authorized to delete a user.',
+            ], 403); // HTTP 403 Forbidden
+        }
+
+        // Temukan user berdasarkan ID
+        $user = User::find($id);
+
+        // Jika user tidak ditemukan
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // Optional: mencegah menghapus diri sendiri
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'message' => 'You cannot delete yourself.',
+            ], 400);
+        }
+
+        // Hapus user
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User deleted successfully.',
+        ]);
+    }
+
 }

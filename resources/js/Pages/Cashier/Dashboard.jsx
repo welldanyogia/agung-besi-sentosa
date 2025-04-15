@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Head} from '@inertiajs/react';
+import {Head, router} from '@inertiajs/react';
 import {CalendarDays, Plus} from "lucide-react";
 import {useEffect, useState} from "react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/Components/ui/card.jsx";
@@ -15,6 +15,7 @@ import {AlertCancelDialog} from "@/Components/Cashier/AlertCancelDialog.jsx";
 import {AlertSuccess} from "@/Components/AlertSuccess.jsx";
 import {AlertDestructive} from "@/Components/AlertDestructive.jsx";
 import {CashierDrawer} from "@/Components/Cashier/CashierDrawer.jsx";
+import {Inertia} from "@inertiajs/inertia";
 
 const formatRupiah = (number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -124,7 +125,7 @@ export default function Dashboard({auth,items,kategoris}) {
     }
     const getItems = async () => {
         try {
-            const response = await axios.post("/api/inventory/show");
+            // const response = await axios.post("/api/inventory/show");
 
             // Format ulang data agar sesuai dengan priorities
             // const formattedCategories = response.data.categories.map(category => ({
@@ -134,7 +135,9 @@ export default function Dashboard({auth,items,kategoris}) {
             //     icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
             // }));
 
-            setItems(response.data.items);
+            // setItems(response.data.items);
+            // Inertia.reload({only:['items']})
+            router.reload({ only: ['items'] })
         } catch (error) {
             // console.error("Error fetching inventory data:", error);
         }

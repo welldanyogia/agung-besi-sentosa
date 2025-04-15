@@ -33,7 +33,7 @@ import {
     CommandList,
 } from "@/Components/ui/command";
 import {cn} from "@/lib/utils.js";
-import {usePage} from "@inertiajs/react";
+import {router, usePage} from "@inertiajs/react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/Components/ui/card.jsx";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/Components/ui/tabs.jsx";
 import {Inertia} from "@inertiajs/inertia";
@@ -155,12 +155,12 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             });
 
             setSuccess(response.data.message);
-            console.log(response)
+            // console.log(response)
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             setError("Gagal menambahkan barang!!!");
         }finally {
-            Inertia.reload()
+            router.reload()
             // getItems()
         }
 

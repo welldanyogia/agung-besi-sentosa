@@ -24,6 +24,7 @@ import {
     SelectValue
 } from "@/Components/ui/select.jsx";
 import {Inertia} from "@inertiajs/inertia";
+import {router} from "@inertiajs/react";
 
 export function FinishTransactionDialog({invoiceItems, setError, invoice_id, setInvoice, setInvoceItems, storeInfo}) {
     const printRef = useRef();
@@ -62,7 +63,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
             setError("Gagal menyelesaikan transaksi!!!");
         } finally {
             setDialogOpen(false)
-            Inertia.reload()
+            setShipment(0)
+            setCustomer('')
+            setPaymentMethod('')
+            setIsShipment('')
+            router.reload()
         }
     };
 
@@ -512,7 +517,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
         font-family: "Courier New", monospace;
         font-size: 12px;
         color: #000;
-        margin-top: 50px;
+        margin-top: 20px;
         /*margin-left: 2px;*/
         /*margin-right: 2px;*/
       }
@@ -539,7 +544,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
       }
 
       .line {
-        border-top: 1px dashed #000;
+        border-top: 1px solid #000;
         margin: 4px 0;
       }
 
@@ -557,14 +562,14 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
       }
 
       /*.col-code { width: 15%; text-align: left; margin-left: 20px }*/
-      .col-item { width: 40%; text-align: left; margin-left: 20px}
+      .col-item { width: 45%; text-align: left;}
       .col-price { width: 20%; text-align: right; }
-      .col-qty { width: 15%; text-align: right; }
+      .col-qty { width: 10%; text-align: left;  margin-left: 20px}
       .col-subtotal { width: 25%; text-align: right; margin-right: 20px; }
 
       .totals {
         margin-top: 6px;
-        margin-left: 20px;
+        margin-left: 15px;
       }
 
       .totals .table-row {
@@ -601,9 +606,9 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
 
   <div class="table-head">
 <!--    <div class="col-code">Kode Barang</div>-->
+    <div class="col-qty">QTY</div>
     <div class="col-item">Item</div>
     <div class="col-price">Harga</div>
-    <div class="col-qty">Qty</div>
     <div class="col-subtotal">Subtotal</div>
   </div>
 
@@ -620,9 +625,9 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
             return `
     <div class="table-row">
 <!--      <div class="col-code">${item.item.item_code}</div>-->
+      <div class="col-qty">${item.qty}</div>
       <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
-      <div class="col-qty">${item.qty}</div>
       <div class="col-subtotal">${formatRupiah(item.sub_total)}</div>
     </div>`;
         }).join('')}

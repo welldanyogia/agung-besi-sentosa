@@ -14,6 +14,7 @@ import {useState} from "react";
 import {columns} from "@/Components/Cashier/table/column.jsx";
 import axios from "axios";
 import {Inertia} from "@inertiajs/inertia";
+import {router} from "@inertiajs/react";
 
 const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,getItems,getInvoice}) => {
     const [rowSelection, setRowSelection] = useState({});
@@ -68,12 +69,13 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
             console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
-            // getInvoice();
+            getInvoice();
         } finally {
             getInvoice()
             // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
-            Inertia.get("/cashier", {}, { preserveState: true, replace: true });
-
+            // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+            getItems();
+            // getInvoice();
 
         }
     };
@@ -112,13 +114,18 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
             getInvoice();
         }finally {
-            Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+            // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+            getItems();
+            // Inertia.get("/cashier", {}, { preserveState: true, replace: true });
+
+            getInvoice();
         }
     };
 
     // Increment and Decrement handlers
     const handleIncrement = (product) => {
         const step = ["ornamen"].includes(product.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
+        console.log(product)
         handlePlus(product)
         setInvoiceItems((prevItems) => {
             return prevItems.map((item) =>
@@ -129,7 +136,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
     const handleDecrement = (product) => {
         const step = ["ornamen"].includes(product.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
-
+        console.log(["ornamen"].includes(product.item.category?.category_name.toLowerCase()))
         handleMin(product)
         setInvoiceItems((prevItems) => {
             return prevItems
@@ -159,7 +166,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
         } finally {
             getInvoice()
             setIsDeleting(false); // selesai loading
-            Inertia.get("/cashier",{},{preserveState:true, replace:true})
+            router.get("/cashier",{},{preserveState:true, replace:true})
         }
     };
 
@@ -196,9 +203,9 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
                                             className="rounded-full"
                                             onClick={() => handleDecrement(row.original)}
                                             disabled={
-                                                ['lembar', 'batang'].includes(row.original.item?.satuan?.toLowerCase())
-                                                    ? row.original.qty <= 0.5
-                                                    : row.original.qty <= 1
+                                                ['ornamen'].includes(row.original.item?.category?.category_name.toLowerCase())
+                                                    ? row.original.qty <= 1
+                                                    : row.original.qty <= 0.5
                                             }                                        >
                                             -
                                         </Button>
