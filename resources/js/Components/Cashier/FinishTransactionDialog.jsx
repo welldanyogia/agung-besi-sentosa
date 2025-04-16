@@ -552,7 +552,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
       .table-row {
         display: flex;
         justify-content: space-between;
-        font-size: 14px;
+        font-size: 16px;
       }
 
       .table-head {
@@ -564,7 +564,7 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
       /*.col-code { width: 15%; text-align: left; margin-left: 20px }*/
       .col-item { width: 45%; text-align: left;}
       .col-price { width: 20%; text-align: right; }
-      .col-qty { width: 10%; text-align: left;  margin-left: 20px}
+      .col-qty { width: 10%; text-align: right;  margin-right: 10px; font-weight: bold}
       .col-subtotal { width: 25%; text-align: right; margin-right: 20px; }
 
       .totals {
