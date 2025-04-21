@@ -125,7 +125,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
     // Increment and Decrement handlers
     const handleIncrement = (product) => {
         const step = ["ornamen"].includes(product.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
-        console.log(product)
+        // console.log(product)
         handlePlus(product)
         setInvoiceItems((prevItems) => {
             return prevItems.map((item) =>
@@ -136,7 +136,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
     const handleDecrement = (product) => {
         const step = ["ornamen"].includes(product.item.category?.category_name.toLowerCase()) ? 1 : 0.5;
-        console.log(["ornamen"].includes(product.item.category?.category_name.toLowerCase()))
+        // console.log(["ornamen"].includes(product.item.category?.category_name.toLowerCase()))
         handleMin(product)
         setInvoiceItems((prevItems) => {
             return prevItems

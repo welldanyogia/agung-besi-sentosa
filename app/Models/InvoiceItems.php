@@ -15,60 +15,91 @@ class InvoiceItems extends Model
         'invoice_id', 'item_id', 'qty', 'price', 'discount', 'sub_total', 'price_type'
     ];
 
+//    protected static function booted(): void
+//    {
+//        static::creating(function ($item) {
+//            $itemModel = Items::find($item->item_id);
+//            $price = static::getPriceByType($itemModel, $item->price_type);
+//
+//            $excludedCategories = [
+//                'engsel bubut',
+//                'plat timbangan',
+//                'timbangan',
+//                'pipa gas timbangan',
+//                'engsel',
+//                'kawat las stenlis',
+//                'kawat las',
+//            ];
+//
+//            $item->price = $price;
+//            $item->sub_total = $item->qty * $price;
+//
+//            $categoryName = strtolower($itemModel->category->category_name ?? '');
+//
+//            if (fmod($item->qty, 1) === 0.5 && !in_array($categoryName, $excludedCategories)) {
+//                $item->sub_total += 5000;
+//            }
+//
+//            $item->sub_total -= $item->discount;
+//        });
+//
+//        static::updating(function ($item) {
+//            $itemModel = Items::find($item->item_id);
+//            $price = static::getPriceByType($itemModel, $item->price_type);
+//
+//            $excludedCategories = [
+//                'engsel bubut',
+//                'plat timbangan',
+//                'timbangan',
+//                'pipa gas timbangan',
+//                'engsel',
+//                'kawat las stenlis',
+//                'kawat las',
+//            ];
+//
+//            $item->price = $price;
+//            $item->sub_total = $item->qty * $price;
+//
+//            $categoryName = strtolower($itemModel->category_name ?? '');
+//
+//            if (fmod($item->qty, 1) === 0.5 && !in_array($categoryName, $excludedCategories)) {
+//                $item->sub_total += 5000;
+//            }
+//
+//            $item->sub_total -= $item->discount;
+//        });
+//
+//    }
+
     protected static function booted(): void
     {
-        static::creating(function ($item) {
-            $itemModel = Items::find($item->item_id);
-            $price = static::getPriceByType($itemModel, $item->price_type);
+        foreach (['creating', 'updating'] as $event) {
+            static::$event(function ($item) {
+                $itemModel = Items::find($item->item_id);
+                $price = static::getPriceByType($itemModel, $item->price_type);
 
-            $excludedCategories = [
-                'engsel bubut',
-                'plat timbangan',
-                'timbangan',
-                'pipa gas timbangan',
-                'engsel',
-                'kawat las stenlis',
-                'kawat las',
-            ];
+                $excludedCategories = [
+                    'engsel bubut',
+                    'plat timbangan',
+                    'timbangan',
+                    'pipa gas timbangan',
+                    'engsel',
+                    'kawat las stenlis',
+                    'kawat las',
+                ];
 
-            $item->price = $price;
-            $item->sub_total = $item->qty * $price;
+                $item->price = $price;
+                $item->sub_total = $item->qty * $price;
 
-            $categoryName = strtolower($itemModel->category->category_name ?? '');
+                $categoryName = strtolower($itemModel->category->category_name ?? '');
 
-            if (fmod($item->qty, 1) === 0.5 && !in_array($categoryName, $excludedCategories)) {
-                $item->sub_total += 5000;
-            }
+                if (fmod($item->qty, 1) === 0.5 && !in_array($categoryName, $excludedCategories)) {
+                    $item->sub_total += 5000;
+                }
 
-            $item->sub_total -= $item->discount;
-        });
-
-        static::updating(function ($item) {
-            $itemModel = Items::find($item->item_id);
-            $price = static::getPriceByType($itemModel, $item->price_type);
-
-            $excludedCategories = [
-                'engsel bubut',
-                'plat timbangan',
-                'timbangan',
-                'pipa gas timbangan',
-                'engsel',
-                'kawat las stenlis',
-                'kawat las',
-            ];
-
-            $item->price = $price;
-            $item->sub_total = $item->qty * $price;
-
-            $categoryName = strtolower($itemModel->category_name ?? '');
-
-            if (fmod($item->qty, 1) === 0.5 && !in_array($categoryName, $excludedCategories)) {
-                $item->sub_total += 5000;
-            }
-
-            $item->sub_total -= $item->discount;
-        });
-
+                $item->sub_total -= $item->discount;
+            });
+        }
     }
 
     protected static function getPriceByType($item, $type)
