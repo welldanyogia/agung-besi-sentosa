@@ -24,6 +24,7 @@ class InvoiceItems extends Model
             $excludedCategories = [
                 'engsel bubut',
                 'plat timbangan',
+                'timbangan',
                 'pipa gas timbangan',
                 'engsel',
                 'kawat las stenlis',
@@ -49,6 +50,7 @@ class InvoiceItems extends Model
             $excludedCategories = [
                 'engsel bubut',
                 'plat timbangan',
+                'timbangan',
                 'pipa gas timbangan',
                 'engsel',
                 'kawat las stenlis',
