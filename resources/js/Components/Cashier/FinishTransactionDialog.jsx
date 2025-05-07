@@ -46,13 +46,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                 payment: paymentMethode,
                 customer_name: customer || "pelanggan", // Default ke "pelanggan" jika null/empty
                 is_printed: is_printed,
-                bayar: cashPaid,
+                bayar: cashPaid || 0,
                 total: total,
                 is_shipment: isShipment,
                 shipment: shipment || 0,
             });
-
-            console.log(response)
 
             setInvoice(null);
             setInvoceItems([]);

@@ -28,7 +28,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        // getPaginationRowModel: getPaginationRowModel(),
         onRowSelectionChange: setRowSelection,
         state: {rowSelection, columnFilters},
     });
