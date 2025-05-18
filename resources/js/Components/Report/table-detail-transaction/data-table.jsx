@@ -259,15 +259,20 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
                 selectedPrice = item.item.wholesale_price; // grosir
             }
 
+            const displayQty = item.price_type === 'eceran'
+                ? `${item.qty} ${item.item.retail_unit}`
+                : item.qty;
+
             return `
     <div class="table-row">
-      <!--     <div class="col-code">${item.item.item_code}</div> -->
-      <div class="col-qty">${item.qty}</div>
+      <!-- <div class="col-code">${item.item.item_code}</div> -->
+      <div class="col-qty">${displayQty}</div>
       <div class="col-item">${item.item.item_name} ${item.price_type === 'eceran' ? '(Eceran)' : ''}</div>
       <div class="col-price">${formatRupiah(selectedPrice)}</div>
       <div class="col-subtotal">${formatRupiah(item.sub_total)}</div>
     </div>`;
         }).join('')}
+
 
   <div class="line"></div>
 
