@@ -69,6 +69,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
     });
     const [categories, setCategories] = useState([])
 
+    console.log(data)
     const getCategories = async () => {
         try {
             const response = await axios.post('/api/categories/');
