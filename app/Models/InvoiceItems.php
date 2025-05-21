@@ -86,6 +86,11 @@ class InvoiceItems extends Model
                     'engsel',
                     'kawat las stenlis',
                     'kawat las',
+                    'KAWAT LAS',
+                    'AMPLAS',
+                    'KABEL LAS',
+                    'kabel las',
+                    'amplas'
                 ];
 
                 $item->price = $price;
