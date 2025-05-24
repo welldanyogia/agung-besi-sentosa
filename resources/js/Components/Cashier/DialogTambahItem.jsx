@@ -230,6 +230,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                     <p className={`text-sm ${product.stock === 0 ? "text-red-500" : "text-green-500"}`}>
                         {product.stock === 0 ? "Stok Habis" : `Stok: ${product.stock}`}
                     </p>
+                    <p className="">Kategori : <span className={'font-bold'}>{product.category.category_name}</span></p>
                 </Card>
 
             </DialogTrigger>

@@ -54,6 +54,7 @@ export default function Dashboard({auth,items,kategoris}) {
     const [invoice, setInvoice] = useState(null)
     const [total,setTotal]= useState()
     const [subTotal,setSubTotal]= useState()
+    const [taxFilter, setTaxFilter] = useState(null);
     const [storeInfo, setStoreInfo] = useState({
         store_name: '',
         address: '',
@@ -159,9 +160,13 @@ export default function Dashboard({auth,items,kategoris}) {
         const lowerSearch = searchQuery.toLowerCase();
         const matchesSearch =
             product.item_name.toLowerCase().includes(lowerSearch) ||
-            product.item_code.toLowerCase().includes(lowerSearch); // Tambahkan pencarian berdasarkan item_code
+            product.item_code.toLowerCase().includes(lowerSearch);
 
-        return matchesCategory && matchesSearch;
+        const matchesTax = taxFilter === null ||
+            (taxFilter === 'pajak' && product.is_tax) ||
+            (taxFilter === 'nonpajak' && !product.is_tax);
+
+        return matchesCategory && matchesSearch && matchesTax;
     });
 
     useEffect(() => {
@@ -230,15 +235,39 @@ export default function Dashboard({auth,items,kategoris}) {
                                 <Card className={'p-4 grid gap-2'}>
                                     <Input placeholder="Cari barang disini..."
                                            onChange={(e) => setSearchQuery(e.target.value)}/>
-                                    <div className="overflow-x-auto whitespace-nowrap pb-2 scrollbar-hidden">
+                                    <div className="grid gap-2">
                                         <div className={'flex gap-2 '}>
                                             <Button
-                                                variant={activeCategory === null ? 'default' : 'outline'}
+                                                variant={taxFilter === null ? 'default' : 'outline'}
                                                 size={'sm'}
-                                                onClick={() => setActiveCategory(null)}
+                                                onClick={() => setTaxFilter(null)}
                                             >
                                                 Tampilkan semua
                                             </Button>
+                                            <Button
+                                                variant={taxFilter === 'pajak' ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => setTaxFilter('pajak')}
+                                            >
+                                                Pajak
+                                            </Button>
+                                            <Button
+                                                variant={taxFilter === 'nonpajak' ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => setTaxFilter('nonpajak')}
+                                            >
+                                                Non Pajak
+                                            </Button>
+
+                                        </div>
+                                        <div className={'flex gap-2 overflow-x-auto  whitespace-nowrap pb-2 scrollbar-hidden'}>
+                                            {/*<Button*/}
+                                            {/*    variant={activeCategory === null ? 'default' : 'outline'}*/}
+                                            {/*    size={'sm'}*/}
+                                            {/*    onClick={() => setActiveCategory(null)}*/}
+                                            {/*>*/}
+                                            {/*    Tampilkan semua*/}
+                                            {/*</Button>*/}
                                             {categories.map(category => (
                                                 <Button
                                                     key={category.id}
