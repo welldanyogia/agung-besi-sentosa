@@ -49,7 +49,6 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         { key: 'eceran', label: 'Eceran', price: product.eceran_price }
     ].filter(tab => Number(tab.price) !== 0);// Filter hanya yang memiliki harga
 
-    console.log(product)
     const defaultValue = availableTabs.length > 0 ? availableTabs[0].key : ''; // Ambil yang pertama
     const [selectedTab, setSelectedTab] = useState(defaultValue);
     // console.log()
@@ -229,7 +228,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                         {formatRupiah(product.retail_price)}
                     </p>
                     <p className={`text-sm ${product.stock === 0 ? "text-red-500" : "text-green-500"}`}>
-                        {product.stock === 0 ? "Stok Habis" : `Stok: ${product.stock}`}
+                        {product.stock === 0 ? "Stok Habis" : `Stok: ${parseFloat(product.stock).toFixed(2)}`}
                     </p>
                     <p className="">Kategori : <span className={'font-bold'}>{product.category.category_name}</span></p>
                 </Card>

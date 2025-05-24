@@ -66,9 +66,14 @@ export const columns = [
     }),
     columnHelper.accessor("stock", {
         header: () => <div className="text-center min-w-[100px]">Stok Barang</div>,
-        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+        cell: ({ getValue }) => {
+            const value = getValue();
+            const formatted = value !== null ? parseFloat(value).toFixed(2) : '-';
+            return <div className="text-center min-w-[100px]">{formatted}</div>;
+        },
     }),
-    columnHelper.accessor("price", {
+
+columnHelper.accessor("price", {
         header: () => <div className="text-center min-w-[100px]">Harga Modal</div>,
         cell: ({row}) => {
             const price = row.original.price;
