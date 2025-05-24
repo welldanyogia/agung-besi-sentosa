@@ -69,7 +69,7 @@ export const columns = [
         cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("price", {
-        header: () => <div className="text-center min-w-[100px]">Harga</div>,
+        header: () => <div className="text-center min-w-[100px]">Harga Modal</div>,
         cell: ({ row }) => {
             const price = row.original.price;
 
@@ -159,6 +159,23 @@ export const columns = [
             );
         },
     }),
+    columnHelper.accessor("tax", {
+        header: () => <div className="text-center min-w-[100px]">Nominal Pajak</div>,
+        cell: ({ row }) => {
+            const price = row.original.price;
+            const tax = Math.ceil((price * 0.11) / 100) * 100; // Bulat ke atas ke kelipatan 100
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(tax)}
+                </div>
+            );
+        },
+    }),
+
     columnHelper.accessor("created_at", {
         header: () => <div className="text-center min-w-[100px]">Tanggal Input</div>,
         cell: ({ row }) => {
