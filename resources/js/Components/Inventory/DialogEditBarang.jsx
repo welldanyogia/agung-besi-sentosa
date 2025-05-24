@@ -56,7 +56,6 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         tax: barang.tax
     });
 
-    console.log(data.is_tax)
 
 
     const [loading, setLoading] = useState(false);
@@ -505,7 +504,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                         <Label className="text-right">Pajak</Label>
                         <Switch checked={data.is_tax} onCheckedChange={handleSwitchChange} className="col-span-3"/>
                     </div>
-                    {data.is_tax === true && (
+                    {(data.is_tax === true || data.is_tax === 1) && (
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="tax" className="text-right">
                                 Jumlah Pajak

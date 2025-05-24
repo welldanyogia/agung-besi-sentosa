@@ -44,11 +44,12 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     const initialQuantity = ["ornamen"].includes(product.category?.category_name.toLowerCase()) ? 1 : 0.5;
     const [quantity, setQuantity] = useState(initialQuantity);
     const availableTabs = [
-        {key: 'retail', label: 'Retail', price: product.retail_price},
-        {key: 'grosir', label: 'Grosir', price: product.wholesale_price},
-        {key: 'eceran', label: 'Eceran', price: product.eceran_price}
-    ].filter(tab => tab.price !== null); // Filter hanya yang memiliki harga
+        { key: 'retail', label: 'Retail', price: product.retail_price },
+        { key: 'grosir', label: 'Grosir', price: product.wholesale_price },
+        { key: 'eceran', label: 'Eceran', price: product.eceran_price }
+    ].filter(tab => Number(tab.price) !== 0);// Filter hanya yang memiliki harga
 
+    console.log(product)
     const defaultValue = availableTabs.length > 0 ? availableTabs[0].key : ''; // Ambil yang pertama
     const [selectedTab, setSelectedTab] = useState(defaultValue);
     // console.log()

@@ -1,8 +1,8 @@
 'use client';
 
-import { createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react"
-import { Button } from "@/Components/ui/button"
+import {createColumnHelper} from "@tanstack/react-table";
+import {MoreHorizontal} from "lucide-react"
+import {Button} from "@/Components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,10 +11,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
-import { AlertDeleteDialog } from "@/Components/Inventory/AlertDeleteDialog.jsx";
-import { AlertEditDialog } from "@/Components/Inventory/AlertEditDialog.jsx";
-import { Checkbox } from "@/Components/ui/checkbox"
-import { Badge } from "@/Components/ui/badge.jsx";
+import {AlertDeleteDialog} from "@/Components/Inventory/AlertDeleteDialog.jsx";
+import {AlertEditDialog} from "@/Components/Inventory/AlertEditDialog.jsx";
+import {Checkbox} from "@/Components/ui/checkbox"
+import {Badge} from "@/Components/ui/badge.jsx";
 import {DialogEditBarang} from "@/Components/Inventory/DialogEditBarang.jsx";
 
 const columnHelper = createColumnHelper();
@@ -22,7 +22,7 @@ const columnHelper = createColumnHelper();
 export const columns = [
     {
         id: "select",
-        header: ({ table }) => (
+        header: ({table}) => (
             <div className="text-center">
                 <Checkbox
                     checked={
@@ -34,7 +34,7 @@ export const columns = [
                 />
             </div>
         ),
-        cell: ({ row }) => (
+        cell: ({row}) => (
             <div className="text-center">
                 <Checkbox
                     checked={row.getIsSelected()}
@@ -49,28 +49,28 @@ export const columns = [
     columnHelper.accessor("no", {
         id: 'no',
         header: () => <div className="text-center">No</div>,
-        cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+        cell: ({row}) => <div className="text-center">{row.index + 1}</div>,
     }),
     columnHelper.accessor("item_code", {
         header: () => <div className="text-center min-w-[100px]">Kode Barang</div>,
-        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("item_name", {
         header: () => <div className="text-center min-w-[100px]">Nama Barang</div>,
-        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("category.category_name", {
         id: "kategori",
         header: () => <div className="text-center min-w-[100px]">Kategori</div>,
-        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("stock", {
         header: () => <div className="text-center min-w-[100px]">Stok Barang</div>,
-        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("price", {
         header: () => <div className="text-center min-w-[100px]">Harga Modal</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const price = row.original.price;
 
             return (
@@ -85,7 +85,7 @@ export const columns = [
     }),
     columnHelper.accessor("retail_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Retail</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const price = row.original.retail_price;
 
             return (
@@ -100,7 +100,7 @@ export const columns = [
     }),
     columnHelper.accessor("wholesale_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Grosir</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const price = row.original.wholesale_price;
 
             return (
@@ -115,7 +115,7 @@ export const columns = [
     }),
     columnHelper.accessor("eceran_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Eceran</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const price = row.original.eceran_price;
 
             return (
@@ -130,11 +130,11 @@ export const columns = [
     }),
     columnHelper.accessor("satuan", {
         header: () => <div className="text-center min-w-[100px]">Satuan</div>,
-        cell: ({ getValue }) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("retail_conversion", {
         header: () => <div className="text-center min-w-[100px]">Spesifikasi</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const conversion = row.original.retail_conversion;
             const satuan = row.original.satuan || 'satuan';
             const satuanEceran = row.original.retail_unit || 'satuan';
@@ -148,7 +148,7 @@ export const columns = [
 
     columnHelper.accessor("is_tax", {
         header: () => <div className="text-center min-w-[100px]">Pajak</div>,
-        cell: ({ getValue }) => {
+        cell: ({getValue}) => {
             const isTax = getValue();
             return (
                 <div className="text-center min-w-[100px]">
@@ -161,9 +161,15 @@ export const columns = [
     }),
     columnHelper.accessor("tax", {
         header: () => <div className="text-center min-w-[100px]">Nominal Pajak</div>,
-        cell: ({ row }) => {
-            const price = row.original.price;
-            const tax = Math.ceil((price * 0.11) / 100) * 100; // Bulat ke atas ke kelipatan 100
+        cell: ({row}) => {
+            const price = Number(row.original.price);
+            const isTax = row.original.is_tax;
+            const taxValue = Number(row.original.tax);
+
+            // Tentukan rate: jika is_tax true dan tax > 0, pakai tax; kalau tidak, pakai 11%
+            const taxRate = (isTax === true && taxValue > 0) ? (taxValue / 100) : 0.11;
+
+            const tax = Math.ceil((price * taxRate) / 100) * 100;
 
             return (
                 <div className="text-center min-w-[100px]">
@@ -175,10 +181,9 @@ export const columns = [
             );
         },
     }),
-
     columnHelper.accessor("created_at", {
         header: () => <div className="text-center min-w-[100px]">Tanggal Input</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const date = new Date(row.original.created_at);
             return (
                 <div className="text-center min-w-[100px]">
@@ -196,7 +201,7 @@ export const columns = [
     }),
     columnHelper.accessor("updated_at", {
         header: () => <div className="text-center min-w-[100px]">Terakhir diupdate</div>,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const date = new Date(row.original.updated_at);
             return (
                 <div className="text-center min-w-[100px]">
