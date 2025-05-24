@@ -142,9 +142,9 @@ class InventoryController extends Controller
             // Simpan item baru
             $taxMultiplier = $request->is_tax ? (1 + ($request->tax / 100)) : 1;
 
-            $wholesale = $request->wholesale_price ? ceil(($request->wholesale_price * $taxMultiplier) / 100) * 100 : null;
-            $retail    = $request->retail_price    ? ceil(($request->retail_price * $taxMultiplier) / 100) * 100 : null;
-            $eceran    = $request->eceran_price    ? ceil(($request->eceran_price * $taxMultiplier) / 100) * 100 : null;
+            $wholesale = $request->wholesale_price ? ceil(($request->wholesale_price ) / 100) * 100 : null;
+            $retail    = $request->retail_price    ? ceil(($request->retail_price ) / 100) * 100 : null;
+            $eceran    = $request->eceran_price    ? ceil(($request->eceran_price ) / 100) * 100 : null;
 
             $item = \App\Models\Items::create([
                 'id'                => \Illuminate\Support\Str::uuid(),

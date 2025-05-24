@@ -241,12 +241,12 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
         const value = e.target.value;
 
         // Only set the value if it's a valid number between 0 and 100
-        if (value === "" || (value >= 0 && value <= 100)) {
+        // if (value === "" || (value >= 0 && value <= 100)) {
             setData((prevData) => ({
                 ...prevData,
                 tax: value,
             }));
-        }
+        // }
     };
     const handleSwitchChange = (checked) => {
         setData((prevData) => ({
@@ -300,7 +300,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
         } finally {
-            router.reload()
+            router.get(route("inventory"), {preserveState: true});
             setOpenDialog(false)
             setLoading(false);
         }
@@ -336,14 +336,14 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
 
 
     return (
-        <Dialog open={openDialog} onOpenChange={(openDialog) => {
+        <Dialog modal={false} open={openDialog} onOpenChange={(openDialog) => {
             setOpenDialog(openDialog);
             if (!openDialog) resetForm();
         }}>
             <DialogTrigger asChild>
                 <Button>Tambah Barang</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto ">
             <DialogHeader>
                     <DialogTitle>Tambah Barang</DialogTitle>
                     <DialogDescription>
@@ -369,7 +369,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                         <Label htmlFor="kategori" className="text-right">
                             Kategori
                         </Label>
-                        <Popover open={open} onOpenChange={setOpen}>
+                        <Popover open={open} onOpenChange={setOpen} >
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
@@ -452,7 +452,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                         <Label htmlFor="kategori" className="text-right">
                             Satuan
                         </Label>
-                        <Popover open={openSatuan} onOpenChange={setOpenSatuan}>
+                        <Popover open={openSatuan} onOpenChange={setOpenSatuan} >
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="outline"
@@ -521,20 +521,6 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                                className="col-span-3"/>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="retail_price" className="text-right">
-                            Harga Retail
-                        </Label>
-                        <Input id="retail_price" value={formatRupiah(data.retail_price)} onChange={handlePriceChange}
-                               className="col-span-3"/>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="wholesale_price" className="text-right">
-                            Harga Grosir
-                        </Label>
-                        <Input id="wholesale_price" value={formatRupiah(data.wholesale_price)}
-                               onChange={handlePriceChange} className="col-span-3"/>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Pajak</Label>
                         <Switch checked={data.is_tax} onCheckedChange={handleSwitchChange} className="col-span-3"/>
                     </div>
@@ -552,10 +538,24 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                                 min="0"
                                 max="100"
                                 step="0.01"  // Allows decimal input for more precision
-                                placeholder="Masukkan persentase (0-100)"
+                                placeholder="Masukkan nilai pajak"
                             />
                         </div>
                     )}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="retail_price" className="text-right">
+                            Harga Retail
+                        </Label>
+                        <Input id="retail_price" value={formatRupiah(data.retail_price)} onChange={handlePriceChange}
+                               className="col-span-3"/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="wholesale_price" className="text-right">
+                            Harga Grosir
+                        </Label>
+                        <Input id="wholesale_price" value={formatRupiah(data.wholesale_price)}
+                               onChange={handlePriceChange} className="col-span-3"/>
+                    </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Eceran</Label>
                         <Switch checked={data.is_eceran} onCheckedChange={handleSwitchEceranChange}
@@ -566,7 +566,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                             <Label htmlFor="kategori" className="text-right">
                                 Satuan Eceran
                             </Label>
-                            <Popover open={openSatuanEcerean} onOpenChange={setOpenSatuanEcerean}>
+                            <Popover open={openSatuanEcerean} onOpenChange={setOpenSatuanEcerean} >
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant="outline"

@@ -166,15 +166,22 @@ columnHelper.accessor("price", {
     }),
     columnHelper.accessor("tax", {
         header: () => <div className="text-center min-w-[100px]">Nominal Pajak</div>,
-        cell: ({row}) => {
+        cell: ({ row }) => {
             const price = Number(row.original.price);
             const isTax = row.original.is_tax;
-            const taxValue = Number(row.original.tax);
+            const rawTax = row.original.tax;
 
-            // Tentukan rate: jika is_tax true dan tax > 0, pakai tax; kalau tidak, pakai 11%
-            const taxRate = (isTax === true && taxValue > 0) ? (taxValue / 100) : 0.11;
+            let tax = 0;
 
-            const tax = Math.ceil((price * taxRate) / 100) * 100;
+            if (isTax === true || isTax === 1) {
+                if (rawTax == null || rawTax === "") {
+                    tax = Math.ceil((price * 0.11) / 100) * 100;
+                } else {
+                    tax = Number(rawTax);
+                }
+            } else if ((isTax === false || isTax === 0) && price) {
+                tax = Math.ceil((price * 0.11) / 100) * 100;
+            }
 
             return (
                 <div className="text-center min-w-[100px]">
@@ -186,6 +193,7 @@ columnHelper.accessor("price", {
             );
         },
     }),
+
     columnHelper.accessor("created_at", {
         header: () => <div className="text-center min-w-[100px]">Tanggal Input</div>,
         cell: ({row}) => {

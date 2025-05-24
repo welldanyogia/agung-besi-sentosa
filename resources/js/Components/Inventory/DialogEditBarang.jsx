@@ -26,7 +26,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/Components/ui/command";
 import { cn } from "@/lib/utils.js";
-import {usePage} from "@inertiajs/react";
+import {router, usePage} from "@inertiajs/react";
 
 export function DialogEditBarang({ barang,dataSatuan,setError }) {
     const {auth} = usePage().props
@@ -194,6 +194,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
             console.error("Terjadi kesalahan:", err);
             // Tampilkan pesan error jika perlu
         } finally {
+            router.get(route("inventory"), {preserveState: true});
             setLoading(false);
         }
     };
@@ -201,12 +202,12 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         const value = e.target.value;
 
         // Only set the value if it's a valid number between 0 and 100
-        if (value === "" || (value >= 0 && value <= 100)) {
+        // if (value === "" || (value >= 0 && value <= 100)) {
             setData((prevData) => ({
                 ...prevData,
                 tax: value,
             }));
-        }
+        // }
     };
 
 
@@ -315,7 +316,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         }));
     };
     return (
-        <Dialog open={openDialog} onOpenChange={(openDialog) => { setOpenDialog(openDialog); if (!openDialog) resetForm(); }}>
+        <Dialog modal={false} open={openDialog} onOpenChange={(openDialog) => { setOpenDialog(openDialog); if (!openDialog) resetForm(); }}>
             <DialogTrigger asChild>
                 <Button variant="outline">Edit</Button>
             </DialogTrigger>
@@ -487,20 +488,6 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                                className="col-span-3"/>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="retail_price" className="text-right">
-                            Harga Retail
-                        </Label>
-                        <Input id="retail_price" value={formatRupiah(data.retail_price)} onChange={handlePriceChange}
-                               className="col-span-3"/>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="wholesale_price" className="text-right">
-                            Harga Grosir
-                        </Label>
-                        <Input id="wholesale_price" value={formatRupiah(data.wholesale_price)}
-                               onChange={handlePriceChange} className="col-span-3"/>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Pajak</Label>
                         <Switch checked={data.is_tax} onCheckedChange={handleSwitchChange} className="col-span-3"/>
                     </div>
@@ -522,6 +509,20 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                             />
                         </div>
                     )}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="retail_price" className="text-right">
+                            Harga Retail
+                        </Label>
+                        <Input id="retail_price" value={formatRupiah(data.retail_price)} onChange={handlePriceChange}
+                               className="col-span-3"/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="wholesale_price" className="text-right">
+                            Harga Grosir
+                        </Label>
+                        <Input id="wholesale_price" value={formatRupiah(data.wholesale_price)}
+                               onChange={handlePriceChange} className="col-span-3"/>
+                    </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Eceran</Label>
                         <Switch checked={data.is_eceran} onCheckedChange={handleSwitchEceranChange}
