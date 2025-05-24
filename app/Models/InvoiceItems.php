@@ -86,19 +86,34 @@ class InvoiceItems extends Model
                     'engsel',
                     'kawat las stenlis',
                     'kawat las',
-                    'KAWAT LAS',
-                    'AMPLAS',
-                    'KABEL LAS',
+                    'amplas',
                     'kabel las',
-                    'amplas'
+                ];
+
+                $excludedItemKeywords = [
+                    'talang'
+                ];
+
+                $excludedUnits = [
+                    'meter',
                 ];
 
                 $item->price = $price;
                 $item->sub_total = $item->qty * $price;
 
                 $categoryName = strtolower($itemModel->category->category_name ?? '');
+                $itemName = strtolower($itemModel->item_name ?? '');
+                $unit = strtolower($itemModel->retail_unit ?? '');
 
-                if (fmod($item->qty, 1) === 0.5 && !in_array($categoryName, $excludedCategories)) {
+                $isCategoryExcluded = in_array($categoryName, $excludedCategories);
+                $isItemNameExcluded = collect($excludedItemKeywords)->contains(
+                    fn($keyword) => str_contains($itemName, $keyword)
+                );
+                $isUnitExcluded = $item->price_type === 'eceran' && in_array($unit, $excludedUnits);
+
+                $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded;
+
+                if ($item->qty == 0.5 && !$shouldExclude) {
                     $item->sub_total += 5000;
                 }
 
@@ -106,6 +121,7 @@ class InvoiceItems extends Model
             });
         }
     }
+
 
     protected static function getPriceByType($item, $type)
     {
