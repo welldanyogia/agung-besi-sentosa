@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import axios from "axios";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/Components/ui/button";
+import {Check, ChevronsUpDown} from "lucide-react";
+import {Button} from "@/Components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -11,9 +11,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/Components/ui/dialog";
-import { Input } from "@/Components/ui/input";
-import { Label } from "@/Components/ui/label";
-import { Switch } from "@/Components/ui/switch";
+import {Input} from "@/Components/ui/input";
+import {Label} from "@/Components/ui/label";
+import {Switch} from "@/Components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -23,12 +23,12 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/Components/ui/select.jsx";
-import { Popover, PopoverContent, PopoverTrigger } from "@/Components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/Components/ui/command";
-import { cn } from "@/lib/utils.js";
+import {Popover, PopoverContent, PopoverTrigger} from "@/Components/ui/popover";
+import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/Components/ui/command";
+import {cn} from "@/lib/utils.js";
 import {router, usePage} from "@inertiajs/react";
 
-export function DialogEditBarang({ barang,dataSatuan,setError }) {
+export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
     const {auth} = usePage().props
     const [open, setOpen] = useState(false);
     const [openSatuan, setOpenSatuan] = useState(false);
@@ -36,7 +36,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
     const [openDialog, setOpenDialog] = useState(false);
     const [inputValue, setInputValue] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
-    const [satuan,setSatuan] = useState(dataSatuan)
+    const [satuan, setSatuan] = useState(dataSatuan)
     const [data, setData] = useState({
         kode_barang: barang.item_code,
         nama_barang: barang.item_name,
@@ -45,6 +45,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         satuan: barang.satuan,
         harga: barang.price,
         wholesale_price: barang.wholesale_price,
+        semi_grosir_price: barang.semi_grosir_price,
         retail_price: barang.retail_price,
         eceran_price: barang.eceran_price,
         retail_unit: barang.retail_unit,
@@ -52,11 +53,13 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         bulk_spec: barang.bulk_spec,
         retail_conversion: barang.retail_conversion,
         is_tax: barang.is_tax,
-        is_eceran: barang.is_eceran,
-        tax: barang.tax
+        is_retail: barang.is_retail,
+        tax: barang.tax,
+        pajak_luaran_retail: barang.pajak_luaran_retail,
+        pajak_luaran_semi_grosir: barang.pajak_luaran_semi_grosir,
+        pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
+        pajak_luaran_eceran: barang.pajak_luaran_eceran
     });
-
-
 
     const [loading, setLoading] = useState(false);
     const [loadingCategory, setLoadingCategory] = useState(false);
@@ -145,7 +148,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
     }, []);
 
     const handleChange = (e) => {
-        const { id, value } = e.target;
+        const {id, value} = e.target;
         setData((prevData) => ({
             ...prevData,
             [id]: value,
@@ -156,7 +159,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         setData((prevData) => ({
             ...prevData,
             is_tax: checked,
-            tax: checked ? prevData.tax : "" // Reset tax jika is_tax dimatikan
+            tax: checked ? barang.tax : "" // Reset tax jika is_tax dimatikan
         }));
     };
 
@@ -172,6 +175,7 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
             satuan: data.satuan,
             price: data.harga,
             wholesale_price: data.wholesale_price,
+            semi_grosir_price: data.semi_grosir_price,
             retail_price: data.retail_price,
             eceran_price: data.eceran_price,
             retail_unit: data.retail_unit,
@@ -179,17 +183,21 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
             bulk_spec: data.bulk_spec,
             retail_conversion: data.retail_conversion,
             is_tax: data.is_tax,
-            tax: data.is_tax ? data.tax : null,
-            updated_by: auth.user.id // Menyertakan siapa yang mengupdate
+            tax: data.is_tax ? parseInt(data.tax) : null,
+            updated_by: auth.user.id, // Menyertakan siapa yang mengupdate
+            pajak_luaran_retail: data.pajak_luaran_retail,
+            pajak_luaran_semi_grosir: data.pajak_luaran_semi_grosir,
+            pajak_luaran_wholesale: data.pajak_luaran_wholesale,
+            pajak_luaran_eceran: data.pajak_luaran_eceran
         };
 
         try {
             const response = await axios.post(`/api/inventory/update/${barang.id}`, payload);
-            // console.log("Update success:", response.data);
+            // console.log("Update :", response.data);
 
             // Setelah update berhasil, tutup dialog dan refresh data
-            setOpenDialog(false);
-            window.location.reload(); // Bisa diganti dengan cara yang lebih efisien jika menggunakan state management
+            // setOpenDialog(false);
+            // window.location.reload(); // Bisa diganti dengan cara yang lebih efisien jika menggunakan state management
         } catch (err) {
             console.error("Terjadi kesalahan:", err);
             // Tampilkan pesan error jika perlu
@@ -200,14 +208,29 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
     };
     const handleTaxChange = (e) => {
         const value = e.target.value;
+        const numericValue = parseFloat(value);
 
-        // Only set the value if it's a valid number between 0 and 100
-        // if (value === "" || (value >= 0 && value <= 100)) {
-            setData((prevData) => ({
-                ...prevData,
-                tax: value,
-            }));
-        // }
+        let pajak_luaran_retail = 0;
+        let pajak_luaran_grosir = 0;
+        let pajak_luaran_semi_grosir = 0;
+        let pajak_luaran_eceran = 0;
+
+        if (!isNaN(numericValue) && numericValue > 0) {
+            const taxFactor = numericValue / (100 + numericValue);
+            pajak_luaran_retail = data.retail_price * taxFactor;
+            pajak_luaran_grosir = data.wholesale_price * taxFactor;
+            pajak_luaran_semi_grosir = data.semi_grosir_price * taxFactor;
+            pajak_luaran_eceran = data.eceran_price * taxFactor;
+        }
+
+        setData((prevData) => ({
+            ...prevData,
+            tax: value,
+            pajak_luaran_retail: pajak_luaran_retail,
+            pajak_luaran_wholesale: pajak_luaran_grosir,
+            pajak_luaran_semi_grosir: pajak_luaran_semi_grosir,
+            pajak_luaran_eceran: pajak_luaran_eceran
+        }));
     };
 
 
@@ -220,25 +243,31 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
             satuan: barang.satuan,
             harga: barang.price,
             wholesale_price: barang.wholesale_price,
+            semi_grosir_price: barang.semi_grosir_price,
             retail_price: barang.retail_price,
             eceran_price: barang.eceran_price,
             retail_unit: barang.retail_unit,
             bulk_unit: barang.bulk_unit,
             bulk_spec: barang.bulk_spec,
             retail_conversion: barang.retail_conversion,
-            is_tax: false,
-            is_eceran: false,
-            tax: barang.tax
+            is_tax: barang.is_tax,
+            is_retail: barang.is_retail,
+            tax: barang.tax,
+            pajak_luaran_retail: barang.pajak_luaran_retail,
+            pajak_luaran_semi_grosir: barang.pajak_luaran_semi_grosir,
+            pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
+            pajak_luaran_eceran: barang.pajak_luaran_eceran
         });
         setInputValue(""); // Reset inputValue untuk pencarian kategori
         setSearchTerm(""); // Reset searchTerm
     };
 
-    const formatRupiah = (number) => {
+
+    const formatRupiah = (number,digit=0) => {
         return new Intl.NumberFormat("id-ID", {
             style: "currency",
             currency: "IDR",
-            maximumFractionDigits: 0
+            maximumFractionDigits: digit
         }).format(number);
     };
     const handlePriceChange = (e) => {
@@ -277,6 +306,14 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                 }))
             }
         }
+        if (id === 'semi_grosir_price') {
+            if (value === '') {
+                setData((prevData) => ({
+                    ...prevData,
+                    semi_grosir_price: 0
+                }))
+            }
+        }
         if (!value || isNaN(value)) {
             return; // Do nothing if the value is invalid or NaN
         }
@@ -284,45 +321,76 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
         value = parseInt(value, 10); // Convert to a number
 
         if (id === 'wholesale_price') {
+            const pajak_luaran = value*(parseFloat(data.tax)/(100+parseFloat(data.tax)))
             setData((prevData) => ({
                 ...prevData,
-                [id]: value
+                [id]: value,
+                pajak_luaran_wholesale: pajak_luaran
             }))
         }
         if (id === 'retail_price') {
+            const pajak_luaran = value*(parseFloat(data.tax)/(100+parseFloat(data.tax)))
             setData((prevData) => ({
                 ...prevData,
-                [id]: value
+                [id]: value,
+                pajak_luaran_retail: pajak_luaran
             }))
         }
         if (id === 'harga') {
+            // const pajak_luaran = value*(parseFloat(data.tax)/(parseFloat(data.tax))+100)
+
             setData((prevData) => ({
                 ...prevData,
                 [id]: value
             }))
         }
         if (id === 'eceran_price') {
+            const pajak_luaran = value*(parseFloat(data.tax)/(100+parseFloat(data.tax)))
+
             setData((prevData) => ({
                 ...prevData,
-                [id]: value
+                [id]: value,
+                pajak_luaran_eceran: pajak_luaran
+            }))
+        }
+        if (id === 'semi_grosir_price') {
+            const pajak_luaran = value*(parseFloat(data.tax)/(100+parseFloat(data.tax)))
+            setData((prevData) => ({
+                ...prevData,
+                [id]: value,
+                pajak_luaran_semi_grosir: pajak_luaran
             }))
         }
 
     }
+
+
     const handleSwitchEceranChange = (checked) => {
+        if (checked){
+            checked=1
+        }else {
+            checked =0
+        }
+
         setData((prevData) => ({
             ...prevData,
-            is_eceran: checked,
+            is_retail: checked,
         }));
     };
     return (
-        <Dialog modal={false} open={openDialog} onOpenChange={(openDialog) => { setOpenDialog(openDialog); if (!openDialog) resetForm(); }}>
+        <Dialog modal={false} open={openDialog} onOpenChange={(openDialog) => {
+            setOpenDialog(openDialog);
+            if (!openDialog) {
+                resetForm()
+            }
+        }}>
             <DialogTrigger asChild>
-                <Button variant="outline">Edit</Button>
+                <Button variant="outline" onClick={() => {
+                }}>Edit</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
 
-            <DialogHeader>
+                <DialogHeader>
                     <DialogTitle>Edit Barang</DialogTitle>
                     <DialogDescription>
                         Isi data barang dengan lengkap. Klik simpan untuk menyimpan.
@@ -494,20 +562,24 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                     {(data.is_tax === true || data.is_tax === 1) && (
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="tax" className="text-right">
-                                Jumlah Pajak
+                                Persentase Pajak
                             </Label>
-                            <Input
-                                id="tax"
-                                value={data.tax}
-                                onChange={handleTaxChange}
-                                className="col-span-3"
-                                type="number"
-                                min="0"
-                                max="100"
-                                step="0.01"  // Allows decimal input for more precision
-                                placeholder="Masukkan persentase (0-100)"
-                            />
+                            <div style={{display: 'flex', alignItems: 'center'}}>
+                                <Input
+                                    id="tax"
+                                    value={data.tax}
+                                    onChange={handleTaxChange}
+                                    className="col-span-3"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                    placeholder="Masukkan persentase pajak"
+                                />
+                                <span style={{marginLeft: '4px'}}>%</span>
+                            </div>
                         </div>
+
                     )}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="retail_price" className="text-right">
@@ -516,6 +588,31 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                         <Input id="retail_price" value={formatRupiah(data.retail_price)} onChange={handlePriceChange}
                                className="col-span-3"/>
                     </div>
+                    {(data.is_tax === true || data.is_tax === 1) && (
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="pajak_luaran_retail" className="text-right">
+                                Pajak Luaran Retail
+                            </Label>
+                            <Input readOnly={true} id="pajak_luaran_retail" value={formatRupiah(data.pajak_luaran_retail,2)} onChange={handlePriceChange}
+                                   className="col-span-3"/>
+                        </div>
+                    )}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="semi_grosir_price" className="text-right">
+                            Harga Semi Grosir
+                        </Label>
+                        <Input id="semi_grosir_price" value={formatRupiah(data.semi_grosir_price)}
+                               onChange={handlePriceChange} className="col-span-3"/>
+                    </div>
+                    {(data.is_tax === true || data.is_tax === 1) && (
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="pajak_luaran_semi_grosir" className="text-right">
+                                Pajak Luaran Semi Grosir
+                            </Label>
+                            <Input readOnly={true} id="pajak_luaran_semi_grosir" value={formatRupiah(data.pajak_luaran_semi_grosir,2)} onChange={handlePriceChange}
+                                   className="col-span-3"/>
+                        </div>
+                    )}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="wholesale_price" className="text-right">
                             Harga Grosir
@@ -523,12 +620,21 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                         <Input id="wholesale_price" value={formatRupiah(data.wholesale_price)}
                                onChange={handlePriceChange} className="col-span-3"/>
                     </div>
+                    {(data.is_tax === true || data.is_tax === 1) && (
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="pajak_luaran_wholesale" className="text-right">
+                                Pajak Luaran Grosir
+                            </Label>
+                            <Input readOnly={true} id="pajak_luaran_wholesale" value={formatRupiah(data.pajak_luaran_wholesale,2)} onChange={handlePriceChange}
+                                   className="col-span-3"/>
+                        </div>
+                    )}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Eceran</Label>
-                        <Switch checked={data.is_eceran} onCheckedChange={handleSwitchEceranChange}
+                        <Switch checked={data.is_retail === 1} onCheckedChange={handleSwitchEceranChange}
                                 className="col-span-3"/>
                     </div>
-                    {data.is_eceran === true && (
+                    {data.is_retail === true || data.is_retail === 1 && (
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="kategori" className="text-right">
                                 Satuan Eceran
@@ -616,6 +722,15 @@ export function DialogEditBarang({ barang,dataSatuan,setError }) {
                                        onChange={handlePriceChange}
                                        className="col-span-3"/>
                             </div>
+                            {(data.is_tax === true || data.is_tax === 1) && (
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="pajak_luaran_eceran" className="text-right">
+                                        Pajak Luaran Eceran
+                                    </Label>
+                                    <Input readOnly={true} id="pajak_luaran_eceran" value={formatRupiah(data.pajak_luaran_eceran,2)} onChange={handlePriceChange}
+                                           className="col-span-3"/>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>

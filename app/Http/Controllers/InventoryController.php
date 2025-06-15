@@ -20,11 +20,15 @@ class InventoryController extends Controller
     {
         // Ambil semua item, beserta relasi kategori dan creator
         $items = \App\Models\Items::with('category', 'createdBy')->get();
+        $pembelians = \App\Models\Pembelian::with('category')->get();
         $satuan = \App\Models\Satuan::all();
+        $uniqueItemCodes = \App\Models\Items::distinct()->pluck('item_code');
 
         return Inertia::render('Inventory/Dashboard', [
             'items' => $items,
+            'pembelians' => $pembelians,
             'satuan' => $satuan,
+            'itemCodes' => $uniqueItemCodes,
         ]);
     }
 
@@ -109,22 +113,22 @@ class InventoryController extends Controller
     {
         // Validasi input
         $request->validate([
-            'item_code'        => 'required|string|unique:items,item_code',
-            'item_name'        => 'required|string|unique:items,item_name',
-            'category_name'    => 'required|string',
-            'stock'            => 'nullable|numeric|min:0',
-            'satuan'           => 'required|string',
-            'price'            => 'nullable|numeric|min:0',
-            'wholesale_price'  => 'nullable|numeric|min:0',
-            'retail_price'     => 'nullable|numeric|min:0',
-            'eceran_price'     => 'nullable|numeric|min:0',
-            'retail_unit'      => 'nullable|string',
-            'bulk_unit'        => 'nullable|string',
-            'bulk_spec'        => 'nullable|string',
-            'retail_convertion'=> 'nullable|numeric|min:0',
-            'is_tax'           => 'required|boolean',
-            'tax'              => 'nullable|integer',
-            'created_by'        => 'required|exists:users,id',
+            'item_code' => 'required|string|unique:items,item_code',
+            'item_name' => 'required|string|unique:items,item_name',
+            'category_name' => 'required|string',
+            'stock' => 'nullable|numeric|min:0',
+            'satuan' => 'required|string',
+            'price' => 'nullable|numeric|min:0',
+            'wholesale_price' => 'nullable|numeric|min:0',
+            'retail_price' => 'nullable|numeric|min:0',
+            'eceran_price' => 'nullable|numeric|min:0',
+            'retail_unit' => 'nullable|string',
+            'bulk_unit' => 'nullable|string',
+            'bulk_spec' => 'nullable|string',
+            'retail_convertion' => 'nullable|numeric|min:0',
+            'is_tax' => 'required|boolean',
+            'tax' => 'nullable|integer',
+            'created_by' => 'required|exists:users,id',
         ]);
 
         try {
@@ -142,37 +146,36 @@ class InventoryController extends Controller
             // Simpan item baru
             $taxMultiplier = $request->is_tax ? (1 + ($request->tax / 100)) : 1;
 
-            $wholesale = $request->wholesale_price ? ceil(($request->wholesale_price ) / 100) * 100 : null;
-            $retail    = $request->retail_price    ? ceil(($request->retail_price ) / 100) * 100 : null;
-            $eceran    = $request->eceran_price    ? ceil(($request->eceran_price ) / 100) * 100 : null;
+            $wholesale = $request->wholesale_price ? ceil(($request->wholesale_price) / 100) * 100 : null;
+            $retail = $request->retail_price ? ceil(($request->retail_price) / 100) * 100 : null;
+            $eceran = $request->eceran_price ? ceil(($request->eceran_price) / 100) * 100 : null;
 
             $item = \App\Models\Items::create([
-                'id'                => \Illuminate\Support\Str::uuid(),
-                'item_code'         => $request->item_code,
-                'item_name'         => $request->item_name,
-                'category_id'       => $category->id,
-                'stock'             => $request->stock ?? 0,
-                'satuan'            => $request->satuan,
-                'price'             => $request->price,
-                'wholesale_price'   => $wholesale,
-                'retail_price'      => $retail,
-                'eceran_price'      => $eceran,
-                'retail_unit'       => $request->retail_unit ?? null,
-                'bulk_unit'         => $request->bulk_unit ?? null,
-                'bulk_spec'         => $request->bulk_spec ?? null,
+                'id' => \Illuminate\Support\Str::uuid(),
+                'item_code' => $request->item_code,
+                'item_name' => $request->item_name,
+                'category_id' => $category->id,
+                'stock' => $request->stock ?? 0,
+                'satuan' => $request->satuan,
+                'price' => $request->price,
+                'wholesale_price' => $wholesale,
+                'retail_price' => $retail,
+                'eceran_price' => $eceran,
+                'retail_unit' => $request->retail_unit ?? null,
+                'bulk_unit' => $request->bulk_unit ?? null,
+                'bulk_spec' => $request->bulk_spec ?? null,
                 'retail_conversion' => $request->retail_convertion ?? null,
-                'is_tax'            => $request->is_tax,
-                'tax'               => $request->is_tax ? $request->tax : null,
-                'created_by'        => $request->created_by,
+                'is_tax' => $request->is_tax,
+                'tax' => $request->is_tax ? $request->tax : null,
+                'created_by' => $request->created_by,
             ]);
-
 
 
             Log::info('Item berhasil ditambahkan:', $item->toArray());
 
             return response()->json([
-                'message'  => 'Item berhasil ditambahkan',
-                'item'     => $item,
+                'message' => 'Item berhasil ditambahkan',
+                'item' => $item,
                 'category' => $category,
             ], 201);
 
@@ -183,13 +186,165 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menambah item.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
 
+    public function storePembelian(Request $request)
+    {
+        $request->validate([
+            'kode_barang' => 'required|string',
+            'nama_barang' => 'required|string',
+            'kategori' => 'required|string',
+            'qty' => 'nullable|numeric|min:0',
+            'satuan' => 'required|string',
+            'harga_beli' => 'nullable|numeric|min:0',
+            'is_tax' => 'required|boolean',
+            'tax_percentage' => 'nullable|integer|min:0|max:100',
+            'pajak_masukan' => 'nullable|numeric|min:0',
+            'harga_sebelum_pajak' => 'nullable|numeric|min:0',
+            'tanggal_pembelian' => 'nullable|date',
+            'created_by' => 'required|exists:users,id',
+        ]);
 
+        try {
+            // Cek atau buat kategori
+            $category = \App\Models\Categories::firstOrCreate(
+                ['category_name' => $request->kategori],
+                ['id' => \Illuminate\Support\Str::uuid()]
+            );
+
+            if (!$category || !$category->id) {
+                Log::error('Kategori gagal dibuat atau ditemukan.');
+                return response()->json(['message' => 'Gagal menambah kategori.'], 500);
+            }
+
+            // Buat data pembelian
+            $pembelian = \App\Models\Pembelian::create([
+                'kode_barang' => $request->kode_barang,
+                'nama_barang' => $request->nama_barang,
+                'kategori' => $category->id,
+                'qty' => $request->qty ?? 0,
+                'satuan' => $request->satuan,
+                'harga' => $request->harga_beli,
+                'pajak' => $request->is_tax,
+                'persentase_pajak' => $request->is_tax ? $request->tax_percentage : 0,
+                'pajak_masukan' => $request->pajak_masukan,
+                'harga_total' => $request->harga_sebelum_pajak,
+                'tanggal_pembelian' => $request->tanggal_pembelian,
+                'created_by' => $request->created_by,
+            ]);
+
+            // ❗️Cek apakah item dengan item_code (kode_barang) sudah ada di Items
+            $existingItem = \App\Models\Items::where('item_code', $request->kode_barang)->first();
+
+            if (!$existingItem) {
+                // Jika tidak ada, buat item baru
+                $newItem = \App\Models\Items::create([
+                    'item_name' => $request->nama_barang,
+                    'item_code' => $request->kode_barang,
+                    'stock' => $request->qty ?? 0,
+                    'price' => $request->harga_beli,
+                    'satuan' => $request->satuan,
+                    'category_id' => $category->id,
+                    'created_by' => $request->created_by,
+                    'is_tax' => $request->is_tax,
+                    'tax' => $request->is_tax ? $request->tax_percentage : 0,
+                ]);
+
+                Log::info('Item baru berhasil dibuat:', $newItem->toArray());
+            } else {
+                Log::info('Item sudah ada, tidak dibuat ulang:', ['item_code' => $existingItem->item_code]);
+            }
+
+            return response()->json([
+                'message' => 'Item berhasil ditambahkan',
+                'item' => $pembelian,
+                'category' => $category,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat menambah item: ' . $e->getMessage(), [
+                'error' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menambah item.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    public function updatePembelian(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'kode_barang' => 'required|string',
+            'nama_barang' => 'required|string',
+            'kategori' => 'required|string',
+            'qty' => 'nullable|numeric|min:0',
+            'satuan' => 'required|string',
+            'harga_beli' => 'nullable|numeric|min:0',
+            'is_tax' => 'required|boolean',
+            'tax_percentage' => 'nullable|numeric|min:0|max:100',
+            'pajak_masukan' => 'nullable|numeric|min:0',
+            'harga_sebelum_pajak' => 'nullable|numeric|min:0',
+            'tanggal_pembelian' => 'nullable|date',
+//            'created_by' => 'required|exists:users,id',
+        ]);
+
+        try {
+            // Cari data pembelian berdasarkan ID
+            $pembelian = \App\Models\Pembelian::findOrFail($id);
+
+            // Cek atau buat kategori baru jika perlu
+            $category = \App\Models\Categories::firstOrCreate(
+                ['category_name' => $request->kategori],
+                ['id' => \Illuminate\Support\Str::uuid()]
+            );
+
+            if (!$category || !$category->id) {
+                Log::error('Kategori gagal dibuat atau ditemukan.');
+                return response()->json(['message' => 'Gagal mengupdate kategori.'], 500);
+            }
+
+            // Update data pembelian
+            $pembelian->update([
+                'kode_barang' => $request->kode_barang,
+                'nama_barang' => $request->nama_barang,
+                'kategori' => $category->id,
+                'qty' => $request->qty ?? 0,
+                'satuan' => $request->satuan,
+                'harga' => $request->harga_beli,
+                'pajak' => $request->is_tax,
+                'persentase_pajak' => $request->is_tax ? $request->tax_percentage : 0,
+                'pajak_masukan' => $request->pajak_masukan,
+                'harga_total' => $request->harga_sebelum_pajak,
+                'tanggal_pembelian' => $request->tanggal_pembelian,
+//                'created_by' => $request->created_by,
+            ]);
+
+            Log::info('Item berhasil diperbarui:', $pembelian->toArray());
+
+            return response()->json([
+                'message' => 'Item berhasil diperbarui',
+                'item' => $pembelian,
+                'category' => $category,
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat mengupdate item: ' . $e->getMessage(), [
+                'error' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat mengupdate item.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
 
     /**
@@ -241,19 +396,20 @@ class InventoryController extends Controller
             }
 
             $rules += [
-                'stock'              => ['nullable', 'numeric', 'min:0'],
-                'satuan'             => ['sometimes', 'string'],
-                'price'              => ['nullable', 'numeric', 'min:0'],
-                'wholesale_price'    => ['nullable', 'numeric', 'min:0'],
-                'retail_price'       => ['nullable', 'numeric', 'min:0'],
-                'eceran_price'       => ['nullable', 'numeric', 'min:0'],
-                'retail_unit'        => ['nullable', 'string'],
-                'bulk_unit'          => ['nullable', 'string'],
-                'bulk_spec'          => ['nullable', 'string'],
-                'retail_convertion'  => ['nullable', 'numeric', 'min:0'],
-                'is_tax'             => ['sometimes', 'boolean'],
-                'tax'                => ['nullable', 'integer'],
-                'created_by'         => ['nullable'], // Optional
+                'stock' => ['nullable', 'numeric', 'min:0'],
+                'satuan' => ['sometimes', 'string'],
+                'price' => ['nullable', 'numeric', 'min:0'],
+                'wholesale_price' => ['nullable', 'numeric', 'min:0'],
+                'semi_grosir_price' => ['nullable', 'numeric', 'min:0'],
+                'retail_price' => ['nullable', 'numeric', 'min:0'],
+                'eceran_price' => ['nullable', 'numeric', 'min:0'],
+                'retail_unit' => ['nullable', 'string'],
+                'bulk_unit' => ['nullable', 'string'],
+                'bulk_spec' => ['nullable', 'string'],
+                'retail_conversion' => ['nullable', 'numeric', 'min:0'],
+                'is_tax' => ['sometimes', 'boolean'],
+                'tax' => ['nullable', 'integer'],
+                'created_by' => ['nullable'], // Optional
             ];
 
             $validated = $request->validate($rules);
@@ -272,7 +428,7 @@ class InventoryController extends Controller
             // Kalikan harga dengan tax jika is_tax true
 //            $taxMultiplier = ($request->is_tax ?? false) ? (1 + ($request->tax / 100)) : 1;
 
-            foreach (['wholesale_price', 'retail_price', 'eceran_price'] as $priceField) {
+            foreach (['wholesale_price', 'retail_price', 'eceran_price','semi_grosir_price'] as $priceField) {
                 if ($request->has($priceField)) {
                     $validated[$priceField] = $request->$priceField;
                 }
@@ -288,8 +444,8 @@ class InventoryController extends Controller
             Log::info('Item berhasil diperbarui', ['item' => $item->toArray()]);
 
             return response()->json([
-                'message'  => 'Item berhasil diperbarui',
-                'item'     => $item,
+                'message' => 'Item berhasil diperbarui',
+                'item' => $item,
                 'category' => $category ?? null,
             ]);
         } catch (\Exception $e) {
@@ -300,7 +456,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Terjadi kesalahan saat memperbarui item.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -338,7 +494,40 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menghapus item.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function destroyPembelian(string $id)
+    {
+        try {
+            // Cek apakah item ada
+            $pembelian = \App\Models\Pembelian::where('id', $id)->first();
+
+            if (!$pembelian) {
+                Log::warning('Item tidak ditemukan', ['id' => $id]);
+                return response()->json([
+                    'message' => 'Item tidak ditemukan.',
+                ], 404);
+            }
+
+            // Hapus item
+            $pembelian->delete();
+
+            Log::info('Item berhasil dihapus', ['item_code' => $id]);
+
+            return response()->json([
+                'message' => 'Item berhasil dihapus.',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Terjadi kesalahan saat menghapus item', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menghapus item.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -346,7 +535,7 @@ class InventoryController extends Controller
     public function storeSatuan(Request $request)
     {
         $request->validate([
-            'satuan_name'   => 'required|string|unique:satuans,name',
+            'satuan_name' => 'required|string|unique:satuans,name',
         ]);
         try {
             // Cek apakah kategori sudah ada berdasarkan nama, jika tidak ada maka buat kategori baru
@@ -398,7 +587,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menambah satuan.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

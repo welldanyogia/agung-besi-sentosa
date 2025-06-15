@@ -9,6 +9,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import {AlertDestructive} from "@/Components/AlertDestructive.jsx";
 import {AlertSuccess} from "@/Components/AlertSuccess.jsx";
 import {SalesChart} from "@/Components/Report/chart/SalesChart.jsx";
+import StockTabsCard from "@/Components/Report/chart/StockTabsCard.jsx";
 
 export default function Dashboard({auth}) {
     const [data, setData] = useState([]);
@@ -19,52 +20,73 @@ export default function Dashboard({auth}) {
     const [totalSales, setTotalSales] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [totalProductsSold, setTotalProductsSold] = useState(0);
+    const [date, setDate] = useState(new Date());
+    const [barangMasuk, setBarangMasuk] = useState([])
+    const [barangKeluar, setBarangKeluar] = useState([])
 
     const getData = async () => {
         try {
             setLoading(true);
             const response = await axios.post('/api/report/show');
+            // Format tanggal yang dipilih ke format YYYY-MM-DD
+            const selectedDate = new Date(date).toISOString().split('T')[0];
+
+            // Filter hanya yang sesuai dengan tanggal yang dipilih
+            const filteredMasuk = response.data.barang_masuk.filter(
+                item => item.date === selectedDate
+            );
+
+            const filteredKeluar = response.data.barang_keluar.filter(
+                item => item.date === selectedDate
+            );
+
+            setBarangMasuk(filteredMasuk);
+            setBarangKeluar(filteredKeluar);
             setData(response.data.transaction);
             setLoading(false);
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
+            console.log(response.data)
         } catch (error) {
             setLoading(false);
         }
     };
 
+
     const calculateTotals = (transactions) => {
-        let sales = 0; // Sekarang ini jumlah transaksi hari ini
-        let orders = 0; // Total nominal dari transaksi 'paid' hari ini
+        let sales = 0;
+        let orders = 0;
         let productsSold = 0;
 
-        const today = new Date().toISOString().split("T")[0]; // 'YYYY-MM-DD'
+        const today = new Date().toISOString().split("T")[0];
 
         transactions.forEach((transaction) => {
             const transactionDate = new Date(transaction.created_at).toISOString().split("T")[0];
 
             if (transactionDate === today) {
-                orders += 1; // Hitung 1 transaksi hari ini
+                orders += 1;
 
-                // Hitung produk terjual hari ini
                 transaction.items.forEach((item) => {
-                    productsSold += item.qty;
+                    // Konversi qty jika price_type === 'eceran'
+                    let qty = item.qty;
+                    if (item.price_type === 'eceran') {
+                        const conversion = item.item?.retail_conversion || 1;
+                        qty = item.qty / conversion;
+                    }
+
+                    productsSold += qty;
                 });
 
-                // Hitung total order hanya untuk yang 'paid'
                 if (transaction.status === 'paid') {
                     sales += transaction.total_price;
                 }
             }
         });
 
-        setTotalSales(sales); // Sekarang ini adalah jumlah transaksi hari ini
+        setTotalSales(sales);
         setTotalOrders(orders);
         setTotalProductsSold(productsSold);
     };
-
-
-
 
 
     useEffect(() => {
@@ -81,8 +103,7 @@ export default function Dashboard({auth}) {
 
             return () => clearTimeout(timer);
         }
-    }, [error, success]);
-
+    }, [error, success,date]);
 
 
     return (
@@ -139,17 +160,20 @@ export default function Dashboard({auth}) {
                                     Total Produk Terjual Hari ini
                                 </div>
                                 <div className={'font-bold lg:text-2xl'}>
-                                    {totalProductsSold}
+                                    {parseFloat(totalProductsSold).toFixed(2)}
                                 </div>
                             </Card>
                         </div>
-                        <Card className={'w-full h-fit'}>
-                        <SalesChart data={data}/>
-                        </Card>
+                        <div className="flex gap-4">
+                            <Card className="w-2/3 h-fit">
+                                <SalesChart data={data}/>
+                            </Card>
+                            <StockTabsCard date={date} setDate={setDate} barangKeluar={barangKeluar} barangMasuk={barangMasuk}/>
+                        </div>
                         {/*<Card className={'w-full h-[200px]'}></Card>*/}
                     </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <DataTable columns={columns} data={data} auth={auth} setError={setError}
+                    <DataTable columns={columns} data={data} auth={auth} setError={setError}
                                    setSuccess={setSuccess} getData={getData}/>
                     </div>
                 </div>

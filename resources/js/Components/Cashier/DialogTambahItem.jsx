@@ -44,9 +44,10 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     const initialQuantity = ["ornamen"].includes(product.category?.category_name.toLowerCase()) ? 1 : 0.5;
     const [quantity, setQuantity] = useState(initialQuantity);
     const availableTabs = [
-        { key: 'retail', label: 'Retail', price: product.retail_price },
-        { key: 'grosir', label: 'Grosir', price: product.wholesale_price },
-        { key: 'eceran', label: 'Eceran', price: product.eceran_price }
+        {key: 'retail', label: 'Retail', price: product.retail_price},
+        {key: 'semi_grosir', label: 'Semi Grosir', price: product.semi_grosir_price},
+        {key: 'grosir', label: 'Grosir', price: product.wholesale_price},
+        {key: 'eceran', label: 'Eceran', price: product.eceran_price},
     ].filter(tab => Number(tab.price) !== 0);// Filter hanya yang memiliki harga
 
     const defaultValue = availableTabs.length > 0 ? availableTabs[0].key : ''; // Ambil yang pertama
@@ -55,12 +56,16 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     const step = ["ornamen"].includes(product?.category?.category_name.toLowerCase()) ? 1 : 0.5;
 
 
+    const handleIncrease = (priceType = null) => {
+        const maxQuantity = priceType === 'eceran'
+            ? product?.retail_conversion ?? 0
+            : product?.stock ?? 0;
 
-    const handleIncrease = () => {
-        if (quantity + step <= product.stock) {
+        if (quantity + step <= maxQuantity) {
             setQuantity(prevQuantity => parseFloat((prevQuantity + step).toFixed(2)));
         }
     };
+
 
     const handleDecrease = () => {
         if (quantity - step >= step) {
@@ -68,7 +73,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         }
     };
 
-    const handleChange = (e) => {
+    const handleChange = (e, priceType = null) => {
         let raw = e.target.value;
         let value = parseFloat(raw);
 
@@ -79,14 +84,22 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         }
 
         if (isNaN(value)) {
-            setQuantity(quantity === 0 ? 0 : step); // Kalau belum pernah input (masih 0), set ke 0. Kalau sudah, fallback ke step
+            setQuantity(quantity === 0 ? 0 : step);
             return;
         }
 
-        if (value > product.stock) {
-            setQuantity(product.stock);
+        // Tentukan batas maksimum berdasarkan priceType jika ada
+        let maxQuantity;
+        if (priceType === 'eceran') {
+            maxQuantity = product?.retail_conversion ?? 0;
         } else {
-            // Boleh input dengan desimal, dan dibulatkan ke kelipatan step jika perlu
+            maxQuantity = product?.stock ?? 0;
+        }
+
+        if (value > maxQuantity) {
+            setQuantity(maxQuantity);
+        } else {
+            // Boleh input desimal, bulatkan ke kelipatan step
             const isMultipleOfStep = Math.abs(value % step) < 0.0001;
 
             if (!isMultipleOfStep) {
@@ -97,10 +110,6 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             setQuantity(parseFloat(value.toFixed(2)));
         }
     };
-
-
-
-
 
 
 
@@ -115,6 +124,9 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         switch (priceType) {
             case "eceran":
                 itemPrice = product.eceran_price;
+                break;
+            case "semi_grosir":
+                itemPrice = product.semi_grosir_price;
                 break;
             case "grosir":
                 itemPrice = product.wholesale_price;
@@ -137,7 +149,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                 const newItem = {
                     id: product.id,
                     item_name: priceType === "eceran" ? `${product.item_name} (Eceran)` : product.item_name,
-                    price: itemPrice , // Harga dengan pajak
+                    price: itemPrice, // Harga dengan pajak
                     satuan: product.satuan,
                     qty: quantity,
                     price_type: priceType, // Tambahkan price_type ke item
@@ -159,7 +171,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
         } catch (error) {
             // console.log(error)
             setError("Gagal menambahkan barang!!!");
-        }finally {
+        } finally {
             router.reload()
             // getItems()
         }
@@ -171,8 +183,6 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
             getInvoice();
         }, 1000);
     };
-
-
 
 
     const formatRupiah = (number) => {
@@ -254,7 +264,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                     <div>{product.item_code}</div>
                                 </div>
                                 <div className={'flex flex-col justify-center p-2 text-center'}>
-                                    <strong>Stok</strong>{product.stock}</div>
+                                    <strong>Stok</strong>{product.stock} {product.satuan}</div>
                             </div>
                             <div className="text-md w-full">
                                 <Tabs value={selectedTab} onValueChange={(newValue) => setSelectedTab(newValue)}
@@ -289,6 +299,27 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                             </div>
                                         </div>
                                     </TabsContent>
+                                    <TabsContent value="semi_grosir">
+                                        <div className={'w-full flex flex-col'}>
+                                            <div className={'justify-center text-center font-bold'}>
+                                                Harga : {formatRupiah(product.semi_grosir_price)}
+                                            </div>
+                                            <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
+                                                <Button onClick={handleDecrease} disabled={quantity <= step}>-</Button>
+                                                <Input
+                                                    type="number"
+                                                    value={quantity}
+                                                    step={step}
+                                                    onChange={handleChange}
+                                                    className="w-16 text-center"
+                                                    disabled={product.stock === 0}
+                                                />
+                                                <span className={'-ml-6'}>/{product.satuan}</span>
+                                                <Button onClick={handleIncrease}
+                                                        disabled={quantity >= product.stock}>+</Button>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
                                     <TabsContent value="grosir">
                                         <div className={'w-full flex flex-col'}>
                                             <div className={'justify-center text-center font-bold'}>
@@ -315,19 +346,22 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                             <div className={'justify-center text-center font-bold'}>
                                                 Harga : {formatRupiah(product.eceran_price)}
                                             </div>
+                                            <div className={'justify-center text-center'}>
+                                                1 {product.satuan} = {product.retail_conversion} {product.retail_unit}
+                                            </div>
                                             <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
                                                 <Button onClick={handleDecrease} disabled={quantity <= step}>-</Button>
                                                 <Input
                                                     type="number"
                                                     value={quantity}
                                                     step={step}
-                                                    onChange={handleChange}
+                                                    onChange={(e) => handleChange(e, 'eceran')}
                                                     className="w-16 text-center"
                                                     disabled={product.stock === 0}
                                                 />
                                                 <span className={'-ml-6'}>/{product.retail_unit}</span>
-                                                <Button onClick={handleIncrease}
-                                                        disabled={quantity >= product.stock}>+</Button>
+                                                <Button onClick={() => handleIncrease('eceran')}
+                                                        disabled={quantity >= product.retail_conversion}>+</Button>
                                             </div>
                                         </div>
                                     </TabsContent>
@@ -341,7 +375,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
 
                 <DialogFooter>
                     <Button
-                        disabled={loading || product.stock <= step|| quantity < step || quantity === 0 || isNaN(quantity)}
+                        disabled={loading || product.stock <= step || quantity < step || quantity === 0 || isNaN(quantity)}
                         onClick={handleAddItem}
                     >
                         {loading ? "Menambahkan..." : "Tambah"}

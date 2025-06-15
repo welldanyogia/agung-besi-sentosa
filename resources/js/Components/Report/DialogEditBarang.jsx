@@ -98,7 +98,7 @@ export function DialogEditBarang({ barang,setError,setSuccess}) {
             category_name: data.kategori,
             stock: data.stok,
             satuan: data.satuan,
-            price: data.harga,
+            price: data.harga_beli,
             is_tax: data.is_tax,
             tax: data.is_tax ? data.tax : null,
             created_by: auth.user.id

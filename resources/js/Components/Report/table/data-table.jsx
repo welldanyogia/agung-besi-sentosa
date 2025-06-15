@@ -1,11 +1,11 @@
 'use client';
 
 import {
-    useReactTable,
-    getCoreRowModel,
     flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
     getPaginationRowModel,
-    getFilteredRowModel
+    useReactTable
 } from '@tanstack/react-table';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/Components/ui/table';
 import {Card, CardContent, CardFooter, CardTitle} from "@/Components/ui/card.jsx";
@@ -14,29 +14,20 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/C
 import {DataTableViewOptions} from "@/Components/Inventory/table/data-table-view-option.jsx";
 import React, {useEffect, useState} from "react";
 import {Button} from "@/Components/ui/button.jsx";
-import {DialogTambahBarang} from "@/Components/Inventory/DialogTambahBarang.jsx";
 import {Input} from "@/Components/ui/input.jsx";
 import {addDays, format} from "date-fns"
-import {
-    ArrowDown,
-    ArrowRight,
-    ArrowUp, CalendarIcon,
-    CheckCircle,
-    Circle,
-    CircleOff,
-    HelpCircle,
-    Timer,
-} from "lucide-react"
-import {DataTableFacetedFilter} from "@/Components/Inventory/table/data-table-faceted-filter.jsx";
+import {CalendarIcon,} from "lucide-react"
 import {
     DropdownMenu,
-    DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/Components/ui/dropdown-menu.jsx";
 import {Popover, PopoverContent, PopoverTrigger} from "@/Components/ui/popover.jsx";
-import { Calendar } from "@/Components/ui/calendar"
+import {Calendar} from "@/Components/ui/calendar"
 import {cn} from "@/lib/utils.js";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -134,6 +125,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             fetchTransactions(startDate, endDate, setTransactions);
         }
     }, [date]);
+
     const getCategories = async () => {
         try {
             const response = await axios.post('/api/categories/');
@@ -401,14 +393,16 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         const wb = XLSX.utils.book_new();
         const wsData = [];
 
-        // Create header for main table with colored cells
         const header = [
             'Kode Transaksi',
             'Nama Pelanggan',
             'Nama Barang',
             'QTY',
+            'Tipe Pembelian',
             'Harga',
             'Sub-Total',
+            'Sub-Total Pajak Luaran',
+            'Total Pajak Luaran',
             'Total Harga',
             'Metode Pembayaran',
             'Jumlah Pembayaran',
@@ -418,46 +412,110 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             'Tanggal'
         ];
 
-        // Apply header color (yellow, for example)
         const headerRow = header.map(cell => ({
             v: cell,
             s: {
-                fill: {
-                    fgColor: { rgb: 'FFFF00' } // Yellow color
-                },
+                fill: { fgColor: { rgb: 'FFFF00' } },
                 font: { bold: true },
-                alignment: {
-                    horizontal: "center",
-                    vertical: "center"
-                }
+                alignment: { horizontal: "center", vertical: "center" }
             }
         }));
         wsData.push(headerRow);
 
-        // Add data rows
+        const merges = [];
+        let currentRow = 1;
+
         transactions.forEach(tx => {
-            const row = [
-                tx.invoice_code || '',
-                tx.customer_name || '',
-                tx.items.map(item => item.item?.item_name).join(', ') || 'No items',
-                tx.items.reduce((sum, item) => sum + item.qty, 0) || 0,
-                `Rp ${tx.items.reduce((sum, item) => sum + item.price, 0).toLocaleString() || 0}`,
-                `Rp ${tx.items.reduce((sum, item) => sum + item.sub_total, 0).toLocaleString() || 0}`,
-                `Rp ${tx.total_price?.toLocaleString() || 0}`,
-                tx.payment || '',
-                `Rp ${tx.bayar?.toLocaleString() || 0}`,
-                `Rp ${tx.kembalian?.toLocaleString() || 0}`,
-                tx.status === 'cash' ? 'Tunai' : 'Non Tunai',
-                tx.created_by?.name || '',
-                formatDate(tx.created_at) || ''
-            ];
-            wsData.push(row);
+            const items = tx.items;
+            const rowspan = items.length;
+            // console.log('Normalized price_type:', (items.items.price_type || "").toLowerCase().trim());
+
+
+            items.forEach((item, index) => {
+                let priceType = "-";
+                let pajak_luran = 0;
+                const price_type = (item.price_type || "").toLowerCase().trim();
+                switch (price_type) {
+                    case "eceran":
+                        priceType = "Eceran";
+                        break;
+                    case "grosir":
+                        priceType = "Grosir";
+                        break;
+                    case "semi_grosir":
+                        priceType = "Semi Grosir";
+                        break;
+                    case "retail":
+                        priceType = "Retail";
+                        break;
+                    default:
+                        priceType = "-";
+                }
+
+
+                if (item.is_tax && item.tax > 0) {
+                    const price_type = (item.price_type || "").toLowerCase().trim();
+
+                    switch (price_type) {
+                        case "eceran":
+                            pajak_luran = item.pajak_luaran_eceran * item.qty;
+                            priceType = "Eceran";
+                            break;
+                        case "grosir":
+                            pajak_luran = item.pajak_luaran_wholesale * item.qty;
+                            priceType = "Grosir";
+                            break;
+                        case "semi_grosir":
+                            pajak_luran = item.pajak_luaran_semi_grosir * item.qty;
+                            priceType = "Semi Grosir";
+                            break;
+                        case "retail":
+                            pajak_luran = item.pajak_luaran_retail * item.qty;
+                            priceType = "Retail";
+                            break;
+                        default:
+                            pajak_luran = 0;
+                            priceType = "-";
+                    }
+                }
+
+                const row = [
+                    index === 0 ? tx.invoice_code : '',
+                    index === 0 ? tx.customer_name : '',
+                    item.item?.item_name || 'No item',
+                    item.qty || 0,
+                    priceType || '-',
+                    `Rp ${item.price?.toLocaleString() || 0}`,
+                    `Rp ${item.sub_total?.toLocaleString() || 0}`,
+                    `Rp ${pajak_luran?.toLocaleString() || 0}`,
+                    `Rp ${pajak_luran?.toLocaleString() || 0}`,
+                    index === 0 ? `Rp ${tx.total_price?.toLocaleString() || 0}` : '',
+                    index === 0 ? tx.payment || '' : '',
+                    index === 0 ? `Rp ${tx.bayar?.toLocaleString() || 0}` : '',
+                    index === 0 ? `Rp ${tx.kembalian?.toLocaleString() || 0}` : '',
+                    index === 0 ? (tx.status === 'cash' ? 'Tunai' : 'Non Tunai') : '',
+                    index === 0 ? tx.created_by?.name || '' : '',
+                    index === 0 ? formatDate(tx.created_at) || '' : ''
+                ];
+                wsData.push(row);
+            });
+
+            if (rowspan > 1) {
+                const mergeCols = [0, 1, 7, 8, 9, 10, 11, 12,13,14];
+                mergeCols.forEach(col => {
+                    merges.push({
+                        s: { r: currentRow, c: col },
+                        e: { r: currentRow + rowspan - 1, c: col }
+                    });
+                });
+            }
+
+            currentRow += rowspan;
         });
 
-        // Create worksheet and apply auto width for all columns
         const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!merges'] = merges;
 
-        // Adjust column widths to be auto
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let col = range.s.c; col <= range.e.c; col++) {
             let maxLength = 0;
@@ -468,10 +526,9 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                 }
             }
             ws['!cols'] = ws['!cols'] || [];
-            ws['!cols'][col] = { wpx: Math.min(maxLength * 8, 150) }; // Adjust the width to fit content
+            ws['!cols'][col] = { wpx: Math.min(maxLength * 8, 150) };
         }
 
-        // Set alignment for all cells (center horizontally and vertically)
         for (let row = range.s.r; row <= range.e.r; row++) {
             for (let col = range.s.c; col <= range.e.c; col++) {
                 const cell = ws[XLSX.utils.encode_cell({ r: row, c: col })];
@@ -482,32 +539,30 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             }
         }
 
-        // Add the worksheet for transactions to the workbook
         XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
 
-        // Create Summary Sheet
+        // ===== Summary Sheet =====
         const summaryHeaders = ['Nama Barang', 'Jumlah Terjual', 'Sub-Total'];
         const itemSummary = {};
 
         transactions.forEach(tx => {
-            tx.items.forEach(itemData => {
-                const itemName = itemData.item?.item_name || 'Unknown Item';
+            tx.items.forEach(item => {
+                const itemName = item.item?.item_name || 'Unknown Item';
                 if (!itemSummary[itemName]) {
                     itemSummary[itemName] = { qty: 0, subTotal: 0 };
                 }
-                itemSummary[itemName].qty += itemData.qty;
-                itemSummary[itemName].subTotal += itemData.sub_total || 0;
+                itemSummary[itemName].qty += item.qty;
+                itemSummary[itemName].subTotal += item.sub_total || 0;
             });
         });
 
-        const summaryRows = Object.keys(itemSummary).map(itemName => [
+        const summaryRows = Object.entries(itemSummary).map(([itemName, data]) => [
             itemName,
-            itemSummary[itemName].qty,
-            `Rp ${itemSummary[itemName].subTotal.toLocaleString() || 0}`
+            data.qty,
+            `Rp ${data.subTotal.toLocaleString()}`
         ]);
 
-        // Add "Total Semua" row
-        const totalAllPrice = Object.values(itemSummary).reduce((sum, item) => sum + item.subTotal, 0);
+        const totalAllPrice = Object.values(itemSummary).reduce((acc, curr) => acc + curr.subTotal, 0);
         summaryRows.push([
             { v: 'Total Semua', s: { font: { bold: true }, fill: { fgColor: { rgb: 'FFFF00' } }, alignment: { horizontal: 'center', vertical: 'center' } } },
             { v: '', s: { font: { bold: true }, alignment: { horizontal: 'center', vertical: 'center' } } },
@@ -516,7 +571,6 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
 
         const summaryWs = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryRows]);
 
-        // Adjust column widths for summary sheet
         const summaryRange = XLSX.utils.decode_range(summaryWs['!ref']);
         for (let col = summaryRange.s.c; col <= summaryRange.e.c; col++) {
             let maxLength = 0;
@@ -527,10 +581,9 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                 }
             }
             summaryWs['!cols'] = summaryWs['!cols'] || [];
-            summaryWs['!cols'][col] = { wpx: Math.min(maxLength * 8, 150) }; // Adjust the width to fit content
+            summaryWs['!cols'][col] = { wpx: Math.min(maxLength * 8, 150) };
         }
 
-        // Set alignment for all cells in summary sheet
         for (let row = summaryRange.s.r; row <= summaryRange.e.r; row++) {
             for (let col = summaryRange.s.c; col <= summaryRange.e.c; col++) {
                 const cell = summaryWs[XLSX.utils.encode_cell({ r: row, c: col })];
@@ -541,13 +594,19 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             }
         }
 
-        // Add the summary sheet to the workbook
         XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
 
-        // Save the Excel file
         const fileName = `invoice_${startDate}_${endDate}.xlsx`;
         XLSX.writeFile(wb, fileName);
     };
+
+// Format Tanggal Helper
+//     const formatDate = (dateStr) => {
+//         const date = new Date(dateStr);
+//         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+//         return date.toLocaleDateString('id-ID', options);
+//     };
+
 
 
 
@@ -648,7 +707,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         <>
             <Card className={'p-6 space-y-2'}>
                 <CardTitle>
-                    Inventory
+                    Report
                 </CardTitle>
 
                 <CardContent>
