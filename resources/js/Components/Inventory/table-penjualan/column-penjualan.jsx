@@ -89,30 +89,7 @@ export const columns_penjualan = [
             );
         },
     }),
-    columnHelper.accessor("tax", {
-        header: () => <div className="text-center min-w-[100px]">Persentase Pajak</div>,
-        cell: ({row}) => {
-            // Ambil nilai persentase pajak dari data baris
-            // const taxPercentageRaw = row.original["tax-percentage"];
-            const taxPercentageRaw = row.original.tax;
-
-            // Jika nilai berupa angka persentase (misal 10), ubah ke desimal (0.1)
-            const taxDecimal = taxPercentageRaw / 100;
-
-            return (
-                <div className="text-center min-w-[100px]">
-                    {new Intl.NumberFormat('id-ID', {
-                        style: 'percent',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 2,
-                    }).format(taxDecimal)}
-                </div>
-            );
-        },
-    }),
-
-
-
+    // Harga
     columnHelper.accessor("price", {
         header: () => <div className="text-center min-w-[100px]">Harga Modal</div>,
         cell: ({row}) => {
@@ -271,6 +248,29 @@ export const columns_penjualan = [
             );
         },
     }),
+    columnHelper.accessor("tax", {
+        header: () => <div className="text-center min-w-[100px]">Persentase Pajak</div>,
+        cell: ({row}) => {
+            // Ambil nilai persentase pajak dari data baris
+            // const taxPercentageRaw = row.original["tax-percentage"];
+            const taxPercentageRaw = row.original.tax;
+
+            // Jika nilai berupa angka persentase (misal 10), ubah ke desimal (0.1)
+            const taxDecimal = taxPercentageRaw / 100;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'percent',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                    }).format(taxDecimal)}
+                </div>
+            );
+        },
+    }),
+
+
 
     columnHelper.accessor("retail_conversion", {
         header: () => <div className="text-center min-w-[100px]">Spesifikasi</div>,

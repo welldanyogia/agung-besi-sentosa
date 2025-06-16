@@ -301,8 +301,8 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // setLoading(true);
-        // setError(null);
+        setLoading(true);
+        setError(null);
 
         const payload = {
             kode_barang: data.kode_barang,
