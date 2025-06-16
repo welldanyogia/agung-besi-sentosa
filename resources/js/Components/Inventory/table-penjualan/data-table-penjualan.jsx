@@ -42,9 +42,8 @@ import {
     DropdownMenuShortcut, DropdownMenuSub,
     DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger
 } from "@/Components/ui/dropdown-menu.jsx";
-import {DialogTambahPembelian} from "@/Components/Inventory/DialogTambahPembelian.jsx";
-import {DialogEditPembelian} from "@/Components/Inventory/DialogEditPembelian.jsx";
-import {AlertDeletePembelianDialog} from "@/Components/Inventory/AlertDeletePembelianDialog.jsx";
+import {DialogEditBarang} from "@/Components/Inventory/DialogEditBarang.jsx";
+import {AlertDeleteDialog} from "@/Components/Inventory/AlertDeleteDialog.jsx";
 
 export const labels = [
     {
@@ -73,12 +72,11 @@ export const statuses = [
     //     // icon: Circle,
     // },
 ]
-const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getData, satuan, tab,itemCodes,items}) => {
+const DataTablePenjualan = ({columns, data, auth, setError, setSuccess, getData, satuan, tab}) => {
     const [rowSelection, setRowSelection] = useState({})
     const [columnFilters, setColumnFilters] = useState(
         []
     )
-
     const table = useReactTable({
         data,
         columns,
@@ -305,7 +303,7 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
                                         <DataTableFacetedFilter column={table.getColumn("kategori")}
                                                                 options={categories}
                                                                 title={"Kategori"}/>
-                                        <DataTableFacetedFilter column={table.getColumn("pajak")} options={statuses}
+                                        <DataTableFacetedFilter column={table.getColumn("is_tax")} options={statuses}
                                                                 title={"Pajak"}/>
                                     </div>
                                 </div>
@@ -331,9 +329,12 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
                                 </div>
                             </div>
                             <div className={'flex gap-2'}>
-
-                                <DialogTambahPembelian auth={auth} getData={getData} setSuccess={setSuccess}
-                                                    setError={setError} dataSatuan={satuan} itemCodes={itemCodes} items={items}/>
+                                {
+                                    tab === 'pembelian' && (
+                                        <DialogTambahBarang auth={auth} getData={getData} setSuccess={setSuccess}
+                                                            setError={setError} dataSatuan={satuan}/>
+                                    )
+                                }
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -392,9 +393,9 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
                                                 >
                                                     {/*<EditAlatKerjaDialog data={row.original} projects={projects}/>*/}
                                                     {/*<DeleteAlatKerjaDialog data={row}/>*/}
-                                                    <DialogEditPembelian setTabValue={setTabValue} pembelian={row.original} dataSatuan={satuan}
+                                                    <DialogEditBarang barang={row.original} dataSatuan={satuan}
                                                                       setError={setError} setSuccess={setSuccess}/>
-                                                    <AlertDeletePembelianDialog id={row.original}/>
+                                                    <AlertDeleteDialog id={row.original}/>
                                                 </TableCell>
 
                                             </TableRow>
@@ -419,4 +420,4 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
     );
 };
 
-export default DataTable;
+export default DataTablePenjualan;

@@ -18,8 +18,33 @@ class Items extends Model
         'retail_unit',
         'bulk_unit',
         'bulk_spec',
-        'retail_conversion'
+        'is_retail',
+        'retail_conversion',
+        'pajak_luaran_retail',
+        'pajak_luaran_wholesale',
+        'pajak_luaran_eceran',
+        'tax_percentage_retail',
+        'tax_percentage_wholesale',
+        'tax_percentage_eceran',
+        'semi_grosir_price', 'tax_percentage_semi_grosir','pajak_luaran_semi_grosir',
+        'status_perubahan_harga', 'selisih_perubahan_harga'
     ];
+    protected static function booted()
+    {
+        static::saving(function ($item) {
+            // Jika eceran_price tidak null dan lebih dari 0, set is_retail = true
+            $item->is_retail = !is_null($item->eceran_price) && $item->eceran_price > 0;
+            self::calculateTaxValues($item);
+        });
+        static::creating(function ($item) {
+            self::calculateTaxValues($item);
+        });
+
+        static::updating(function ($item) {
+            self::calculateTaxValues($item);
+        });
+    }
+
 
 //    protected static function booted()
 //    {
@@ -81,4 +106,44 @@ class Items extends Model
     {
         return $this->hasMany(InvoiceItems::class, 'item_id');
     }
+    protected static function calculateTaxValues($item)
+    {
+        // Set semua tax_percentage_* = tax jika is_tax true
+        if ($item->is_tax) {
+            $item->tax_percentage_retail = $item->tax;
+            $item->tax_percentage_wholesale = $item->tax;
+            $item->tax_percentage_eceran = $item->tax;
+            $item->tax_percentage_semi_grosir = $item->tax;
+        }
+
+        // Pajak Luaran Retail
+        if ($item->tax_percentage_retail > 0 && $item->retail_price > 0) {
+            $item->pajak_luaran_retail = $item->retail_price * ($item->tax_percentage_retail / (100 + $item->tax_percentage_retail));
+        } else {
+            $item->pajak_luaran_retail = 0;
+        }
+
+        // Pajak Luaran Wholesale
+        if ($item->tax_percentage_wholesale > 0 && $item->wholesale_price > 0) {
+            $item->pajak_luaran_wholesale = $item->wholesale_price * ($item->tax_percentage_wholesale / (100 + $item->tax_percentage_wholesale));
+        } else {
+            $item->pajak_luaran_wholesale = 0;
+        }
+
+        // Pajak Luaran Eceran
+        if ($item->tax_percentage_eceran > 0 && $item->eceran_price > 0) {
+            $item->pajak_luaran_eceran = $item->eceran_price * ($item->tax_percentage_eceran / (100 + $item->tax_percentage_eceran));
+        } else {
+            $item->pajak_luaran_eceran = 0;
+        }
+
+        // Pajak Luaran Semi Grosir
+        if ($item->tax_percentage_semi_grosir > 0 && $item->semi_grosir_price > 0) {
+            $item->pajak_luaran_semi_grosir = $item->semi_grosir_price * ($item->tax_percentage_semi_grosir / (100 + $item->tax_percentage_semi_grosir));
+        } else {
+            $item->pajak_luaran_semi_grosir = 0;
+        }
+    }
+
+
 }

@@ -16,4 +16,9 @@ class Categories extends Model
     {
         return $this->hasMany(Items::class, 'category_id');
     }
+
+    public function pembelians()
+    {
+        return $this->hasMany(Pembelian::class, 'kategori');
+    }
 }

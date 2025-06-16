@@ -129,19 +129,33 @@ class DashboardController extends Controller
 //            })->values(); // agar jadi array indexed
 
         // Top Produk
-        $topProducts = InvoiceItems::selectRaw('item_id, SUM(qty) as total_qty')
+        $topProducts = InvoiceItems::selectRaw('item_id, price_type, SUM(qty) as total_qty')
             ->whereMonth('created_at', $month)
-            ->groupBy('item_id')
+            ->groupBy('item_id', 'price_type') // karena price_type berpengaruh ke konversi
             ->orderByDesc('total_qty')
-            ->with('item:id,item_name')
-            ->limit(10)
+            ->with('item:id,item_name,retail_conversion,satuan') // ambil tambahan data untuk konversi
             ->get()
             ->map(function ($item) {
+                $itemModel = $item->item;
+
+                // Default qty
+                $qty = $item->total_qty;
+
+                // Konversi jika eceran
+                if ($item->price_type === 'eceran' && $itemModel->retail_conversion) {
+                    $qty = $qty / $itemModel->retail_conversion;
+                }
+
                 return [
-                    'item_name' => $item->item->item_name ?? 'N/A',
-                    'total_qty' => $item->total_qty,
+                    'item_name' => $itemModel->item_name ?? 'N/A',
+                    'total_qty' => round($qty, 2),
+                    'unit' => $itemModel->satuan ?? '-', // tampilkan satuan utama
                 ];
-            });
+            })
+            ->sortByDesc('total_qty')
+            ->take(10)
+            ->values();
+
 
         // Pajak Masukan Total dari pembelian
         $pajakMasukanTotal = \App\Models\Pembelian::whereMonth('tanggal_pembelian', $month)
@@ -226,6 +240,33 @@ class DashboardController extends Controller
                 ];
             })->values();
 
+        $rekapPerItem = $invoiceItems->groupBy('item_id')->map(function ($items, $itemId) {
+            $itemModel = $items->first()->item;
+            $priceType = $items->first()->price_type;
+
+            $totalQty = $items->sum(function ($item) use ($itemModel) {
+                if ($item->price_type === 'eceran') {
+                    // konversi eceran ke satuan utama
+                    return $item->qty / ($itemModel->retail_conversion ?: 1); // hindari division by zero
+                }
+                return $item->qty;
+            });
+
+            // satuan utamanya selalu kolom 'satuan'
+            $unit = $itemModel->satuan ?? '-';
+
+            return [
+                'name' => $itemModel->item_name ?? 'N/A',
+                'sold' => round($totalQty, 2),
+                'nominal' => $items->sum('sub_total'),
+                'unit' => $unit,
+                'is_tax' => $itemModel->is_tax,
+            ];
+        })->sortByDesc('sold')->values();
+
+        $itemsWithTax = $rekapPerItem->filter(fn($item) => $item['is_tax'])->values();
+        $itemsWithoutTax = $rekapPerItem->filter(fn($item) => !$item['is_tax'])->values();
+
 
 
         return Inertia::render('Dashboard/Dashboard', [
@@ -240,6 +281,8 @@ class DashboardController extends Controller
             'rekapPerPriceType' => $rekapPerPriceType,
             'rekapPajak' => $rekapPajak,
             'dailyRekap' => $dailyRekap,
+            'itemsWithTax' => $itemsWithTax,
+            'itemsWithoutTax' => $itemsWithoutTax,
         ]);
     }
 

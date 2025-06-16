@@ -51,11 +51,11 @@ export const columns = [
         header: () => <div className="text-center">No</div>,
         cell: ({row}) => <div className="text-center">{row.index + 1}</div>,
     }),
-    columnHelper.accessor("item_code", {
+    columnHelper.accessor("kode_barang", {
         header: () => <div className="text-center min-w-[100px]">Kode Barang</div>,
         cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
-    columnHelper.accessor("item_name", {
+    columnHelper.accessor("nama_barang", {
         header: () => <div className="text-center min-w-[100px]">Nama Barang</div>,
         cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
@@ -64,94 +64,35 @@ export const columns = [
         header: () => <div className="text-center min-w-[100px]">Kategori</div>,
         cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
-    columnHelper.accessor("stock", {
-        header: () => <div className="text-center min-w-[100px]">Stok Barang</div>,
-        cell: ({ getValue }) => {
+    columnHelper.accessor("qty", {
+        header: () => <div className="text-center min-w-[100px]">QTY</div>,
+        cell: ({getValue}) => {
             const value = getValue();
-            const formatted = value !== null ? parseFloat(value).toFixed(2) : '-';
+            const formatted = value !== null ? parseFloat(value).toFixed(0) : '-';
             return <div className="text-center min-w-[100px]">{formatted}</div>;
-        },
-    }),
-
-columnHelper.accessor("price", {
-        header: () => <div className="text-center min-w-[100px]">Harga Modal</div>,
-        cell: ({row}) => {
-            const price = row.original.price;
-
-            return (
-                <div className="text-center min-w-[100px]">
-                    {new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                    }).format(price)}
-                </div>
-            );
-        },
-    }),
-    columnHelper.accessor("retail_price", {
-        header: () => <div className="text-center min-w-[100px]">Harga Retail</div>,
-        cell: ({row}) => {
-            const price = row.original.retail_price;
-
-            return (
-                <div className="text-center min-w-[100px]">
-                    {new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                    }).format(price)}
-                </div>
-            );
-        },
-    }),
-    columnHelper.accessor("wholesale_price", {
-        header: () => <div className="text-center min-w-[100px]">Harga Grosir</div>,
-        cell: ({row}) => {
-            const price = row.original.wholesale_price;
-
-            return (
-                <div className="text-center min-w-[100px]">
-                    {new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                    }).format(price)}
-                </div>
-            );
-        },
-    }),
-    columnHelper.accessor("eceran_price", {
-        header: () => <div className="text-center min-w-[100px]">Harga Eceran</div>,
-        cell: ({row}) => {
-            const price = row.original.eceran_price;
-
-            return (
-                <div className="text-center min-w-[100px]">
-                    {new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                    }).format(price)}
-                </div>
-            );
         },
     }),
     columnHelper.accessor("satuan", {
         header: () => <div className="text-center min-w-[100px]">Satuan</div>,
         cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
-    columnHelper.accessor("retail_conversion", {
-        header: () => <div className="text-center min-w-[100px]">Spesifikasi</div>,
+
+    columnHelper.accessor("harga", {
+        header: () => <div className="text-center min-w-[100px]">Harga</div>,
         cell: ({row}) => {
-            const conversion = row.original.retail_conversion;
-            const satuan = row.original.satuan || 'satuan';
-            const satuanEceran = row.original.retail_unit || 'satuan';
+            const price = row.original.harga;
+
             return (
                 <div className="text-center min-w-[100px]">
-                    1 {satuan} = {conversion} {satuanEceran}
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(parseFloat(price))}
                 </div>
             );
         },
     }),
-
-    columnHelper.accessor("is_tax", {
+    columnHelper.accessor("pajak", {
         header: () => <div className="text-center min-w-[100px]">Pajak</div>,
         cell: ({getValue}) => {
             const isTax = getValue();
@@ -164,31 +105,73 @@ columnHelper.accessor("price", {
             );
         },
     }),
-    columnHelper.accessor("tax", {
-        header: () => <div className="text-center min-w-[100px]">Nominal Pajak</div>,
-        cell: ({ row }) => {
-            const price = Number(row.original.price);
-            const isTax = row.original.is_tax;
-            const rawTax = row.original.tax;
+    columnHelper.accessor("tax-percentage", {
+        header: () => <div className="text-center min-w-[100px]">Persentase Pajak</div>,
+        cell: ({row}) => {
+            // Ambil nilai persentase pajak dari data baris
+            // const taxPercentageRaw = row.original["tax-percentage"];
+            const taxPercentageRaw = 11;
 
-            let tax = 0;
+            // Jika nilai berupa angka persentase (misal 10), ubah ke desimal (0.1)
+            const taxDecimal = taxPercentageRaw / 100;
 
-            if (isTax === true || isTax === 1) {
-                if (rawTax == null || rawTax === "") {
-                    tax = Math.ceil((price * 0.11) / 100) * 100;
-                } else {
-                    tax = Number(rawTax);
-                }
-            } else if ((isTax === false || isTax === 0) && price) {
-                tax = Math.ceil((price * 0.11) / 100) * 100;
-            }
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'percent',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                    }).format(taxDecimal)}
+                </div>
+            );
+        },
+    }),
+
+
+    columnHelper.accessor("pajak_masukan", {
+        header: () => <div className="text-center min-w-[100px]">Pajak Masukan</div>,
+        cell: ({row}) => {
 
             return (
                 <div className="text-center min-w-[100px]">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
-                    }).format(tax)}
+                        maximumFractionDigits: 2
+                    }).format(row.original.pajak_masukan)}
+                </div>
+            );
+        },
+    }),
+
+
+    columnHelper.accessor("harga_total", {
+        header: () => <div className="text-center min-w-[100px]">Harga Sebelum Pajak</div>,
+        cell: ({row}) => {
+            const price = row.original.harga_total;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("tanggal_pembelian", {
+        header: () => <div className="text-center min-w-[100px]">Tanggal Pembelian</div>,
+        cell: ({row}) => {
+            const date = new Date(row.original.tanggal_pembelian);
+            return (
+                <div className="text-center min-w-[100px]">
+                    {date.toLocaleString('id-ID', {
+                        timeZone: 'Asia/Jakarta',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                    })}
                 </div>
             );
         },
@@ -198,24 +181,6 @@ columnHelper.accessor("price", {
         header: () => <div className="text-center min-w-[100px]">Tanggal Input</div>,
         cell: ({row}) => {
             const date = new Date(row.original.created_at);
-            return (
-                <div className="text-center min-w-[100px]">
-                    {date.toLocaleString('id-ID', {
-                        timeZone: 'Asia/Jakarta',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                    })}
-                </div>
-            );
-        },
-    }),
-    columnHelper.accessor("updated_at", {
-        header: () => <div className="text-center min-w-[100px]">Terakhir diupdate</div>,
-        cell: ({row}) => {
-            const date = new Date(row.original.updated_at);
             return (
                 <div className="text-center min-w-[100px]">
                     {date.toLocaleString('id-ID', {

@@ -22,9 +22,12 @@ Route::post('/login', [\App\Http\Controllers\Auth\AuthenticatedSessionController
 
 
 Route::post('/inventory/store', [InventoryController::class, 'store'])->named('inventory.store'); // Tambah item baru
+Route::post('/inventory/pembelian/store', [InventoryController::class, 'storePembelian'])->named('inventory.storePembelian'); // Tambah item baru
 Route::post('/inventory/show', [InventoryController::class, 'index'])->named('inventory.show'); // Tambah item baru
 Route::post('/inventory/update/{id}', [InventoryController::class, 'update'])->named('inventory.update'); // Tambah item baru
+Route::post('/inventory/pembelian/update/{id}', [InventoryController::class, 'updatePembelian'])->named('inventory.updatePembelian'); // Tambah item baru
 Route::post('/items/{id}', [InventoryController::class, 'destroy'])->named('inventory.destroy'); // Tambah item baru
+Route::post('/pembelian/{id}', [InventoryController::class, 'destroyPembelian'])->named('inventory.destroyPembelian'); // Tambah item baru
 Route::post('/categories/', [\App\Http\Controllers\CategoryController::class, 'index'])->named('categories.index'); // Tambah item baru
 Route::post('/satuans/', [\App\Http\Controllers\InventoryController::class, 'getSatuans'])->named('satuans.index'); // Tambah item baru
 Route::post('/categories/store', [\App\Http\Controllers\CategoryController::class, 'store'])->named('categories.store'); // Tambah item baru

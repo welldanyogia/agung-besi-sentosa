@@ -151,7 +151,7 @@ function classifyTotalTransactionsByDate(data) {
 
 const chartConfig = {
     visitors: {
-        label: "Statys",
+        label: "Status",
     },
     paid: {
         label: "Total Transaksi",

@@ -15,15 +15,88 @@ class ReportController extends Controller
     public function index()
     {
         // Ambil semua item, beserta relasi kategori dan creator
-//        $transactions = \App\Models\Invoices::with('createdBy', 'items')->get();
         $transactions = \App\Models\Invoices::with('createdBy', 'items.item')
             ->latest()
             ->get();
 
+        // BARANG KELUAR (Transaksi)
+        $invoiceItems = \App\Models\InvoiceItems::with('item', 'invoice')->get();
+        $barangKeluar = [];
+
+        foreach ($invoiceItems as $item) {
+            if (!$item->item || !$item->invoice) continue;
+
+            $qty = $item->qty;
+            $satuan = $item->item->satuan ?? '-';
+
+            if ($item->price_type === 'eceran' && $item->item->retail_conversion > 0) {
+                $qty = $qty / $item->item->retail_conversion;
+            }
+
+            $name = $item->item->item_name;
+            $date = \Carbon\Carbon::parse($item->invoice->created_at)->format('Y-m-d');
+            $key = $name . '_' . $date;
+
+            if (!isset($barangKeluar[$key])) {
+                $barangKeluar[$key] = [
+                    'name' => $name,
+                    'qty' => 0,
+                    'date' => $date,
+                    'satuan' => $satuan,
+                ];
+            }
+
+            $barangKeluar[$key]['qty'] += $qty;
+        }
+
+        $barangKeluar = collect($barangKeluar)
+            ->map(fn($entry) => [
+                'name' => $entry['name'],
+                'qty' => round($entry['qty']),
+                'date' => $entry['date'],
+                'satuan' => $entry['satuan'],
+            ])
+            ->sortByDesc('qty')
+            ->values();
+
+        // BARANG MASUK (Pembelian)
+        $pembelians = \App\Models\Pembelian::latest()->get();
+        $barangMasuk = [];
+
+        foreach ($pembelians as $pembelian) {
+            $name = $pembelian->nama_barang;
+            $qty = $pembelian->qty;
+            $date = \Carbon\Carbon::parse($pembelian->tanggal_pembelian)->format('Y-m-d');
+            $satuan = $pembelian->satuan ?? '-';
+            $key = $name . '_' . $date;
+
+            if (!isset($barangMasuk[$key])) {
+                $barangMasuk[$key] = [
+                    'name' => $name,
+                    'qty' => 0,
+                    'date' => $date,
+                    'satuan' => $satuan,
+                ];
+            }
+
+            $barangMasuk[$key]['qty'] += $qty;
+        }
+
+        $barangMasuk = collect($barangMasuk)
+            ->map(fn($entry) => [
+                'name' => $entry['name'],
+                'qty' => round($entry['qty']),
+                'date' => $entry['date'],
+                'satuan' => $entry['satuan'],
+            ])
+            ->sortByDesc('qty')
+            ->values();
 
         return response()->json([
             'message' => 'Daftar transaksi berhasil diambil',
-            'transaction' => $transactions
+            'transaction' => $transactions,
+            'barang_keluar' => $barangKeluar,
+            'barang_masuk' => $barangMasuk,
         ], 200);
     }
 
