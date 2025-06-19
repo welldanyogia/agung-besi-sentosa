@@ -87,7 +87,6 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
     // Merge kolom expander dengan kolom dari columns.jsx
     const columnsWithExpander = [expanderColumn, ...baseColumns];
 
-    console.log(columnsWithExpander)
     const colSpan = columns.length + 1;
     // Table filters/pagination state
     const [rowSelection, setRowSelection] = useState({});

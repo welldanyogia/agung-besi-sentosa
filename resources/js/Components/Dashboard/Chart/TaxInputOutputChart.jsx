@@ -88,7 +88,6 @@ function formatRupiah(value) {
 
 export function TaxInputOutputChart({rekapPajak}) {
     const monthlyData = groupDataMonthly(rekapPajak)
-    console.log(rekapPajak)
 
     return (
         <Card className="pt-0 w-2/3">

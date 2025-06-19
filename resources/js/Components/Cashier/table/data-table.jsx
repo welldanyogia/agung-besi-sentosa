@@ -66,7 +66,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
             getItems();
             getInvoice()
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
             getInvoice();
@@ -107,7 +107,7 @@ const DataTable = ({auth,invoice,item,data, setInvoiceItems,setError,setSuccess,
 
             getInvoice();
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             setError("Gagal memperbarui QTY!!!");
             getItems();
             // Inertia.get("/cashier", {}, { preserveState: true, replace: true });

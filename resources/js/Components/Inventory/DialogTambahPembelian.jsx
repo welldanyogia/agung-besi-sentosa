@@ -280,7 +280,6 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
         }
     };
     const handleSwitchChange = (checked) => {
-        console.log(checked)
         if (checked){
         setData((prevData) => ({
             ...prevData,
@@ -454,8 +453,7 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
                                                                     kode_barang: currentValue === prevData.kode_barang ? "" : currentValue,
                                                                 }));
                                                                 const foundItem = items.find(item => item.item_code === currentValue);
-                                                                console.log(items)
-                                                                console.log(data)
+
                                                                 if (foundItem) {
                                                                     setData(prevData => ({
                                                                         ...prevData,

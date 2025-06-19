@@ -46,7 +46,6 @@ export default function Dashboard({auth}) {
             setLoading(false);
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
-            console.log(response.data)
         } catch (error) {
             setLoading(false);
         }

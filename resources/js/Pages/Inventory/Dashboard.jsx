@@ -60,7 +60,7 @@ export default function Dashboard({auth, satuan, items, pembelians,itemCodes}) {
         }
     }, []);
 
-    console.log('tab value :' , tabValue)
+    // console.log('tab value :' , tabValue)
 
     useEffect(() => {
         // Refresh page from server when tab changes
