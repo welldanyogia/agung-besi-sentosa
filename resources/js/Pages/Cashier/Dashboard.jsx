@@ -116,6 +116,7 @@ export default function Dashboard({auth,items,kategoris}) {
             });
             if (response.data.success){
                 setInvoice(response.data.invoice)
+                console.log(response.data.invoice.items)
                 setInvoiceItems(response.data.invoice.items)
             }else {
                 setInvoice(null)

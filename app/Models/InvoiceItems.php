@@ -183,6 +183,7 @@ class InvoiceItems extends Model
     {
         return match ($type) {
             'retail' => $item->retail_price,
+            'semi_grosir' => $item->semi_grosir_price,
             'grosir' => $item->wholesale_price,
             'eceran' => $item->eceran_price,
             default => 0,

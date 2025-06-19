@@ -58,7 +58,9 @@ export const columns = [
                 selectedPrice = item?.eceran_price;
             } else if (priceType === 'retail') {
                 selectedPrice = item?.retail_price;
-            } else {
+            } else if (priceType === 'semi_grosir') {
+                selectedPrice = item?.semi_grosir_price;
+            }else {
                 selectedPrice = item?.wholesale_price; // grosir
             }
 

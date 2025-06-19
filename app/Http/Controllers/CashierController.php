@@ -138,6 +138,10 @@ class CashierController extends Controller
                 $price = $item->eceran_price;
                 $quantityReduction = $request->quantity / ($item->retail_conversion ?: 1);
                 break;
+            case 'semi_grosir':
+                $price = $item->semi_grosir_price;
+                $quantityReduction = $request->quantity;
+                break;
             case 'grosir':
                 $price = $item->wholesale_price;
                 $quantityReduction = $request->quantity;
