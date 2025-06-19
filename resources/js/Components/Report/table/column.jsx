@@ -16,10 +16,30 @@ import {AlertEditDialog} from "@/Components/Report/AlertEditDialog.jsx";
 import {Checkbox} from "@/Components/ui/checkbox"
 import {Badge} from "@/Components/ui/badge.jsx";
 import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
+import {useState} from "react";
 
 const columnHelper = createColumnHelper();
-
 export const columns = [
+    // columnHelper.accessor("expander",{
+    //     id: "expander",
+    //     header: () => null,
+    //     cell: ({ row }) => (
+    //         <Button
+    //             variant="ghost"
+    //             size="icon"
+    //             onClick={() => handleToggleExpand(row.id)}
+    //             aria-label={expandedRows.includes(row.id) ? "Collapse" : "Expand"}
+    //             className="hover:bg-accent/70"
+    //         >
+    //             {expandedRows.includes(row.id) ? (
+    //                 <ChevronDown className="w-5 h-5" />
+    //             ) : (
+    //                 <ChevronRight className="w-5 h-5" />
+    //             )}
+    //         </Button>
+    //     ),
+    //     size: 32
+    // }),
     columnHelper.accessor("no", {
         id: 'no',
         header: () => <div className="text-center">No</div>,

@@ -47,7 +47,7 @@ export const statuses = [
         // icon: Circle,
     },
 ]
-const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
+const DataTableDetailTransaction = ({columns, data, auth, setError, setSuccess, invoice}) => {
     const {storeInfo} = usePage().props;
 
     const [rowSelection, setRowSelection] = useState({})
@@ -356,7 +356,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
                         </div>
                         <div className="rounded-md border">
                             <Table>
-                                <TableHeader>
+                                <TableHeader className={'bg-accent'}>
                                     {table.getHeaderGroups().map(headerGroup => (
                                         <TableRow key={headerGroup.id}>
                                             {headerGroup.headers.map(header => (
@@ -405,4 +405,4 @@ const DataTable = ({columns, data, auth, setError, setSuccess, invoice}) => {
     );
 };
 
-export default DataTable;
+export default DataTableDetailTransaction;

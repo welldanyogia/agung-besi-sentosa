@@ -90,7 +90,7 @@ class CashierController extends Controller
             'item_id' => 'required|exists:items,id',
             'quantity' => 'required|numeric',
             'user_id' => 'required|exists:users,id',
-            'price_type' => 'required|in:retail,grosir,eceran', // Validasi price_type
+            'price_type' => 'required|in:retail,grosir,eceran,semi_grosir', // Validasi price_type
         ]);
 
         // Cek apakah ada invoice dengan status 'pending' untuk user ini

@@ -33,8 +33,11 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { columns as baseColumns } from "./column.jsx";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
 import {AlertDeleteDialog} from "@/Components/Report/AlertDeleteDialog.jsx";
+import InvoiceItemsTable from "@/Components/Report/InvoiceItemsTable.jsx";
 
 export const labels = [
     {
@@ -51,26 +54,47 @@ export const labels = [
     },
 ]
 
-export const statuses = [
-    {
-        value: 1,
-        label: "Pajak",
-        // icon: Tax,
-    },
-    {
-        value: 0,
-        label: "Non Pajak",
-        // icon: Circle,
-    },
-]
 const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
-    const [rowSelection, setRowSelection] = useState({})
-    const [columnFilters, setColumnFilters] = useState(
-        []
-    )
+    const [expandedRows, setExpandedRows] = useState([]);
+    const handleToggleExpand = (rowId) => {
+        setExpandedRows(prev =>
+            prev.includes(rowId) ? prev.filter(id => id !== rowId) : [...prev, rowId]
+        );
+    };
+
+    // Kolom expander
+    const expanderColumn = {
+        id: "expander",
+        header: () => null,
+        cell: ({ row }) => (
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleToggleExpand(row.id)}
+                aria-label={expandedRows.includes(row.id) ? "Collapse" : "Expand"}
+                className="hover:bg-accent/70"
+            >
+                {expandedRows.includes(row.id) ? (
+                    <ChevronDown className="w-5 h-5" />
+                ) : (
+                    <ChevronRight className="w-5 h-5" />
+                )}
+            </Button>
+        ),
+        size: 32
+    };
+
+    // Merge kolom expander dengan kolom dari columns.jsx
+    const columnsWithExpander = [expanderColumn, ...baseColumns];
+
+    console.log(columnsWithExpander)
+    const colSpan = columns.length + 1;
+    // Table filters/pagination state
+    const [rowSelection, setRowSelection] = useState({});
+    const [columnFilters, setColumnFilters] = useState([]);
     const table = useReactTable({
         data,
-        columns,
+        columns: columnsWithExpander,
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         getCoreRowModel: getCoreRowModel(),
@@ -821,7 +845,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                         <div className="rounded-md border overflow-x-auto">
 
                             <Table>
-                                <TableHeader className={'bg-accent '}>
+                                <TableHeader className={'bg-accent'}>
                                     {table.getHeaderGroups().map(headerGroup => (
                                         <TableRow key={headerGroup.id}>
                                             {headerGroup.headers.map(header => (
@@ -829,33 +853,60 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                 </TableHead>
                                             ))}
-                                            <TableHead className="sticky right-0 bg-accent z-10">
-                                                {/*<DialogEditBarang barang={table.getRowModel.} />*/}
-                                                Aksi
-                                            </TableHead>
+                                            {/*<TableHead className="sticky right-0 bg-accent z-10">*/}
+                                            {/*    /!*<DialogEditBarang barang={table.getRowModel.} />*!/*/}
+                                            {/*    Aksi*/}
+                                            {/*</TableHead>*/}
                                         </TableRow>
                                     ))}
                                 </TableHeader>
                                 <TableBody>
                                     {table.getRowModel().rows.length ? (
                                         table.getRowModel().rows.map(row => (
-                                            <TableRow key={row.id}
-                                                      data-state={row.getIsSelected() ? 'selected' : undefined}>
-                                                {row.getVisibleCells().map(cell => (
-                                                    <TableCell key={cell.id}>
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </TableCell>
-                                                ))}
-                                                <TableCell className="sticky right-0 bg-white z-10 space-y-2">
-                                                    <DialogEditBarang barang={row.original} />
-                                                    {
-                                                        auth?.user?.roles[0]?.name === 'superadmin' && (
-                                                            <AlertDeleteDialog invoice={row.original} getData={getData} setError={setError} setSuccess={setSuccess}/>
-                                                        )
-                                                    }
-                                                </TableCell>
+                                            <React.Fragment key={row.id}>
+                                                <TableRow
+                                                    data-state={row.getIsSelected() ? "selected" : undefined}
+                                                >
+                                                    {row.getVisibleCells().map((cell) => (
+                                                        <TableCell key={cell.id}>
+                                                            {flexRender(
+                                                                cell.column.columnDef.cell,
+                                                                cell.getContext()
+                                                            )}
+                                                        </TableCell>
+                                                    ))}
+                          {/*                          <TableCell className="sticky right-0 bg-white z-10 space-y-2">*/}
+                          {/*                              /!* DialogEditBarang & AlertDeleteDialog, jika ada *!/*/}
+                          {/*                              /!* <DialogEditBarang barang={row.original} /> *!/*/}
+                          {/*                              /!* {auth?.user?.roles[0]?.name === 'superadmin' && (*/}
+                          {/*    <AlertDeleteDialog invoice={row.original} getData={getData} setError={setError} setSuccess={setSuccess}/>*/}
+                          {/*)} *!/*/}
+                          {/*                          </TableCell>*/}
+                                                </TableRow>
+                                                {expandedRows.includes(row.id) && (
+                                                    <TableRow className="bg-muted">
+                                                        <TableCell colSpan={colSpan + 1}>
+                                                            {/* Example: tampilkan item dalam row.detail (ubah sesuai kebutuhan) */}
+                                                            {/*<div className="p-2">*/}
+                                                            {/*    <span className="font-semibold">Detail Transaksi:</span>*/}
+                                                            {/*    {row.original.items && row.original.items.length ? (*/}
+                                                            {/*        <ul className="list-disc ml-4 mt-2">*/}
+                                                            {/*            {row.original.items.map((item, idx) => (*/}
+                                                            {/*                <li key={idx}>*/}
+                                                            {/*                    {item.item?.item_name} — Qty: {item.qty}, Harga: Rp{item.price?.toLocaleString()}, Sub-total: Rp{item.sub_total?.toLocaleString()}*/}
+                                                            {/*                </li>*/}
+                                                            {/*            ))}*/}
+                                                            {/*        </ul>*/}
+                                                            {/*    ) : (*/}
+                                                            {/*        <div className="italic text-muted-foreground">Tidak ada item</div>*/}
+                                                            {/*    )}*/}
+                                                            {/*</div>*/}
+                                                            <InvoiceItemsTable items={row.original.items} invoice={row.original} />
 
-                                            </TableRow>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </React.Fragment>
                                         ))
                                     ) : (
                                         <TableRow>

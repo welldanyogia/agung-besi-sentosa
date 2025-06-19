@@ -71,6 +71,57 @@ class InvoiceItems extends Model
 //
 //    }
 
+//    protected static function booted(): void
+//    {
+//        foreach (['creating', 'updating'] as $event) {
+//            static::$event(function ($item) {
+//                $itemModel = Items::find($item->item_id);
+//                $price = static::getPriceByType($itemModel, $item->price_type);
+//
+//                $excludedCategories = [
+//                    'engsel bubut',
+//                    'plat timbangan',
+//                    'timbangan',
+//                    'pipa gas timbangan',
+//                    'engsel',
+//                    'kawat las stenlis',
+//                    'kawat las',
+//                    'amplas',
+//                    'kabel las',
+//                ];
+//
+//                $excludedItemKeywords = [
+//                    'talang'
+//                ];
+//
+//                $excludedUnits = [
+//                    'meter',
+//                ];
+//
+//                $item->price = $price;
+//                $item->sub_total = $item->qty * $price;
+//
+//                $categoryName = strtolower($itemModel->category->category_name ?? '');
+//                $itemName = strtolower($itemModel->item_name ?? '');
+//                $unit = strtolower($itemModel->retail_unit ?? '');
+//
+//                $isCategoryExcluded = in_array($categoryName, $excludedCategories);
+//                $isItemNameExcluded = collect($excludedItemKeywords)->contains(
+//                    fn($keyword) => str_contains($itemName, $keyword)
+//                );
+//                $isUnitExcluded = $item->price_type === 'eceran' && in_array($unit, $excludedUnits);
+//
+//                $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded;
+//
+//                if ($item->qty == 0.5 && !$shouldExclude) {
+//                    $item->sub_total += 5000;
+//                }
+//
+//                $item->sub_total -= $item->discount;
+//            });
+//        }
+//    }
+
     protected static function booted(): void
     {
         foreach (['creating', 'updating'] as $event) {
@@ -111,11 +162,16 @@ class InvoiceItems extends Model
                 );
                 $isUnitExcluded = $item->price_type === 'eceran' && in_array($unit, $excludedUnits);
 
-                $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded;
+                // Tambahkan pengecualian untuk barang berpajak
+                $isTaxed = $itemModel->is_tax ?? false;
 
-                if ($item->qty == 0.5 && !$shouldExclude) {
+                // Update kondisi pengecualian
+                $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded || $isTaxed;
+
+                if (fmod($item->qty, 1) === 0.5 && !$shouldExclude) {
                     $item->sub_total += 5000;
                 }
+
 
                 $item->sub_total -= $item->discount;
             });

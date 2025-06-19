@@ -170,7 +170,7 @@ export default function Dashboard({auth, satuan, items, pembelians,itemCodes}) {
                             />
                         )}
 
-                        {/*<DataTable tab={tabValue} columns={columns} data={data} auth={auth} setError={setError}*/}
+                        {/*<DataTableDetailTransaction tab={tabValue} columns={columns} data={data} auth={auth} setError={setError}*/}
                         {/*           setSuccess={setSuccess} getData={getData} satuan={satuan} role={auth.roles[0]}/>*/}
                     </div>
                 </div>
