@@ -75,7 +75,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->hasRole('superadmin')) {
             Log::info('User is admin.');
-            return redirect()->intended(route('report', absolute: false));
+            return redirect()->intended(route('dashboard', absolute: false));
         } elseif ($user->hasRole('admin')) {
             Log::info('User is customer.');
             return redirect()->intended(route('report', absolute: false));

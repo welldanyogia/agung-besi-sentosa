@@ -10,6 +10,7 @@ import {TaxOmsetProfitChart} from "@/Components/Dashboard/Chart/TaxOmsetProfitCh
 import {TaxInputOutputChart} from "@/Components/Dashboard/Chart/TaxInputOutputChart.jsx";
 import ChartPieSalesTransactionTypes from "@/Components/Dashboard/Chart/ChartPieSalesTransactionTypes.jsx";
 import PPnBarChart from "@/Components/Dashboard/Chart/PPnBarChart.jsx";
+import ProfitLossReport from "@/Components/Dashboard/ProfitLossReport.jsx";
 
 
 export default function Dashboard({
@@ -22,7 +23,7 @@ export default function Dashboard({
                                       rekapPajak,
                                       dailyRekap,
                                       itemsWithTax,
-                                      itemsWithoutTax
+                                      itemsWithoutTax,
                                   }) {
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // default bulan ini
     const topProductsDummy = [
@@ -89,6 +90,8 @@ export default function Dashboard({
     ]
     const totalNominalNonPPN = itemsWithoutTax.reduce((sum, item) => sum + item.nominal, 0)
     const totalNominalPPN = itemsWithTax.reduce((sum, item) => sum + item.nominal, 0)
+    // const totalNominalNonPPN = itemsWithoutTax
+    // const totalNominalPPN = itemsWithTax
 
 
     const formatRupiah = (angka) => {
@@ -168,6 +171,10 @@ export default function Dashboard({
                             ))}
                         </div>
 
+                        <div className={'flex gap-2'}>
+                            <ProfitLossReport thisMonth={selectedMonth}/>
+
+                        </div>
                         <div className={'flex gap-2'}>
                             <TaxInputOutputChart rekapPajak={rekapPajak}/>
                             <ChartPieSalesTransactionTypes month={selectedMonth} rekapPerPriceType={rekapPerPriceType}/>

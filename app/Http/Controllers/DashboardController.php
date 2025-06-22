@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InvoiceItems;
+use App\Models\Invoices;
 use App\Models\Pembelian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -23,6 +24,45 @@ class DashboardController extends Controller
         $invoiceItems = InvoiceItems::with(['item'])
             ->whereMonth('created_at', $month)
             ->get();
+
+        // === REVISI DI SINI ===
+        // Pajak Masukan Total dari pembelian
+        $pajakMasukanTotal = \App\Models\Pembelian::whereMonth('tanggal_pembelian', $month)
+            ->sum('pajak_masukan');
+
+        // Omset, Pajak Luaran, Omset Barang PPN & NonPPN
+        $totalOmset = 0;
+        $totalPajakLuaran = 0;
+        $omsetBarangPPn = 0;
+        $omsetBarangNonPPn = 0;
+
+        foreach ($invoiceItems as $item) {
+            $itemModel = $item->item;
+            $subTotal = $item->sub_total;
+            $isTax = $itemModel->is_tax ?? false;
+
+            // Ambil tax rate sesuai price_type
+            $taxRate = match ($item->price_type) {
+                'retail' => $itemModel->tax_percentage_retail ?? 0,
+                'grosir' => $itemModel->tax_percentage_wholesale ?? 0,
+                'eceran' => $itemModel->tax_percentage_eceran ?? 0,
+                'semi_grosir' => $itemModel->tax_percentage_semi_grosir ?? 0,
+                default => 0,
+            };
+
+            $totalOmset += $subTotal;
+
+            if ($isTax && $taxRate > 0) {
+                $dpp = $subTotal / (1 + $taxRate / 100);
+                $ppn = $subTotal - $dpp;
+
+                $omsetBarangPPn += $subTotal;
+                $totalPajakLuaran += $ppn;
+            } else {
+                $omsetBarangNonPPn += $subTotal;
+            }
+        }
+        // === END REVISI ===
 
 //
         $rekapPerPriceType = $invoiceItems->groupBy('price_type')->map(function ($items, $type) {
@@ -158,8 +198,8 @@ class DashboardController extends Controller
 
 
         // Pajak Masukan Total dari pembelian
-        $pajakMasukanTotal = \App\Models\Pembelian::whereMonth('tanggal_pembelian', $month)
-            ->sum('pajak_masukan');
+//        $pajakMasukanTotal = \App\Models\Pembelian::whereMonth('tanggal_pembelian', $month)
+//            ->sum('pajak_masukan');
 
         $year = $request->input('year', now()->year);
 
@@ -173,6 +213,30 @@ class DashboardController extends Controller
             ]);
 
         // Pajak Luaran (group by bulan)
+//        $outputTaxData = InvoiceItems::with('item')
+//            ->whereYear('created_at', $year)
+//            ->get()
+//            ->groupBy(fn($item) => $item->created_at->format('Y-m'))
+//            ->map(function ($group) {
+//                $month = $group->first()->created_at->format('Y-m');
+//                $outputTax = $group->sum(function ($item) {
+//                    $itemModel = $item->item;
+//                    $taxPerUnit = match ($item->price_type) {
+//                        'wholesale', 'grosir' => $itemModel->pajak_luaran_wholesale ?? 0,
+//                        'semi_grosir' => $itemModel->pajak_luaran_semi_grosir ?? 0,
+//                        'retail' => $itemModel->pajak_luaran_retail ?? 0,
+//                        'eceran' => $itemModel->pajak_luaran_eceran ?? 0,
+//                        default => 0,
+//                    };
+//                    return $taxPerUnit * $item->qty;
+//                });
+//
+//                return [
+//                    'month' => $month,
+//                    'outputTax' => $outputTax,
+//                ];
+//            });
+
         $outputTaxData = InvoiceItems::with('item')
             ->whereYear('created_at', $year)
             ->get()
@@ -181,14 +245,25 @@ class DashboardController extends Controller
                 $month = $group->first()->created_at->format('Y-m');
                 $outputTax = $group->sum(function ($item) {
                     $itemModel = $item->item;
-                    $taxPerUnit = match ($item->price_type) {
-                        'wholesale', 'grosir' => $itemModel->pajak_luaran_wholesale ?? 0,
-                        'semi_grosir' => $itemModel->pajak_luaran_semi_grosir ?? 0,
-                        'retail' => $itemModel->pajak_luaran_retail ?? 0,
-                        'eceran' => $itemModel->pajak_luaran_eceran ?? 0,
+                    $isTax = $itemModel->is_tax ?? false;
+
+                    // Ambil tarif pajak sesuai price_type
+                    $taxRate = match ($item->price_type) {
+                        'retail' => $itemModel->tax_percentage_retail ?? 0,
+                        'grosir' => $itemModel->tax_percentage_wholesale ?? 0,
+                        'eceran' => $itemModel->tax_percentage_eceran ?? 0,
+                        'semi_grosir' => $itemModel->tax_percentage_semi_grosir ?? 0,
                         default => 0,
                     };
-                    return $taxPerUnit * $item->qty;
+
+                    if ($isTax && $taxRate > 0) {
+                        $subTotal = $item->sub_total;
+                        $dpp = $subTotal / (1 + $taxRate / 100);
+                        $ppn = $subTotal - $dpp;
+                        return $ppn;
+                    } else {
+                        return 0;
+                    }
                 });
 
                 return [
@@ -196,6 +271,7 @@ class DashboardController extends Controller
                     'outputTax' => $outputTax,
                 ];
             });
+
 
         // Gabungkan berdasarkan bulan
         $allMonths = $inputTaxData->keys()->merge($outputTaxData->keys())->unique()->sort();
@@ -272,8 +348,8 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard/Dashboard', [
             'topProducts' => $topProducts,
             'invoiceItems' => $invoiceItems,
-            'omset' => $omset,
-            'taxOutcome' => $taxOutcome,
+            'omset' => $totalOmset,
+            'taxOutcome' => $totalPajakLuaran,
 //            'totalProfit' => $totalProfit,
 //            'totalCost' => $totalCost,
 //            'dailyData' => $dailyData,
@@ -283,8 +359,162 @@ class DashboardController extends Controller
             'dailyRekap' => $dailyRekap,
             'itemsWithTax' => $itemsWithTax,
             'itemsWithoutTax' => $itemsWithoutTax,
+            'totalNominalNonPPN' => $omsetBarangNonPPn,
+            'totalNominalPPN' => $omsetBarangPPn,
         ]);
     }
+
+//    public function profitLossReport(Request $request)
+//    {
+//        $from = $request->input('from');
+//        $to = $request->input('to');
+//
+//        $invoices = Invoices::with(['items.item'])
+//            ->whereBetween('created_at', [$from, $to])
+//            ->get();
+//
+//        $totalRevenueGross = 0;
+//        $totalRevenueNet = 0;
+//        $totalPPN = 0;
+//        $totalHpp = 0;
+//
+//        foreach ($invoices as $invoice) {
+//            foreach ($invoice->items as $invoiceItem) {
+//                $item = $invoiceItem->item;
+//                $qty = $invoiceItem->qty;
+//                $price = $invoiceItem->price;
+//                $subTotalPenjualan = $invoiceItem->sub_total; // Omzet penjualan (sudah termasuk PPN)
+//                $subTotalHPP = $invoiceItem->subTotal;        // HPP per transaksi
+//
+//                // --- Pilih tax_percentage sesuai price_type
+//                switch ($invoiceItem->price_type) {
+//                    case 'retail':
+//                        $ppnRate = $item->tax_percentage_retail ?? 0;
+//                        break;
+//                    case 'grosir':
+//                        $ppnRate = $item->tax_percentage_wholesale ?? 0;
+//                        break;
+//                    case 'eceran':
+//                        $ppnRate = $item->tax_percentage_eceran ?? 0;
+//                        break;
+//                    case 'semi_grosir':
+//                        $ppnRate = $item->tax_percentage_semi_grosir ?? 0;
+//                        break;
+//                    default:
+//                        $ppnRate = 0;
+//                }
+//
+//                // --- Hitung omzet bersih & PPN
+//                if ($ppnRate > 0) {
+//                    $net = $subTotalPenjualan / (1 + ($ppnRate / 100));
+//                    $ppn = $subTotalPenjualan - $net;
+//                } else {
+//                    $net = $subTotalPenjualan;
+//                    $ppn = 0;
+//                }
+//
+//                $totalRevenueGross += $subTotalPenjualan;
+//                $totalRevenueNet += $net;
+//                $totalPPN += $ppn;
+//
+//                // --- HPP langsung dari subTotal InvoiceItems
+//                $totalHpp += $subTotalHPP;
+//            }
+//        }
+//
+//        $grossProfit = $totalRevenueNet - $totalHpp;
+//
+//        return response()->json([
+//            'total_revenue_gross' => round($totalRevenueGross),
+//            'total_revenue_net' => round($totalRevenueNet),
+//            'total_ppn' => round($totalPPN),
+//            'total_hpp' => round($totalHpp),
+//            'gross_profit' => round($grossProfit),
+//        ]);
+//    }
+
+    public function profitLossReport(Request $request)
+    {
+        $from = $request->input('from');
+        $to = $request->input('to');
+
+// Jika tidak ada input, fallback ke bulan berjalan
+        if (!$from || !$to) {
+            $month = $request->input('month', now()->month);
+            $year = $request->input('year', now()->year);
+
+            $start = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+            $end = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
+
+            $from = $start->format('Y-m-d');
+            $to = $end->format('Y-m-d');
+        }
+
+        $invoiceItems = InvoiceItems::with(['item'])
+            ->whereBetween('created_at', [$from, $to])
+            ->get();
+
+
+        $totalRevenueGross = 0;
+        $totalRevenueNet = 0;
+        $totalPPN = 0;
+        $totalHpp = 0;
+        $omsetBarangPPn = 0;
+        $omsetBarangNonPPn = 0;
+
+        foreach ($invoiceItems as $item) {
+            $itemModel = $item->item;
+            $subTotal = $item->sub_total;
+            $isTax = $itemModel->is_tax ?? false;
+
+            // Pajak, omzet, dsb ... (kode sebelumnya tetap)
+            $taxRate = match ($item->price_type) {
+                'retail' => $itemModel->tax_percentage_retail ?? 0,
+                'grosir' => $itemModel->tax_percentage_wholesale ?? 0,
+                'eceran' => $itemModel->tax_percentage_eceran ?? 0,
+                'semi_grosir' => $itemModel->tax_percentage_semi_grosir ?? 0,
+                default => 0,
+            };
+
+            $totalRevenueGross += $subTotal;
+
+            if ($isTax && $taxRate > 0) {
+                $dpp = $subTotal / (1 + $taxRate / 100);
+                $ppn = $subTotal - $dpp;
+
+                $totalRevenueNet += $dpp;
+                $totalPPN += $ppn;
+                $omsetBarangPPn += $subTotal;
+            } else {
+                $totalRevenueNet += $subTotal;
+                $omsetBarangNonPPn += $subTotal;
+            }
+
+            // --- HPP: sesuai price_type ---
+            if ($item->price_type === 'eceran' && ($itemModel->retail_conversion ?? 0) > 0) {
+                $hpp = ($itemModel->price / $itemModel->retail_conversion) * $item->qty;
+            } else {
+                $hpp = $itemModel->price * $item->qty;
+            }
+            $totalHpp += $hpp;
+        }
+
+
+        $grossProfit = $totalRevenueNet - $totalHpp;
+
+        return response()->json([
+            'total_revenue_gross' => round($totalRevenueGross),
+            'total_revenue_net' => round($totalRevenueNet),
+            'total_ppn' => round($totalPPN),
+            'total_hpp' => round($totalHpp),
+            'gross_profit' => round($grossProfit),
+            'omset_barang_ppn' => round($omsetBarangPPn),
+            'omset_barang_nonppn' => round($omsetBarangNonPPn),
+        ]);
+    }
+
+
+
 
 
     /**

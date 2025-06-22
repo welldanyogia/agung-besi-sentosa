@@ -33,8 +33,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
-import { columns as baseColumns } from "./column.jsx";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {columns as baseColumns} from "./column.jsx";
+import {ChevronDown, ChevronRight} from "lucide-react";
 import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
 import {AlertDeleteDialog} from "@/Components/Report/AlertDeleteDialog.jsx";
 import InvoiceItemsTable from "@/Components/Report/InvoiceItemsTable.jsx";
@@ -54,7 +54,7 @@ export const labels = [
     },
 ]
 
-const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
+const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
     const [expandedRows, setExpandedRows] = useState([]);
     const handleToggleExpand = (rowId) => {
         setExpandedRows(prev =>
@@ -66,7 +66,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
     const expanderColumn = {
         id: "expander",
         header: () => null,
-        cell: ({ row }) => (
+        cell: ({row}) => (
             <Button
                 variant="ghost"
                 size="icon"
@@ -75,9 +75,9 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                 className="hover:bg-accent/70"
             >
                 {expandedRows.includes(row.id) ? (
-                    <ChevronDown className="w-5 h-5" />
+                    <ChevronDown className="w-5 h-5"/>
                 ) : (
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-5 h-5"/>
                 )}
             </Button>
         ),
@@ -110,7 +110,6 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         to: new Date() // 20 hari setelahnya
     })
     const [transactions, setTransactions] = useState([]);
-
 
 
     const fetchTransactions = async (startDate, endDate, setTransactions) => {
@@ -171,13 +170,13 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             customer_name: 'Pelanggan',
             items: [
                 {
-                    item: { item_name: 'PIPA GAS 5/8 inch' },
+                    item: {item_name: 'PIPA GAS 5/8 inch'},
                     qty: 3,
                     price: 100000,
                     sub_total: 300000
                 },
                 {
-                    item: { item_name: 'Test Barang 4' },
+                    item: {item_name: 'Test Barang 4'},
                     qty: 2,
                     price: 100000,
                     sub_total: 200000
@@ -186,7 +185,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             total_price: 500000,
             payment: 'Cash',
             status: 'Berhasil',
-            created_by: { name: 'Super Admin Name' },
+            created_by: {name: 'Super Admin Name'},
             tanggal: '2025-03-24'
         }
     ];
@@ -205,7 +204,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
 
 
     const downloadInvoicePDF = (transactions, startDate = '2025-03-01', endDate = '2025-03-31') => {
-        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        const doc = new jsPDF({orientation: "landscape", unit: "mm", format: "a4"});
 
         // Set font size
         doc.setFontSize(6);
@@ -270,12 +269,12 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
 
                 // Apply rowspan for Invoice Code (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: tx.invoice_code || '' });
+                    row.push({rowSpan: numItems, content: tx.invoice_code || ''});
                 }
 
                 // Apply rowspan for Customer Name (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: tx.customer_name || '' });
+                    row.push({rowSpan: numItems, content: tx.customer_name || ''});
                 }
 
                 // Always display item name in its respective column
@@ -288,38 +287,38 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
 
                 // Apply rowspan for Total Price (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: `Rp ${tx.total_price?.toLocaleString() || 0}` });
+                    row.push({rowSpan: numItems, content: `Rp ${tx.total_price?.toLocaleString() || 0}`});
                 }
 
                 // Apply rowspan for Payment (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: tx.payment || '' });
+                    row.push({rowSpan: numItems, content: tx.payment || ''});
                 }
 
                 // Apply rowspan for Jumlah Pembayaran (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: `Rp ${tx.bayar?.toLocaleString() || 0}` });
+                    row.push({rowSpan: numItems, content: `Rp ${tx.bayar?.toLocaleString() || 0}`});
                 }
 
                 // Apply rowspan for Kembalian (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: `Rp ${tx.kembalian?.toLocaleString() || 0}` });
+                    row.push({rowSpan: numItems, content: `Rp ${tx.kembalian?.toLocaleString() || 0}`});
                 }
 
                 // Apply rowspan for Status (only on the first item)
                 if (index === 0) {
                     const statusFormatted = tx.status === 'cash' ? 'Tunai' : 'Non Tunai';
-                    row.push({ rowSpan: numItems, content: statusFormatted });
+                    row.push({rowSpan: numItems, content: statusFormatted});
                 }
 
                 // Apply rowspan for Created By (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: tx.created_by?.name || '' });
+                    row.push({rowSpan: numItems, content: tx.created_by?.name || ''});
                 }
 
                 // Apply rowspan for Tanggal (only on the first item)
                 if (index === 0) {
-                    row.push({ rowSpan: numItems, content: formatDate(tx.created_at) || '' });
+                    row.push({rowSpan: numItems, content: formatDate(tx.created_at) || ''});
                 }
 
                 allRows.push(row);
@@ -327,7 +326,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                 // Track the item quantities for summary
                 const itemName = itemData.item?.item_name || 'Unknown Item';
                 if (!itemSummary[itemName]) {
-                    itemSummary[itemName] = { qty: 0, subTotal: 0 };
+                    itemSummary[itemName] = {qty: 0, subTotal: 0};
                 }
                 itemSummary[itemName].qty += itemData.qty;
                 itemSummary[itemName].subTotal += itemData.sub_total || 0;
@@ -348,8 +347,8 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         // Add the "Total Semua" row
         summaryRows.push([
 
-            { content: 'Total Semua', colSpan: 1, styles: { fontStyle: 'bold',fillColor: [0, 123, 255] } },
-            { content: `Rp ${totalAllPrice.toLocaleString()}`, colSpan: 2,styles: { fontStyle: 'bold'} },
+            {content: 'Total Semua', colSpan: 1, styles: {fontStyle: 'bold', fillColor: [0, 123, 255]}},
+            {content: `Rp ${totalAllPrice.toLocaleString()}`, colSpan: 2, styles: {fontStyle: 'bold'}},
             //
             // `Rp ${totalAllPrice.toLocaleString()}`
         ]);
@@ -367,9 +366,9 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                 valign: 'middle'
             },
             columnStyles: {
-                0: { cellWidth: 'auto' },  // Item Name column
-                1: { cellWidth: 30 }, // Quantity column
-                2: { cellWidth: 40 } // Sub-total column
+                0: {cellWidth: 'auto'},  // Item Name column
+                1: {cellWidth: 30}, // Quantity column
+                2: {cellWidth: 40} // Sub-total column
             }
         });
 
@@ -386,19 +385,19 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                 valign: 'middle'
             },
             columnStyles: {
-                0: { cellWidth: 20 },  // Invoice Code column
-                1: { cellWidth: 20 },  // Customer Name column
-                2: { cellWidth: 20 }, // Item Name column
-                3: { cellWidth: 10 },
-                4: { cellWidth: 20 },
-                5: { cellWidth: 20 },
-                6: { cellWidth: 20 },
-                7: { cellWidth: 20 },
-                8: { cellWidth: 20 },
-                9: { cellWidth: 30 },
-                10: { cellWidth: 30 },
+                0: {cellWidth: 20},  // Invoice Code column
+                1: {cellWidth: 20},  // Customer Name column
+                2: {cellWidth: 20}, // Item Name column
+                3: {cellWidth: 10},
+                4: {cellWidth: 20},
+                5: {cellWidth: 20},
+                6: {cellWidth: 20},
+                7: {cellWidth: 20},
+                8: {cellWidth: 20},
+                9: {cellWidth: 30},
+                10: {cellWidth: 30},
             },
-            didDrawPage: function(data) {
+            didDrawPage: function (data) {
                 // Add page number - Centered horizontally
                 doc.setFontSize(8);
                 const pageNumber = `Halaman ${doc.internal.getNumberOfPages()}`;
@@ -438,9 +437,9 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         const headerRow = header.map(cell => ({
             v: cell,
             s: {
-                fill: { fgColor: { rgb: 'FFFF00' } },
-                font: { bold: true },
-                alignment: { horizontal: "center", vertical: "center" }
+                fill: {fgColor: {rgb: 'FFFF00'}},
+                font: {bold: true},
+                alignment: {horizontal: "center", vertical: "center"}
             }
         }));
         wsData.push(headerRow);
@@ -524,11 +523,11 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             });
 
             if (rowspan > 1) {
-                const mergeCols = [0, 1, 7, 8, 9, 10, 11, 12,13,14];
+                const mergeCols = [0, 1, 7, 8, 9, 10, 11, 12, 13, 14];
                 mergeCols.forEach(col => {
                     merges.push({
-                        s: { r: currentRow, c: col },
-                        e: { r: currentRow + rowspan - 1, c: col }
+                        s: {r: currentRow, c: col},
+                        e: {r: currentRow + rowspan - 1, c: col}
                     });
                 });
             }
@@ -543,21 +542,21 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         for (let col = range.s.c; col <= range.e.c; col++) {
             let maxLength = 0;
             for (let row = range.s.r; row <= range.e.r; row++) {
-                const cell = ws[XLSX.utils.encode_cell({ r: row, c: col })];
+                const cell = ws[XLSX.utils.encode_cell({r: row, c: col})];
                 if (cell && cell.v && cell.v.toString().length > maxLength) {
                     maxLength = cell.v.toString().length;
                 }
             }
             ws['!cols'] = ws['!cols'] || [];
-            ws['!cols'][col] = { wpx: Math.min(maxLength * 8, 150) };
+            ws['!cols'][col] = {wpx: Math.min(maxLength * 8, 150)};
         }
 
         for (let row = range.s.r; row <= range.e.r; row++) {
             for (let col = range.s.c; col <= range.e.c; col++) {
-                const cell = ws[XLSX.utils.encode_cell({ r: row, c: col })];
+                const cell = ws[XLSX.utils.encode_cell({r: row, c: col})];
                 if (cell) {
                     cell.s = cell.s || {};
-                    cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+                    cell.s.alignment = {horizontal: 'center', vertical: 'center'};
                 }
             }
         }
@@ -572,7 +571,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
             tx.items.forEach(item => {
                 const itemName = item.item?.item_name || 'Unknown Item';
                 if (!itemSummary[itemName]) {
-                    itemSummary[itemName] = { qty: 0, subTotal: 0 };
+                    itemSummary[itemName] = {qty: 0, subTotal: 0};
                 }
                 itemSummary[itemName].qty += item.qty;
                 itemSummary[itemName].subTotal += item.sub_total || 0;
@@ -587,9 +586,19 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
 
         const totalAllPrice = Object.values(itemSummary).reduce((acc, curr) => acc + curr.subTotal, 0);
         summaryRows.push([
-            { v: 'Total Semua', s: { font: { bold: true }, fill: { fgColor: { rgb: 'FFFF00' } }, alignment: { horizontal: 'center', vertical: 'center' } } },
-            { v: '', s: { font: { bold: true }, alignment: { horizontal: 'center', vertical: 'center' } } },
-            { v: `Rp ${totalAllPrice.toLocaleString()}`, s: { font: { bold: true }, alignment: { horizontal: 'center', vertical: 'center' } } }
+            {
+                v: 'Total Semua',
+                s: {
+                    font: {bold: true},
+                    fill: {fgColor: {rgb: 'FFFF00'}},
+                    alignment: {horizontal: 'center', vertical: 'center'}
+                }
+            },
+            {v: '', s: {font: {bold: true}, alignment: {horizontal: 'center', vertical: 'center'}}},
+            {
+                v: `Rp ${totalAllPrice.toLocaleString()}`,
+                s: {font: {bold: true}, alignment: {horizontal: 'center', vertical: 'center'}}
+            }
         ]);
 
         const summaryWs = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryRows]);
@@ -598,21 +607,21 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
         for (let col = summaryRange.s.c; col <= summaryRange.e.c; col++) {
             let maxLength = 0;
             for (let row = summaryRange.s.r; row <= summaryRange.e.r; row++) {
-                const cell = summaryWs[XLSX.utils.encode_cell({ r: row, c: col })];
+                const cell = summaryWs[XLSX.utils.encode_cell({r: row, c: col})];
                 if (cell && cell.v && cell.v.toString().length > maxLength) {
                     maxLength = cell.v.toString().length;
                 }
             }
             summaryWs['!cols'] = summaryWs['!cols'] || [];
-            summaryWs['!cols'][col] = { wpx: Math.min(maxLength * 8, 150) };
+            summaryWs['!cols'][col] = {wpx: Math.min(maxLength * 8, 150)};
         }
 
         for (let row = summaryRange.s.r; row <= summaryRange.e.r; row++) {
             for (let col = summaryRange.s.c; col <= summaryRange.e.c; col++) {
-                const cell = summaryWs[XLSX.utils.encode_cell({ r: row, c: col })];
+                const cell = summaryWs[XLSX.utils.encode_cell({r: row, c: col})];
                 if (cell) {
                     cell.s = cell.s || {};
-                    cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+                    cell.s.alignment = {horizontal: 'center', vertical: 'center'};
                 }
             }
         }
@@ -629,9 +638,6 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
 //         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
 //         return date.toLocaleDateString('id-ID', options);
 //     };
-
-
-
 
 
     // const downloadPDF = (transactions, startDate, endDate) => {
@@ -716,9 +722,6 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
     //     // Menyimpan PDF
     //     doc.save(fileName);
     // };
-
-
-
 
 
     useEffect(() => {
@@ -823,14 +826,14 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                                             <DropdownMenuItem
                                                 // onClick={() => downloadPDF(transactions, format(date.from, "yyyy-MM-dd"), format(date.to, "yyyy-MM-dd"))}
                                                 onClick={() => downloadInvoicePDF(transactions, format(date.from, "yyyy-MM-dd"), format(date.to, "yyyy-MM-dd"))}
-                                                disabled={ transactions.length ===0}
+                                                disabled={transactions.length === 0}
                                             >
                                                 PDF
                                             </DropdownMenuItem>
                                             <DropdownMenuItem
                                                 onClick={() => downloadInvoiceExcel(transactions, format(date.from, "yyyy-MM-dd"), format(date.to, "yyyy-MM-dd"))}
                                                 // disabled={ transactions !== null}
-                                                disabled={ transactions.length ===0}
+                                                disabled={transactions.length === 0}
                                             >
                                                 Excel
                                             </DropdownMenuItem>
@@ -852,10 +855,13 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                 </TableHead>
                                             ))}
-                                            {/*<TableHead className="sticky right-0 bg-accent z-10">*/}
-                                            {/*    /!*<DialogEditBarang barang={table.getRowModel.} />*!/*/}
-                                            {/*    Aksi*/}
-                                            {/*</TableHead>*/}
+                                            {auth?.user?.roles[0]?.name === 'superadmin' && (
+
+                                                <TableHead className="sticky right-0 bg-accent z-10">
+                                                    {/*<DialogEditBarang barang={table.getRowModel.} />*/}
+                                                    Aksi
+                                                </TableHead>
+                                            )}
                                         </TableRow>
                                     ))}
                                 </TableHeader>
@@ -874,13 +880,15 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                                                             )}
                                                         </TableCell>
                                                     ))}
-                          {/*                          <TableCell className="sticky right-0 bg-white z-10 space-y-2">*/}
-                          {/*                              /!* DialogEditBarang & AlertDeleteDialog, jika ada *!/*/}
-                          {/*                              /!* <DialogEditBarang barang={row.original} /> *!/*/}
-                          {/*                              /!* {auth?.user?.roles[0]?.name === 'superadmin' && (*/}
-                          {/*    <AlertDeleteDialog invoice={row.original} getData={getData} setError={setError} setSuccess={setSuccess}/>*/}
-                          {/*)} *!/*/}
-                          {/*                          </TableCell>*/}
+                                                    {auth?.user?.roles[0]?.name === 'superadmin' && (
+                                                        <TableCell className="sticky right-0 bg-white z-10 space-y-2">
+                                                            {/* DialogEditBarang & AlertDeleteDialog, jika ada */}
+                                                            {/* <DialogEditBarang barang={row.original} /> */}
+                                                            <AlertDeleteDialog invoice={row.original} getData={getData}
+                                                                               setError={setError}
+                                                                               setSuccess={setSuccess}/>
+                                                        </TableCell>
+                                                    )}
                                                 </TableRow>
                                                 {expandedRows.includes(row.id) && (
                                                     <TableRow className="bg-muted">
@@ -900,7 +908,8 @@ const DataTable = ({columns, data, auth,setError, setSuccess,getData}) => {
                                                             {/*        <div className="italic text-muted-foreground">Tidak ada item</div>*/}
                                                             {/*    )}*/}
                                                             {/*</div>*/}
-                                                            <InvoiceItemsTable items={row.original.items} invoice={row.original} />
+                                                            <InvoiceItemsTable items={row.original.items}
+                                                                               invoice={row.original}/>
 
                                                         </TableCell>
                                                     </TableRow>

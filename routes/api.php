@@ -44,6 +44,8 @@ Route::get('/storeinfo', [\App\Http\Controllers\SettingController::class, 'getSt
 Route::post('/transactions', [\App\Http\Controllers\ReportController::class, 'getTransaction']);
 Route::post('/invoices/{id}/update-is-printed', [ReportController::class, 'updateIsPrinted']);
 Route::post('/invoices/{id}', [ReportController::class, 'destroy'])->name('invoices.destroy');
+Route::get('/reports/profit-loss', [\App\Http\Controllers\DashboardController::class, 'profitLossReport']);
+
 
 
 
