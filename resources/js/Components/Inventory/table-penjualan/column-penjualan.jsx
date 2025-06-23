@@ -126,10 +126,71 @@ export const columns_penjualan = [
             );
         },
     }),
+    columnHelper.accessor("pajak_masukan", {
+        header: () => <div className="text-center min-w-[100px]">Pajak Masukan</div>,
+        cell: ({row}) => {
+            const is_tax = row.original.is_tax
+            const price = row.original.price
+            const tax_percentage = parseFloat(row.original.tax).toFixed(2)
+            const pajakMasukan = is_tax === 1
+                ? price * (tax_percentage / ((tax_percentage/100) + 100))
+                : 0;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {/*{pajakMasukan}*/}
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(pajakMasukan)}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("dpp", {
+        header: () => <div className="text-center min-w-[100px]">DPP</div>,
+        cell: ({row}) => {
+            const is_tax = row.original.is_tax
+            const price = row.original.price
+            const tax_percentage = parseFloat(row.original.tax).toFixed(2)
+            const pajakMasukan = is_tax === 1
+                ? price * (tax_percentage / ((tax_percentage/100) + 100))
+                : 0;
+            const dpp = price-pajakMasukan
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {/*{pajakMasukan}*/}
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(dpp)}
+                </div>
+            );
+        },
+    }),
+
     columnHelper.accessor("retail_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Retail</div>,
         cell: ({row}) => {
+            const priceModal = row.original.price;
             const price = row.original.retail_price;
+            const is_tax = row.original.is_tax;
+            const tax_percentage = parseFloat(row.original.tax); // Tidak perlu toFixed di perhitungan
+            const retail_price = row.original.retail_price;
+
+            // Hitung pajak masukan
+            const pajakMasukan = is_tax === 1
+                ? priceModal * (tax_percentage / (tax_percentage + 100))
+                : 0;
+            // DPP
+            const dpp = priceModal - pajakMasukan;
+
+            // Margin (%)
+            const margin = dpp > 0 ?
+                ((retail_price - dpp) / dpp) * 100
+                : 0
+
 
             return (
                 <div className="text-center min-w-[100px]">
@@ -137,6 +198,9 @@ export const columns_penjualan = [
                         style: 'currency',
                         currency: 'IDR',
                     }).format(price)}
+                    <Badge className="text-xs text-white">
+                {margin.toFixed(2)}%
+            </Badge>
                 </div>
             );
         },
@@ -159,7 +223,23 @@ export const columns_penjualan = [
     columnHelper.accessor("semi_grosir_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Semi Grosir</div>,
         cell: ({row}) => {
+            const priceModal = row.original.price;
             const price = row.original.semi_grosir_price;
+            const is_tax = row.original.is_tax;
+            const tax_percentage = parseFloat(row.original.tax); // Tidak perlu toFixed di perhitungan
+            const semi_grosir_price = row.original.semi_grosir_price;
+
+            // Hitung pajak masukan
+            const pajakMasukan = is_tax === 1
+                ? priceModal * (tax_percentage / (tax_percentage + 100))
+                : 0;
+            // DPP
+            const dpp = priceModal - pajakMasukan;
+
+            // Margin (%)
+            const margin = dpp > 0 ?
+                ((semi_grosir_price - dpp) / dpp) * 100
+                : 0
 
 
             return (
@@ -168,6 +248,9 @@ export const columns_penjualan = [
                         style: 'currency',
                         currency: 'IDR',
                     }).format(price)}
+                    <Badge className="text-xs text-white">
+                        {margin.toFixed(2)}%
+                    </Badge>
                 </div>
             );
         },
@@ -190,7 +273,24 @@ export const columns_penjualan = [
     columnHelper.accessor("wholesale_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Grosir</div>,
         cell: ({row}) => {
+            const priceModal = row.original.price;
             const price = row.original.wholesale_price;
+            const is_tax = row.original.is_tax;
+            const tax_percentage = parseFloat(row.original.tax); // Tidak perlu toFixed di perhitungan
+            const wholesale_price = row.original.wholesale_price;
+
+            // Hitung pajak masukan
+            const pajakMasukan = is_tax === 1
+                ? priceModal * (tax_percentage / (tax_percentage + 100))
+                : 0;
+            // DPP
+            const dpp = priceModal - pajakMasukan;
+
+            // Margin (%)
+            const margin = dpp > 0 ?
+                ((wholesale_price - dpp) / dpp) * 100
+                : 0
+
 
             return (
                 <div className="text-center min-w-[100px]">
@@ -198,6 +298,9 @@ export const columns_penjualan = [
                         style: 'currency',
                         currency: 'IDR',
                     }).format(price)}
+                    <Badge className="text-xs text-white">
+                        {margin.toFixed(2)}%
+                    </Badge>
                 </div>
             );
         },
@@ -221,7 +324,29 @@ export const columns_penjualan = [
     columnHelper.accessor("eceran_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Eceran</div>,
         cell: ({row}) => {
+            const priceModal = row.original.price;
             const price = row.original.eceran_price;
+            const is_tax = row.original.is_tax;
+            const tax_percentage = parseFloat(row.original.tax); // Tidak perlu toFixed di perhitungan
+            const eceran_price = row.original.eceran_price;
+
+            // Hitung pajak masukan
+            const pajakMasukan = is_tax === 1
+                ? priceModal * (tax_percentage / (tax_percentage + 100))
+                : 0;
+            // DPP
+            const retail_conversion = row.original.retail_conversion;
+            const dpp = retail_conversion != null && retail_conversion !== 0
+                ? (priceModal - pajakMasukan) / retail_conversion
+                : (priceModal - pajakMasukan);
+
+
+            // console.log(`${row.original.item_code} ${priceModal} ${dpp} ${row.original.retail_conversion}`)
+            // Margin (%)
+            const margin = dpp > 0 ?
+                ((eceran_price - dpp) / dpp) * 100
+                : 0
+
 
             return (
                 <div className="text-center min-w-[100px]">
@@ -229,6 +354,9 @@ export const columns_penjualan = [
                         style: 'currency',
                         currency: 'IDR',
                     }).format(price)}
+                    <Badge className="text-xs text-white">
+                        {margin.toFixed(2)}%
+                    </Badge>
                 </div>
             );
         },
