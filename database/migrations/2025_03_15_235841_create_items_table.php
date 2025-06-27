@@ -19,7 +19,7 @@ return new class extends Migration
             $table->double('price');
             $table->enum('satuan', ['Kg', 'Meter', 'Batang']);
             $table->uuid('category_id');
-            $table->uuid('created_by');
+            $table->unsignedBigInteger('created_by');
             $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();

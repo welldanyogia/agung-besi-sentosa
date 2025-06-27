@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Head} from '@inertiajs/react';
+import {Head, usePage} from '@inertiajs/react';
 import {useEffect, useState} from "react";
 import DataTable from "@/Components/Report/table/data-table.jsx";
 import {columns} from "@/Components/Report/table/column.jsx";
@@ -9,6 +9,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import {AlertDestructive} from "@/Components/AlertDestructive.jsx";
 import {AlertSuccess} from "@/Components/AlertSuccess.jsx";
 import {SalesChart} from "@/Components/Report/chart/SalesChart.jsx";
+import StockTabsCard from "@/Components/Report/chart/StockTabsCard.jsx";
 
 export default function Dashboard({auth}) {
     const [data, setData] = useState([]);
@@ -19,14 +20,30 @@ export default function Dashboard({auth}) {
     const [totalSales, setTotalSales] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [totalProductsSold, setTotalProductsSold] = useState(0);
+    const [date, setDate] = useState(new Date());
+    const [barangMasuk, setBarangMasuk] = useState([])
+    const [barangKeluar, setBarangKeluar] = useState([])
 
     const getData = async () => {
         try {
             setLoading(true);
             const response = await axios.post('/api/report/show');
+            // Format tanggal yang dipilih ke format YYYY-MM-DD
+            const selectedDate = new Date(date).toISOString().split('T')[0];
+
+            // Filter hanya yang sesuai dengan tanggal yang dipilih
+            const filteredMasuk = response.data.barang_masuk.filter(
+                item => item.date === selectedDate
+            );
+
+            const filteredKeluar = response.data.barang_keluar.filter(
+                item => item.date === selectedDate
+            );
+
+            setBarangMasuk(filteredMasuk);
+            setBarangKeluar(filteredKeluar);
             setData(response.data.transaction);
             setLoading(false);
-
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
         } catch (error) {
@@ -34,16 +51,35 @@ export default function Dashboard({auth}) {
         }
     };
 
+
     const calculateTotals = (transactions) => {
         let sales = 0;
-        let orders = transactions.length;
+        let orders = 0;
         let productsSold = 0;
 
+        const today = new Date().toISOString().split("T")[0];
+
         transactions.forEach((transaction) => {
-            transaction.items.forEach((item) => {
-                sales += item.price * item.qty; // Total sales
-                productsSold += item.qty; // Total products sold
-            });
+            const transactionDate = new Date(transaction.created_at).toISOString().split("T")[0];
+
+            if (transactionDate === today) {
+                orders += 1;
+
+                transaction.items.forEach((item) => {
+                    // Konversi qty jika price_type === 'eceran'
+                    let qty = item.qty;
+                    if (item.price_type === 'eceran') {
+                        const conversion = item.item?.retail_conversion || 1;
+                        qty = item.qty / conversion;
+                    }
+
+                    productsSold += qty;
+                });
+
+                if (transaction.status === 'paid') {
+                    sales += transaction.total_price;
+                }
+            }
         });
 
         setTotalSales(sales);
@@ -51,14 +87,22 @@ export default function Dashboard({auth}) {
         setTotalProductsSold(productsSold);
     };
 
+
     useEffect(() => {
         getData();  // Fetch the inventory data when the component mounts
+
         if (error || success) {
             setShowAlert(true);
-            const timer = setTimeout(() => setShowAlert(false), 8000);
+
+            const timer = setTimeout(() => {
+                setShowAlert(false);
+                setError(null);
+                setSuccess(null);
+            }, 8000);
+
             return () => clearTimeout(timer);
         }
-    }, [error, success]);
+    }, [error, success,date]);
 
 
     return (
@@ -69,7 +113,7 @@ export default function Dashboard({auth}) {
                 </h2>
             }
         >
-            <Head title="Inventory"/>
+            <Head title="Report"/>
 
             <AnimatePresence>
                 {showAlert && (
@@ -90,11 +134,11 @@ export default function Dashboard({auth}) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 gap-4 flex flex-col space-y-6">
                     <div className={'w-full flex flex-col gap-2'}>
                         <div className={'flex w-full gap-2'}>
-                            <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
-                                <div>
-                                    Total Sales Hari ini
+                            <Card className={'w-full p-10 flex flex-col'}>
+                                <div className={'text-xl'}>
+                                    Total Penjualan Hari ini
                                 </div>
-                                <div>
+                                <div className={'font-bold lg:text-2xl'}>
                                     {new Intl.NumberFormat('id-ID', {
                                         style: 'currency',
                                         currency: 'IDR',
@@ -102,31 +146,34 @@ export default function Dashboard({auth}) {
                                     }).format(totalSales)}
                                 </div>
                             </Card>
-                            <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
-                                <div>
+                            <Card className={'w-full p-10 flex flex-col'}>
+                                <div className={'text-xl'}>
                                     Total Order Hari ini
                                 </div>
-                                <div>
+                                <div className={'font-bold lg:text-2xl'}>
                                     {totalOrders}
                                 </div>
                             </Card>
-                            <Card className={'w-full p-10 font-bold flex flex-col lg:text-2xl'}>
-                                <div>
+                            <Card className={'w-full p-10 flex flex-col'}>
+                                <div className={'text-xl'}>
                                     Total Produk Terjual Hari ini
                                 </div>
-                                <div>
-                                    {totalProductsSold}
+                                <div className={'font-bold lg:text-2xl'}>
+                                    {parseFloat(totalProductsSold).toFixed(2)}
                                 </div>
                             </Card>
                         </div>
-                        <Card className={'w-full h-fit'}>
-                        <SalesChart data={data}/>
-                        </Card>
+                        <div className="flex gap-4">
+                            <Card className="w-2/3 h-fit">
+                                <SalesChart data={data}/>
+                            </Card>
+                            <StockTabsCard date={date} setDate={setDate} barangKeluar={barangKeluar} barangMasuk={barangMasuk}/>
+                        </div>
                         {/*<Card className={'w-full h-[200px]'}></Card>*/}
                     </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <DataTable columns={columns} data={data} auth={auth} setError={setError}
-                                   setSuccess={setSuccess}/>
+                    <DataTable columns={columns} data={data} auth={auth} setError={setError}
+                                   setSuccess={setSuccess} getData={getData}/>
                     </div>
                 </div>
             </div>

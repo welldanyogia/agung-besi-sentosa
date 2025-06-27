@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -10,10 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+} from "@/Components/ui/dialog";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { Switch } from "@/Components/ui/switch";
 import {
     Select,
     SelectContent,
@@ -40,7 +40,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
         kategori: barang.category.category_name,
         stok: barang.stock,
         satuan: barang.satuan,
-        harga: barang.price,
+        harga_beli: barang.price,
         is_tax: barang.is_tax,
         tax: barang.tax
     });
@@ -125,7 +125,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
             category_name: data.kategori,
             stock: data.stok,
             satuan: data.satuan,
-            price: data.harga,
+            price: data.harga_beli,
             is_tax: data.is_tax,
             tax: data.is_tax ? data.tax : null,
             created_by: auth.user.id
@@ -155,7 +155,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
             kategori: "",
             stok: "",
             satuan: "",
-            harga: "",
+            harga_beli: "",
             is_tax: false,
             tax: ""
         });
@@ -281,7 +281,7 @@ export function DialogEditBarang({ barang,setError,setSuccess }) {
                         <Label htmlFor="harga" className="text-right">
                             Harga
                         </Label>
-                        <Input id="harga" value={data.harga} onChange={handleChange} className="col-span-3" />
+                        <Input id="harga" value={data.harga_beli} onChange={handleChange} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Pajak</Label>

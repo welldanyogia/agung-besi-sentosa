@@ -8,8 +8,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {Button} from "@/components/ui/button";
+} from "@/Components/ui/alert-dialog";
+import {Button} from "@/Components/ui/button";
 import axios from "axios";
 
 export function AlertCancelDialog({setInvoiceItems,invoiceItems,setError,setSuccess,getItems}) {
@@ -32,11 +32,11 @@ export function AlertCancelDialog({setInvoiceItems,invoiceItems,setError,setSucc
 
             setSuccess("Stok berhasil dikembalikan untuk semua barang.");
             setInvoiceItems([]);
-            getItems();
+            // getItems();
         } catch (error) {
             console.error("Error restoring stock:", error);
             setError("Gagal mengembalikan stok barang!!!");
-            getItems();
+            // getItems();
         }
     };
     return (

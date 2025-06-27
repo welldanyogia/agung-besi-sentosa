@@ -21,13 +21,16 @@ class SettingController extends Controller
 
         // Jika pengguna yang login adalah Superadmin, ambil semua pengguna
         // Jika pengguna yang login adalah Admin, ambil pengguna yang role-nya 'employee'
-        if (auth()->user()->hasRole('superadmin')) {
-            $users = User::withCount('invoices')->with('roles')->get(); // Ambil semua user beserta jumlah invoice mereka
-        } elseif (auth()->user()->hasRole('admin')) {
+        if (auth()->check() && auth()->user()->hasRole('superadmin')) {
+            $users = User::withCount('invoices')->with('roles')->get();
+        } elseif (auth()->check() && auth()->user()->hasRole('admin')) {
             $users = User::withCount('invoices')->with('roles')->whereHas('roles', function ($query) {
-                $query->where('name', 'employee'); // Ambil hanya user yang role-nya 'employee'
+                $query->where('name', 'employee');
             })->get();
+        } else {
+            $users = collect(); // atau redirect, atau tampilkan error
         }
+
 
         $storeInfo = StoreInfo::first();
 
@@ -47,7 +50,7 @@ class SettingController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', Rules\Password::defaults()],
             'role' => 'required|in:superadmin,admin,employee', // Validate the role
-            'phone_number' => 'required|string|max:15', // Validate phone number
+            'phone_number' => 'nullable|string|max:15', // Validate phone number
         ]);
 
         // Create the user
@@ -81,7 +84,7 @@ class SettingController extends Controller
         $validatedData = $request->validate([
             'store_name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:15',
+            'phone_number' => 'nullable|string|max:15',
         ]);
 
         // Check if store info already exists, if so, update it; otherwise, create a new one
@@ -115,4 +118,39 @@ class SettingController extends Controller
             'data' => null
         ], 404);
     }
+
+    public function destroy(string $id)
+    {
+        // Cek apakah user yang login memiliki izin untuk menghapus user lain
+        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('admin')) {
+            return response()->json([
+                'message' => 'You are not authorized to delete a user.',
+            ], 403); // HTTP 403 Forbidden
+        }
+
+        // Temukan user berdasarkan ID
+        $user = User::find($id);
+
+        // Jika user tidak ditemukan
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // Optional: mencegah menghapus diri sendiri
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'message' => 'You cannot delete yourself.',
+            ], 400);
+        }
+
+        // Hapus user
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User deleted successfully.',
+        ]);
+    }
+
 }

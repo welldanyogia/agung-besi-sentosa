@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {Head} from '@inertiajs/react';
+import {Head, router} from '@inertiajs/react';
 import {CalendarDays, Plus} from "lucide-react";
 import {useEffect, useState} from "react";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/Components/ui/card.jsx";
@@ -15,6 +15,7 @@ import {AlertCancelDialog} from "@/Components/Cashier/AlertCancelDialog.jsx";
 import {AlertSuccess} from "@/Components/AlertSuccess.jsx";
 import {AlertDestructive} from "@/Components/AlertDestructive.jsx";
 import {CashierDrawer} from "@/Components/Cashier/CashierDrawer.jsx";
+import {Inertia} from "@inertiajs/inertia";
 
 const formatRupiah = (number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -39,11 +40,11 @@ function useIsMobile() {
 
     return isMobile
 }
-export default function Dashboard({auth}) {
+export default function Dashboard({auth,items,kategoris}) {
     const isMobile = useIsMobile()
     const [currentTime, setCurrentTime] = useState("");
     const [categories, setCategories] = useState([]);
-    const [items, setItems] = useState([]);
+    // const [items, setItems] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [invoiceItems, setInvoiceItems] = useState([])
@@ -53,6 +54,7 @@ export default function Dashboard({auth}) {
     const [invoice, setInvoice] = useState(null)
     const [total,setTotal]= useState()
     const [subTotal,setSubTotal]= useState()
+    const [taxFilter, setTaxFilter] = useState(null);
     const [storeInfo, setStoreInfo] = useState({
         store_name: '',
         address: '',
@@ -79,34 +81,32 @@ export default function Dashboard({auth}) {
         }
 
         // Cek items jika belum ada
-        if (items.length === 0) {
-            getItems();
-            getCategories()
-        }
+        // if (items.length === 0) {
+        //     getItems();
+        //     getCategories()
+        // }
 
-        const totalAmount = invoiceItems.reduce((acc, item) => acc + (item.sub_total + ((item?.item?.tax / 100) * item.sub_total)), 0);
-        setTotal(formatRupiah(totalAmount));
-        setSubTotal(formatRupiah(totalAmount));
-
-    }, [invoice, storeInfo, invoiceItems, items]); // Menambahkan dependensi yang sesuai untuk memastikan hanya mengambil data jika diperlukan
-
-    const getCategories = async () => {
-        try {
-            const response = await axios.post("/api/categories/");
-
-            // Format ulang data agar sesuai dengan priorities
-            const formattedCategories = response.data.categories.map(category => ({
+        const formattedCategories = kategoris
+            .sort((a, b) => a.category_name.localeCompare(b.category_name))
+            .map(category => ({
                 id: category.id,
                 label: category.category_name,
                 value: category.category_name,
                 icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
             }));
 
-            setCategories(formattedCategories);
-        } catch (error) {
-            // console.error("Error fetching inventory data:", error);
-        }
-    };
+        setCategories(formattedCategories);
+
+        const totalAmount = invoiceItems.reduce((acc, item) => {
+            return acc + (item.sub_total || 0);
+        }, 0);
+
+
+        setTotal(formatRupiah(totalAmount));
+        setSubTotal(formatRupiah(totalAmount));
+
+    }, [invoice, storeInfo, invoiceItems, items]); // Menambahkan dependensi yang sesuai untuk memastikan hanya mengambil data jika diperlukan
+
 
 
     const getInvoice = async ()=>{
@@ -126,7 +126,7 @@ export default function Dashboard({auth}) {
     }
     const getItems = async () => {
         try {
-            const response = await axios.post("/api/inventory/show");
+            // const response = await axios.post("/api/inventory/show");
 
             // Format ulang data agar sesuai dengan priorities
             // const formattedCategories = response.data.categories.map(category => ({
@@ -136,18 +136,37 @@ export default function Dashboard({auth}) {
             //     icon: null, // Jika ingin menambahkan ikon, bisa diganti dengan komponen yang sesuai
             // }));
 
-            setItems(response.data.items);
+            // setItems(response.data.items);
+            // Inertia.reload({only:['items']})
+            router.reload({ only: ['items'] })
         } catch (error) {
             // console.error("Error fetching inventory data:", error);
         }
     };
 
+    // console.log("items :",items)
+
+    // const filteredItems = items.filter((product) => {
+    //     const matchesCategory =
+    //         activeCategory === null || product.category_id === activeCategory;  // Filter by category
+    //     const matchesSearch = product.item_name.toLowerCase().includes(searchQuery.toLowerCase());  // Filter by search query
+    //     return matchesCategory && matchesSearch;
+    // });
 
     const filteredItems = items.filter((product) => {
         const matchesCategory =
-            activeCategory === null || product.category_id === activeCategory;  // Filter by category
-        const matchesSearch = product.item_name.toLowerCase().includes(searchQuery.toLowerCase());  // Filter by search query
-        return matchesCategory && matchesSearch;
+            activeCategory === null || product.category_id === activeCategory;
+
+        const lowerSearch = searchQuery.toLowerCase();
+        const matchesSearch =
+            product.item_name.toLowerCase().includes(lowerSearch) ||
+            product.item_code.toLowerCase().includes(lowerSearch);
+
+        const matchesTax = taxFilter === null ||
+            (taxFilter === 'pajak' && product.is_tax) ||
+            (taxFilter === 'nonpajak' && !product.is_tax);
+
+        return matchesCategory && matchesSearch && matchesTax;
     });
 
     useEffect(() => {
@@ -216,15 +235,39 @@ export default function Dashboard({auth}) {
                                 <Card className={'p-4 grid gap-2'}>
                                     <Input placeholder="Cari barang disini..."
                                            onChange={(e) => setSearchQuery(e.target.value)}/>
-                                    <div className="overflow-x-auto whitespace-nowrap pb-2 scrollbar-hidden">
+                                    <div className="grid gap-2">
                                         <div className={'flex gap-2 '}>
                                             <Button
-                                                variant={activeCategory === null ? 'default' : 'outline'}
+                                                variant={taxFilter === null ? 'default' : 'outline'}
                                                 size={'sm'}
-                                                onClick={() => setActiveCategory(null)}
+                                                onClick={() => setTaxFilter(null)}
                                             >
                                                 Tampilkan semua
                                             </Button>
+                                            <Button
+                                                variant={taxFilter === 'pajak' ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => setTaxFilter('pajak')}
+                                            >
+                                                Pajak
+                                            </Button>
+                                            <Button
+                                                variant={taxFilter === 'nonpajak' ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => setTaxFilter('nonpajak')}
+                                            >
+                                                Non Pajak
+                                            </Button>
+
+                                        </div>
+                                        <div className={'flex gap-2 overflow-x-auto  whitespace-nowrap pb-2 scrollbar-hidden'}>
+                                            {/*<Button*/}
+                                            {/*    variant={activeCategory === null ? 'default' : 'outline'}*/}
+                                            {/*    size={'sm'}*/}
+                                            {/*    onClick={() => setActiveCategory(null)}*/}
+                                            {/*>*/}
+                                            {/*    Tampilkan semua*/}
+                                            {/*</Button>*/}
                                             {categories.map(category => (
                                                 <Button
                                                     key={category.id}
@@ -293,10 +336,6 @@ export default function Dashboard({auth}) {
                                                     <span>Item(s)</span>
                                                     <span>{invoiceItems.length}</span>
                                                 </div>
-                                                <div className={'flex justify-between w-full'}>
-                                                    <span>Sub-Total</span>
-                                                    <span>{subTotal}</span> {/* Sum total */}
-                                                </div>
                                                 <div className={'flex justify-between w-full font-bold'}>
                                                     <span>Total</span>
                                                     <span>{total}</span> {/* Sum total */}
@@ -310,11 +349,11 @@ export default function Dashboard({auth}) {
                                                                          setInvoceItems={setInvoiceItems}
                                                                          storeInfo={storeInfo}/>
                                             </div>
-                                            <div className={'w-full flex p-2 gap-2'}>
-                                                <AlertCancelDialog setInvoiceItems={setInvoiceItems}
-                                                                   invoiceItems={invoiceItems} setError={setError}
-                                                                   setSuccess={setSuccess} getItems={getItems()}/>
-                                            </div>
+                                            {/*<div className={'w-full flex p-2 gap-2'}>*/}
+                                            {/*    <AlertCancelDialog setInvoiceItems={setInvoiceItems}*/}
+                                            {/*                       invoiceItems={invoiceItems} setError={setError}*/}
+                                            {/*                       setSuccess={setSuccess} getItems={getItems()}/>*/}
+                                            {/*</div>*/}
                                         </Card>
                                     </div>
                                 )

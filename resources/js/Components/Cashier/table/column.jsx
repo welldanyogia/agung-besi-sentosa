@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import { Button } from "@/Components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/Components/ui/checkbox";
 import { Input } from "@/Components/ui/input.jsx";
 
 const columnHelper = createColumnHelper();
@@ -33,32 +33,62 @@ export const columns = [
     },
     columnHelper.accessor("item.item_name", {
         header: () => <div className="text-center">Nama Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        cell: ({ getValue, row }) => {
+            // Check if price_type is 'eceran'
+            const priceType = row.original.price_type; // Assuming you have access to 'price_type' in the row data
+
+            // Conditionally append (Eceran) in bold if price_type is 'eceran'
+            const itemName = getValue();
+            const displayName = priceType === 'eceran' ? `${itemName} <strong>(Eceran)</strong>` : itemName;
+
+            return <div className="text-center" dangerouslySetInnerHTML={{ __html: displayName }} />;
+        },
     }),
+
+
     columnHelper.accessor("price", {
         header: () => <div className="text-center">Harga</div>,
         cell: ({ row }) => {
-            const price = row.original.price;
-            const tax = row.original.item?.tax; // Assuming you have the 'tax' value in the row data
+            const item = row.original.item;
+            const priceType = row.original.price_type;
 
-            // Calculate price with tax (e.g., if tax is 10%, price * 1.1)
-            const priceWithTax = tax ? (price * (tax / 100))+price : price;
+            let selectedPrice = 0;
+
+            if (priceType === 'eceran') {
+                selectedPrice = item?.eceran_price;
+            } else if (priceType === 'retail') {
+                selectedPrice = item?.retail_price;
+            } else if (priceType === 'semi_grosir') {
+                selectedPrice = item?.semi_grosir_price;
+            }else {
+                selectedPrice = item?.wholesale_price; // grosir
+            }
 
             return (
                 <div className="text-center">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
-                    }).format(priceWithTax)}
+                    }).format(selectedPrice ?? 0)}
                 </div>
             );
         },
     }),
 
+
     columnHelper.accessor("item.satuan", {
         header: () => <div className="text-center">Satuan</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        cell: ({ getValue, row }) => {
+            // Access the price_type in the row data
+            const priceType = row.original.price_type;  // Assuming 'price_type' is available in the row data
+
+            // Use item.retail_unit if price_type is 'eceran', otherwise use item.satuan
+            const satuan = priceType === 'eceran' ? row.original.item?.retail_unit : getValue();
+
+            return <div className="text-center">{satuan}</div>;
+        },
     }),
+
     // columnHelper.accessor("qty", {
     //     header: () => <div className="text-center">QTY</div>,
     //     cell: ({ getValue }) => (

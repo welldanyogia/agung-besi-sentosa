@@ -5,7 +5,7 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import {Link, usePage} from '@inertiajs/react';
 import {useState} from 'react';
 
-export default function AuthenticatedLayout({header, children}) {
+export default function AuthenticatedLayout({header, children, auth}) {
     const user = usePage().props.auth.user;
     const role = user.roles[0].name;
 
@@ -19,18 +19,20 @@ export default function AuthenticatedLayout({header, children}) {
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
+                                <Link href="/cashier">
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800"/>
                                 </Link>
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
+                                {['superadmin'].includes(role) && (
+                                    <NavLink
+                                        href={route('dashboard')}
+                                        active={route().current('dashboard')}
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                )}
                                 <NavLink
                                     href={route('cashier')}
                                     active={route().current('cashier')}
@@ -161,12 +163,15 @@ export default function AuthenticatedLayout({header, children}) {
                     }
                 >
                     <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                        {['superadmin'].includes(role) && (
+
+                            <ResponsiveNavLink
+                                href={route('dashboard')}
+                                active={route().current('dashboard')}
+                            >
+                                Dashboard
+                            </ResponsiveNavLink>
+                        )}
                         <ResponsiveNavLink
                             href={route('cashier')}
                             active={route().current('cashier')}
@@ -180,13 +185,13 @@ export default function AuthenticatedLayout({header, children}) {
                             Inventory
                         </ResponsiveNavLink>
                         {['superadmin', 'admin'].includes(role) && (
-                                <ResponsiveNavLink
-                                    href={route('report')}
-                                    active={route().current('report')}
-                                >
-                                    Report
-                                </ResponsiveNavLink>
-                            )
+                            <ResponsiveNavLink
+                                href={route('report')}
+                                active={route().current('report')}
+                            >
+                                Report
+                            </ResponsiveNavLink>
+                        )
                         }
                         <ResponsiveNavLink
                             href={route('setting')}

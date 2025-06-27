@@ -1,8 +1,8 @@
 'use client';
 
-import { createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react"
-import { Button } from "@/Components/ui/button"
+import {createColumnHelper} from "@tanstack/react-table";
+import {MoreHorizontal} from "lucide-react"
+import {Button} from "@/Components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,10 +11,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
-import { AlertDeleteDialog } from "@/Components/Inventory/AlertDeleteDialog.jsx";
-import { AlertEditDialog } from "@/Components/Inventory/AlertEditDialog.jsx";
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/Components/ui/badge.jsx";
+import {AlertDeleteDialog} from "@/Components/Inventory/AlertDeleteDialog.jsx";
+import {AlertEditDialog} from "@/Components/Inventory/AlertEditDialog.jsx";
+import {Checkbox} from "@/Components/ui/checkbox"
+import {Badge} from "@/Components/ui/badge.jsx";
 import {DialogEditBarang} from "@/Components/Inventory/DialogEditBarang.jsx";
 
 const columnHelper = createColumnHelper();
@@ -22,7 +22,7 @@ const columnHelper = createColumnHelper();
 export const columns = [
     {
         id: "select",
-        header: ({ table }) => (
+        header: ({table}) => (
             <div className="text-center">
                 <Checkbox
                     checked={
@@ -34,7 +34,7 @@ export const columns = [
                 />
             </div>
         ),
-        cell: ({ row }) => (
+        cell: ({row}) => (
             <div className="text-center">
                 <Checkbox
                     checked={row.getIsSelected()}
@@ -49,54 +49,55 @@ export const columns = [
     columnHelper.accessor("no", {
         id: 'no',
         header: () => <div className="text-center">No</div>,
-        cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+        cell: ({row}) => <div className="text-center">{row.index + 1}</div>,
     }),
-    columnHelper.accessor("item_code", {
-        header: () => <div className="text-center">Kode Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+    columnHelper.accessor("kode_barang", {
+        header: () => <div className="text-center min-w-[100px]">Kode Barang</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
-    columnHelper.accessor("item_name", {
-        header: () => <div className="text-center">Nama Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+    columnHelper.accessor("nama_barang", {
+        header: () => <div className="text-center min-w-[100px]">Nama Barang</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
     columnHelper.accessor("category.category_name", {
         id: "kategori",
-        header: () => <div className="text-center">Kategori</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+        header: () => <div className="text-center min-w-[100px]">Kategori</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
     }),
-    columnHelper.accessor("stock", {
-        header: () => <div className="text-center">Stok Barang</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
+    columnHelper.accessor("qty", {
+        header: () => <div className="text-center min-w-[100px]">QTY</div>,
+        cell: ({getValue}) => {
+            const value = getValue();
+            const formatted = value !== null ? parseFloat(value).toFixed(0) : '-';
+            return <div className="text-center min-w-[100px]">{formatted}</div>;
+        },
     }),
-    columnHelper.accessor("price", {
-        header: () => <div className="text-center">Harga</div>,
-        cell: ({ row }) => {
-            const price = row.original.price;
-            const tax = row.original.tax; // Assuming you have the 'tax' value in the row data
+    columnHelper.accessor("satuan", {
+        header: () => <div className="text-center min-w-[100px]">Satuan</div>,
+        cell: ({getValue}) => <div className="text-center min-w-[100px]">{getValue()}</div>,
+    }),
 
-            // Calculate price with tax (e.g., if tax is 10%, price * 1.1)
-            const priceWithTax = tax ? (price * (tax / 100))+price : price;
+    columnHelper.accessor("harga", {
+        header: () => <div className="text-center min-w-[100px]">Harga</div>,
+        cell: ({row}) => {
+            const price = row.original.harga;
 
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {new Intl.NumberFormat('id-ID', {
                         style: 'currency',
                         currency: 'IDR',
-                    }).format(priceWithTax)}
+                    }).format(parseFloat(price))}
                 </div>
             );
         },
     }),
-    columnHelper.accessor("satuan", {
-        header: () => <div className="text-center">Satuan</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue()}</div>,
-    }),
-    columnHelper.accessor("is_tax", {
-        header: () => <div className="text-center">Pajak</div>,
-        cell: ({ getValue }) => {
+    columnHelper.accessor("pajak", {
+        header: () => <div className="text-center min-w-[100px]">Pajak</div>,
+        cell: ({getValue}) => {
             const isTax = getValue();
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     <Badge variant={isTax ? "destructive" : "secondary"}>
                         {isTax ? "Pajak" : "Non Pajak"}
                     </Badge>
@@ -104,12 +105,84 @@ export const columns = [
             );
         },
     }),
+    columnHelper.accessor("tax-percentage", {
+        header: () => <div className="text-center min-w-[100px]">Persentase Pajak</div>,
+        cell: ({row}) => {
+            // Ambil nilai persentase pajak dari data baris
+            // const taxPercentageRaw = row.original["tax-percentage"];
+            const taxPercentageRaw = 11;
+
+            // Jika nilai berupa angka persentase (misal 10), ubah ke desimal (0.1)
+            const taxDecimal = taxPercentageRaw / 100;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'percent',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                    }).format(taxDecimal)}
+                </div>
+            );
+        },
+    }),
+
+
+    columnHelper.accessor("pajak_masukan", {
+        header: () => <div className="text-center min-w-[100px]">Pajak Masukan</div>,
+        cell: ({row}) => {
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        maximumFractionDigits: 2
+                    }).format(row.original.pajak_masukan)}
+                </div>
+            );
+        },
+    }),
+
+
+    columnHelper.accessor("harga_total", {
+        header: () => <div className="text-center min-w-[100px]">Harga Sebelum Pajak</div>,
+        cell: ({row}) => {
+            const price = row.original.harga_total;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("tanggal_pembelian", {
+        header: () => <div className="text-center min-w-[100px]">Tanggal Pembelian</div>,
+        cell: ({row}) => {
+            const date = new Date(row.original.tanggal_pembelian);
+            return (
+                <div className="text-center min-w-[100px]">
+                    {date.toLocaleString('id-ID', {
+                        timeZone: 'Asia/Jakarta',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                    })}
+                </div>
+            );
+        },
+    }),
+
     columnHelper.accessor("created_at", {
-        header: () => <div className="text-center">Tanggal Input</div>,
-        cell: ({ row }) => {
+        header: () => <div className="text-center min-w-[100px]">Tanggal Input</div>,
+        cell: ({row}) => {
             const date = new Date(row.original.created_at);
             return (
-                <div className="text-center">
+                <div className="text-center min-w-[100px]">
                     {date.toLocaleString('id-ID', {
                         timeZone: 'Asia/Jakarta',
                         year: 'numeric',
@@ -122,32 +195,4 @@ export const columns = [
             );
         },
     }),
-    columnHelper.accessor("updated_at", {
-        header: () => <div className="text-center">Terakhir diupdate</div>,
-        cell: ({ row }) => {
-            const date = new Date(row.original.updated_at);
-            return (
-                <div className="text-center">
-                    {date.toLocaleString('id-ID', {
-                        timeZone: 'Asia/Jakarta',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                    })}
-                </div>
-            );
-        },
-    }),
-    {
-        id: "actions",
-        header: () => <div className="text-center">Aksi</div>,
-        cell: ({ row }) => (
-            <div className="flex justify-center gap-2">
-                <DialogEditBarang barang={row.original}/>
-                <AlertDeleteDialog />
-            </div>
-        ),
-    },
 ];

@@ -75,3 +75,39 @@
     -ms-overflow-style: none;  /* Sembunyikan scrollbar di IE/Edge */
     scrollbar-width: none;  /* Sembunyikan scrollbar di Firefox */
 }
+
+/*@media print {*/
+/*    @page {*/
+/*        size: 8.3in 3.9in; !* Bisa diganti dengan 8.5in 11in *!*/
+/*        margin: 0.1in;*/
+/*    }*/
+
+/*    body {*/
+/*        font-family: "Courier New", monospace;*/
+/*        font-size: 12px;*/
+/*        white-space: pre;*/
+/*        text-align: left;*/
+/*    }*/
+
+/*    .header, .footer {*/
+/*        text-align: center;*/
+/*    }*/
+
+/*    .line {*/
+/*        border-top: 1px dashed black;*/
+/*        margin: 5px 0;*/
+/*    }*/
+
+/*    .table {*/
+/*        display: flex;*/
+/*        justify-content: space-between;*/
+/*        font-size: 12px;*/
+/*    }*/
+
+/*    .col-item { width: 40%; text-align: left; }*/
+/*    .col-price { width: 20%; text-align: right; }*/
+/*    .col-qty { width: 15%; text-align: right; }*/
+/*    .col-subtotal { width: 25%; text-align: right; }*/
+/*}*/
+
+

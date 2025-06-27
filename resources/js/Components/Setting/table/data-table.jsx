@@ -12,7 +12,7 @@ import {Card, CardContent, CardFooter, CardTitle} from "@/Components/ui/card.jsx
 import {DataTablePagination} from "@/Components/Inventory/table/data-table-pagination.jsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/Components/ui/select.jsx";
 import {DataTableViewOptions} from "@/Components/Inventory/table/data-table-view-option.jsx";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button} from "@/Components/ui/button.jsx";
 import {DialogTambahBarang} from "@/Components/Inventory/DialogTambahBarang.jsx";
 import {Input} from "@/Components/ui/input.jsx";
@@ -29,6 +29,8 @@ import {
 } from "lucide-react"
 import {DataTableFacetedFilter} from "@/Components/Inventory/table/data-table-faceted-filter.jsx";
 import {DialogTambahUser} from "@/Components/Setting/DialogTambahUser.jsx";
+import {DialogEditBarang} from "@/Components/Report/DialogEditBarang.jsx";
+import {AlertDeleteDialog} from "@/Components/Setting/AlertDeleteDialog.jsx";
 
 export const labels = [
     {
@@ -160,7 +162,7 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                         </div>
                         <div className="rounded-md border">
                             <Table>
-                                <TableHeader>
+                                <TableHeader className={'bg-accent'}>
                                     {table.getHeaderGroups().map(headerGroup => (
                                         <TableRow key={headerGroup.id}>
                                             {headerGroup.headers.map(header => (
@@ -168,6 +170,10 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                 </TableHead>
                                             ))}
+                                            <TableHead className="sticky right-0 bg-accent z-10">
+                                                {/*<DialogEditBarang barang={table.getRowModel.} />*/}
+                                                Aksi
+                                            </TableHead>
                                         </TableRow>
                                     ))}
                                 </TableHeader>
@@ -181,6 +187,9 @@ const DataTable = ({columns, data, auth,setError, setSuccess}) => {
                                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </TableCell>
                                                 ))}
+                                                <TableCell className="sticky right-0 bg-white z-10 space-y-2">
+                                                    <AlertDeleteDialog userId={row.original.id} setError={setError} setSuccess={setSuccess}/>
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     ) : (

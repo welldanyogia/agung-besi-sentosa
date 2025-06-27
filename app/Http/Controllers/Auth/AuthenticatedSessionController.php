@@ -71,14 +71,14 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
-//        Log::info('Authenticated user:', ['id' => $user->id, 'email' => $user->email]);
+        Log::info('Authenticated user:', ['id' => $user->id, 'email' => $user->email]);
 
         if ($user->hasRole('superadmin')) {
             Log::info('User is admin.');
             return redirect()->intended(route('dashboard', absolute: false));
         } elseif ($user->hasRole('admin')) {
             Log::info('User is customer.');
-            return redirect()->intended(route('dashboard', absolute: false));
+            return redirect()->intended(route('report', absolute: false));
         } else {
             Log::info('User has no specific role, redirecting to default.');
             return redirect()->intended(route('cashier', absolute: false));
