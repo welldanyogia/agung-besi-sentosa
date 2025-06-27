@@ -225,6 +225,8 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
             'Nama Barang',
             'QTY',
             'Harga',
+            'DPP',
+            'DPP Sub-Total',
             'Sub-Total',
             'Total Harga',
             'Metode Pembayaran',
@@ -283,6 +285,31 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
                 // Always display other columns normally (Quantity, Price, Sub-Total)
                 row.push(itemData.qty || 0);
                 row.push(`Rp ${itemData.price?.toLocaleString() || 0}`);
+
+                let pajakLuaranUnit = 0;
+                if (itemData.is_tax && itemData.tax > 0) {
+                    const pt = (itemData.price_type || '').toLowerCase().trim();
+                    switch (pt) {
+                        case 'eceran':
+                            pajakLuaranUnit = itemData.pajak_luaran_eceran;
+                            break;
+                        case 'grosir':
+                            pajakLuaranUnit = itemData.pajak_luaran_wholesale;
+                            break;
+                        case 'semi_grosir':
+                            pajakLuaranUnit = itemData.pajak_luaran_semi_grosir;
+                            break;
+                        case 'retail':
+                            pajakLuaranUnit = itemData.pajak_luaran_retail;
+                            break;
+                        default:
+                            pajakLuaranUnit = 0;
+                    }
+                }
+                const dppValue = itemData.price - pajakLuaranUnit;
+                const dppSubTotal = dppValue * itemData.qty;
+                row.push(`Rp ${dppValue.toLocaleString()}`);
+                row.push(`Rp ${dppSubTotal.toLocaleString()}`);
                 row.push(`Rp ${itemData.sub_total?.toLocaleString() || 0}`);
 
                 // Apply rowspan for Total Price (only on the first item)
@@ -394,8 +421,12 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
                 6: {cellWidth: 20},
                 7: {cellWidth: 20},
                 8: {cellWidth: 20},
-                9: {cellWidth: 30},
-                10: {cellWidth: 30},
+                9: {cellWidth: 20},
+                10: {cellWidth: 20},
+                11: {cellWidth: 20},
+                12: {cellWidth: 30},
+                13: {cellWidth: 30},
+                14: {cellWidth: 30},
             },
             didDrawPage: function (data) {
                 // Add page number - Centered horizontally
@@ -422,6 +453,8 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
             'QTY',
             'Tipe Pembelian',
             'Harga',
+            'DPP',
+            'DPP Sub-Total',
             'Sub-Total',
             'Sub-Total Pajak Luaran',
             'Total Pajak Luaran',
@@ -455,7 +488,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
 
             items.forEach((item, index) => {
                 let priceType = "-";
-                let pajak_luran = 0;
+                let pajakLuaranUnit = 0;
                 const price_type = (item.price_type || "").toLowerCase().trim();
                 switch (price_type) {
                     case "eceran":
@@ -480,26 +513,30 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
 
                     switch (price_type) {
                         case "eceran":
-                            pajak_luran = item.pajak_luaran_eceran * item.qty;
+                            pajakLuaranUnit = item.pajak_luaran_eceran;
                             priceType = "Eceran";
                             break;
                         case "grosir":
-                            pajak_luran = item.pajak_luaran_wholesale * item.qty;
+                            pajakLuaranUnit = item.pajak_luaran_wholesale;
                             priceType = "Grosir";
                             break;
                         case "semi_grosir":
-                            pajak_luran = item.pajak_luaran_semi_grosir * item.qty;
+                            pajakLuaranUnit = item.pajak_luaran_semi_grosir;
                             priceType = "Semi Grosir";
                             break;
                         case "retail":
-                            pajak_luran = item.pajak_luaran_retail * item.qty;
+                            pajakLuaranUnit = item.pajak_luaran_retail;
                             priceType = "Retail";
                             break;
                         default:
-                            pajak_luran = 0;
+                            pajakLuaranUnit = 0;
                             priceType = "-";
                     }
                 }
+
+                const pajakLuaranTotal = pajakLuaranUnit * item.qty;
+                const dppValue = item.price - pajakLuaranUnit;
+                const dppSubTotal = dppValue * item.qty;
 
                 const row = [
                     index === 0 ? tx.invoice_code : '',
@@ -508,9 +545,11 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
                     item.qty || 0,
                     priceType || '-',
                     `Rp ${item.price?.toLocaleString() || 0}`,
+                    `Rp ${dppValue.toLocaleString()}`,
+                    `Rp ${dppSubTotal.toLocaleString()}`,
                     `Rp ${item.sub_total?.toLocaleString() || 0}`,
-                    `Rp ${pajak_luran?.toLocaleString() || 0}`,
-                    `Rp ${pajak_luran?.toLocaleString() || 0}`,
+                    `Rp ${pajakLuaranTotal?.toLocaleString() || 0}`,
+                    `Rp ${pajakLuaranTotal?.toLocaleString() || 0}`,
                     index === 0 ? `Rp ${tx.total_price?.toLocaleString() || 0}` : '',
                     index === 0 ? tx.payment || '' : '',
                     index === 0 ? `Rp ${tx.bayar?.toLocaleString() || 0}` : '',
@@ -523,7 +562,7 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
             });
 
             if (rowspan > 1) {
-                const mergeCols = [0, 1, 7, 8, 9, 10, 11, 12, 13, 14];
+                const mergeCols = [0, 1, 9, 10, 11, 12, 13, 14, 15, 16];
                 mergeCols.forEach(col => {
                     merges.push({
                         s: {r: currentRow, c: col},
