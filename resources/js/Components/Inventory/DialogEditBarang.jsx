@@ -58,7 +58,8 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
         pajak_luaran_retail: barang.pajak_luaran_retail,
         pajak_luaran_semi_grosir: barang.pajak_luaran_semi_grosir,
         pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
-        pajak_luaran_eceran: barang.pajak_luaran_eceran
+        pajak_luaran_eceran: barang.pajak_luaran_eceran,
+        dpp: barang.dpp
     });
 
     const [loading, setLoading] = useState(false);
@@ -255,8 +256,9 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             tax: barang.tax,
             pajak_luaran_retail: barang.pajak_luaran_retail,
             pajak_luaran_semi_grosir: barang.pajak_luaran_semi_grosir,
-            pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
-            pajak_luaran_eceran: barang.pajak_luaran_eceran
+        pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
+        pajak_luaran_eceran: barang.pajak_luaran_eceran,
+        dpp: barang.dpp
         });
         setInputValue(""); // Reset inputValue untuk pencarian kategori
         setSearchTerm(""); // Reset searchTerm
@@ -548,11 +550,18 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
                             </PopoverContent>
                         </Popover>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
+                   <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="harga" className="text-right">
                             Harga Modal
                         </Label>
                         <Input id="harga" value={formatRupiah(data.harga)} onChange={handlePriceChange}
+                               className="col-span-3"/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="dpp" className="text-right">
+                            DPP
+                        </Label>
+                        <Input id="dpp" readOnly value={formatRupiah(data.dpp)}
                                className="col-span-3"/>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">

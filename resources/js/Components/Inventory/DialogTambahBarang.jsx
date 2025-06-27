@@ -61,7 +61,8 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
         retail_convertion: "",
         is_tax: false,
         is_retail: false,
-        tax: ""
+        tax: "",
+        dpp: 0
     });
 
     const [loading, setLoading] = useState(false);
@@ -323,7 +324,8 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             bulk_spec: "",
             retail_convertion: "",
             is_tax: false,
-            tax: ""
+            tax: "",
+            dpp: 0
         });
         setInputValue(""); // Reset inputValue untuk pencarian kategori
         setSearchTerm(""); // Reset searchTerm
@@ -518,6 +520,13 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                             Harga Modal
                         </Label>
                         <Input id="harga" value={formatRupiah(data.harga_beli)} onChange={handlePriceChange}
+                               className="col-span-3"/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="dpp" className="text-right">
+                            DPP
+                        </Label>
+                        <Input id="dpp" readOnly value={formatRupiah(data.dpp)}
                                className="col-span-3"/>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
