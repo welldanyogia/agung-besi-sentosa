@@ -21,8 +21,14 @@ class UpdateItemDppSeeder extends Seeder
 
                 if ($latest) {
                     $item->dpp = $latest->harga_total;
-                    $item->save();
+                } elseif ($item->is_tax) {
+                    $taxRate = $item->tax ?? 0;
+                    $item->dpp = round($item->price / (1 + $taxRate / 100), 2);
+                } else {
+                    continue; // tidak ada perubahan dpp
                 }
+
+                $item->save();
             }
         });
     }
