@@ -162,11 +162,12 @@ class InvoiceItems extends Model
                 );
                 $isUnitExcluded = $item->price_type === 'eceran' && in_array($unit, $excludedUnits);
 
-                // Tambahkan pengecualian untuk barang berpajak
+                // Tambahkan pengecualian untuk barang berpajak dan dijual eceran
                 $isTaxed = $itemModel->is_tax ?? false;
+                $isTaxedExcluded = $isTaxed && $item->price_type === 'eceran';
 
                 // Update kondisi pengecualian
-                $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded || $isTaxed;
+                $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded || $isTaxedExcluded;
 
                 if (fmod($item->qty, 1) === 0.5 && !$shouldExclude) {
                     $item->sub_total += 5000;
