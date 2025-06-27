@@ -101,6 +101,26 @@ class Pembelian extends Model
             }
         });
 
+        static::saved(function ($pembelian) {
+            self::syncItemDpp($pembelian->kode_barang);
+        });
 
+        static::deleted(function ($pembelian) {
+            self::syncItemDpp($pembelian->kode_barang);
+        });
+
+    }
+
+    protected static function syncItemDpp(string $kodeBarang): void
+    {
+        $item = \App\Models\Items::where('item_code', $kodeBarang)->first();
+        if ($item) {
+            $latest = self::where('kode_barang', $kodeBarang)
+                ->orderBy('tanggal_pembelian', 'desc')
+                ->first();
+
+            $item->dpp = $latest?->harga_total;
+            $item->save();
+        }
     }
 }
