@@ -27,7 +27,8 @@ class Items extends Model
         'tax_percentage_wholesale',
         'tax_percentage_eceran',
         'semi_grosir_price', 'tax_percentage_semi_grosir','pajak_luaran_semi_grosir',
-        'status_perubahan_harga', 'selisih_perubahan_harga'
+        'status_perubahan_harga', 'selisih_perubahan_harga',
+        'dpp'
     ];
     protected static function booted()
     {
