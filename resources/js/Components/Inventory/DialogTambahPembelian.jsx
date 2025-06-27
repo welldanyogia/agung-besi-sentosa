@@ -312,7 +312,7 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
             harga_beli: data.harga_beli,
             harga_sebelum_pajak: data.harga_sebelum_pajak,
             pajak_masukan: data.pajak_masukan,
-            is_tax: data.is_tax,
+            is_tax: data.is_tax ? data.is_tax : false,
             tax_percentage: data.tax_percentage,
             tanggal_pembelian: data.tanggal_pembelian,
             created_by: auth.user.id
@@ -321,8 +321,8 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
 
 
         try {
+            console.log('payload :', payload)
             const response = await axios.post("/api/inventory/pembelian/store", payload);
-
 
             // Reset form setelah berhasil
             setSuccess(response.data.message)
@@ -332,7 +332,7 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
         } finally {
-            router.get(route("inventory"), {preserveState: true, tabValue: 'pembelian'});
+            // router.get(route("inventory"), {preserveState: true, tabValue: 'pembelian'});
             setOpenDialog(false)
             setLoading(false);
         }

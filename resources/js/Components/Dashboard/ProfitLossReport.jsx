@@ -1,119 +1,102 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/Components/ui/card";
 import { Input } from "@/Components/ui/input";
 import { Skeleton } from "@/Components/ui/skeleton";
 
-// Helper: Dapatkan tanggal awal & akhir dari bulan ini
-function getMonthStartEnd(year, month) {
-    // month: 1-12
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0);
-    const to2 = v => v < 10 ? "0" + v : v;
-    return {
-        from: `${start.getFullYear()}-${to2(start.getMonth() + 1)}-01`,
-        to: `${end.getFullYear()}-${to2(end.getMonth() + 1)}-${to2(end.getDate())}`,
-    };
-}
+// helper untuk format Rupiah
+const formatRupiah = (n) => n?.toLocaleString("id-ID") ?? '0';
 
 export default function ProfitLossReport({ thisMonth }) {
-    const today = new Date();
-    const thisYear = today.getFullYear();
-    // Jika thisMonth tidak diberikan, fallback ke bulan sekarang
-    const bulanSekarang = thisMonth ? Number(thisMonth) : today.getMonth() + 1;
-    const { from: defaultFrom, to: defaultTo } = getMonthStartEnd(thisYear, bulanSekarang);
+    const today      = new Date();
+    const year       = today.getFullYear();
+    const monthNum   = thisMonth ? Number(thisMonth) : today.getMonth() + 1;
+    const pad        = v => String(v).padStart(2, "0");
+    const defaultFrom = `${year}-${pad(monthNum)}-01`;
+    const defaultTo   = `${year}-${pad(monthNum)}-${pad(new Date(year, monthNum, 0).getDate())}`;
 
-    const [dateRange, setDateRange] = useState({
-        from: defaultFrom,
-        to: defaultTo
-    });
+    const [range, setRange]   = useState({ from: defaultFrom, to: defaultTo });
     const [report, setReport] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoad]  = useState(false);
 
-    // Jika thisMonth berubah, reset range default sesuai bulan itu
     useEffect(() => {
-        const { from, to } = getMonthStartEnd(thisYear, Number(thisMonth || bulanSekarang));
-        setDateRange({ from, to });
+        setRange({
+            from: `${year}-${pad(monthNum)}-01`,
+            to: `${year}-${pad(monthNum)}-${pad(new Date(year, monthNum, 0).getDate())}`
+        });
     }, [thisMonth]);
 
-    // Fetch data saat dari/ke berubah
     useEffect(() => {
-        if (dateRange.from && dateRange.to) fetchReport(dateRange.from, dateRange.to);
-        // eslint-disable-next-line
-    }, [dateRange.from, dateRange.to]);
-
-    const fetchReport = async (from, to) => {
-        setLoading(true);
-        setReport(null);
-        try {
-            const res = await fetch(`/api/reports/profit-loss?from=${from}&to=${to}`);
-            const data = await res.json();
-            setReport(data);
-        } catch (e) {
-            setReport(null);
+        async function fetchData() {
+            setLoad(true);
+            try {
+                const res = await fetch(`/api/reports/profit-loss?from=${range.from}&to=${range.to}`);
+                const data = await res.json();
+                setReport(data);
+            } catch {
+                setReport(null);
+            }
+            setLoad(false);
         }
-        setLoading(false);
-    };
+        fetchData();
+    }, [range]);
 
     return (
-        <Card className="w-full mx-auto">
+        <Card className="w-full">
             <CardHeader>
-                <CardTitle>Laporan Laba/Rugi</CardTitle>
+                <CardTitle>Laporan Laba Kotor</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-wrap items-center gap-4 mb-6">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm">Dari</span>
-                        <Input
-                            type="date"
-                            value={dateRange.from}
-                            onChange={e => setDateRange(dr => ({ ...dr, from: e.target.value }))}
-                            className="w-[150px]"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm">Sampai</span>
-                        <Input
-                            type="date"
-                            value={dateRange.to}
-                            onChange={e => setDateRange(dr => ({ ...dr, to: e.target.value }))}
-                            className="w-[150px]"
-                        />
-                    </div>
+                {/* Pilih tanggal */}
+                <div className="flex gap-4 mb-4">
+                    {["from","to"].map((f) => (
+                        <div key={f} className="flex items-center gap-2">
+                            <span className="text-sm">{f === "from" ? "Dari" : "Sampai"}</span>
+                            <Input
+                                type="date"
+                                value={range[f]}
+                                onChange={e => setRange(r => ({ ...r, [f]: e.target.value }))}
+                                className="w-[150px]"
+                            />
+                        </div>
+                    ))}
                 </div>
+
+                {/* Loading skeleton */}
                 {loading && (
                     <div className="space-y-2">
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-8 w-full" />
+                        {[...Array(5)].map((_,i) => <Skeleton key={i} className="h-6 w-full" />)}
                     </div>
                 )}
-                {report && (
-                    <div className="w-full bg-muted/50 rounded-lg px-3 py-2 space-y-2 border">
-                        <div className="flex justify-between py-1">
-                            <span>Total Penjualan (Bruto / Termasuk PPN)</span>
-                            <span className="font-medium">Rp {report.total_revenue_gross?.toLocaleString()}</span>
+
+                {/* Hasil laporan */}
+                {report && !loading && (
+                    <div className="space-y-2 bg-muted/50 p-4 rounded-lg border">
+                        <div className="flex justify-between">
+                            <span>Total Penjualan (Bruto)</span>
+                            <span>Rp {formatRupiah(report.total_revenue_gross)}</span>
                         </div>
-                        <div className="flex justify-between py-1">
-                            <span>PPN Keluaran</span>
-                            <span className="font-medium">Rp {report.total_ppn?.toLocaleString()}</span>
+                        {/*<div className="flex justify-between">*/}
+                        {/*    <span>PPN Keluaran</span>*/}
+                        {/*    <span>Rp {formatRupiah(report.total_ppn)}</span>*/}
+                        {/*</div>*/}
+                        {/*<div className="flex justify-between">*/}
+                        {/*    <span>Penjualan Bersih (Net Revenue)</span>*/}
+                        {/*    <span>Rp {formatRupiah(report.total_revenue_net)}</span>*/}
+                        {/*</div>*/}
+                        <div className="flex justify-between">
+                            <span>Harga Pokok Penjualan (HPP)</span>
+                            <span>Rp {formatRupiah(report.total_hpp+report.total_ppn)}</span>
                         </div>
-                        <div className="flex justify-between py-1">
-                            <span>Penjualan Bersih (Omzet, sebelum PPN)</span>
-                            <span className="font-medium">Rp {report.total_revenue_net?.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between py-1">
-                            <span>Total HPP</span>
-                            <span className="font-medium">Rp {report.total_hpp?.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-t font-bold">
+                        <div className="flex justify-between pt-2 border-t font-bold">
                             <span>Laba Kotor</span>
-                            <span>Rp {report.gross_profit?.toLocaleString()}</span>
+                            <span>Rp {formatRupiah(report.total_revenue_gross-(report.total_hpp+report.total_ppn))}</span>
                         </div>
                     </div>
                 )}
+
+                {/* Fallback jika data kosong */}
                 {!loading && !report && (
                     <div className="text-center text-muted-foreground mt-4">
                         Data tidak tersedia untuk rentang tanggal ini.
