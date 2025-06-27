@@ -435,83 +435,79 @@ class DashboardController extends Controller
 
     public function profitLossReport(Request $request)
     {
+        // 1. Tentukan periode
         $from = $request->input('from');
-        $to = $request->input('to');
-
-// Jika tidak ada input, fallback ke bulan berjalan
+        $to   = $request->input('to');
         if (!$from || !$to) {
             $month = $request->input('month', now()->month);
-            $year = $request->input('year', now()->year);
-
-            $start = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
-            $end = \Carbon\Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
-
-            $from = $start->format('Y-m-d');
-            $to = $end->format('Y-m-d');
+            $year  = $request->input('year',  now()->year);
+            $dt    = \Carbon\Carbon::create($year, $month, 1);
+            $from  = $dt->startOfMonth()->toDateString();
+            $to    = $dt->endOfMonth()->toDateString();
         }
 
-        $invoiceItems = InvoiceItems::with(['item'])
+        // 2. Ambil semua invoice items di periode
+        $items = InvoiceItems::with('item')
             ->whereBetween('created_at', [$from, $to])
             ->get();
 
+        // 3. Inisialisasi akumulator
+        $grossRevenue = 0;   // Total Penjualan Bruto (termasuk PPN)
+        $netRevenue   = 0;   // Penjualan Bersih (ex-PPN)
+        $totalPPN     = 0;   // Total PPN Keluaran
+        $totalCOGS    = 0;   // Harga Pokok Penjualan (HPP / COGS)
 
-        $totalRevenueGross = 0;
-        $totalRevenueNet = 0;
-        $totalPPN = 0;
-        $totalHpp = 0;
-        $omsetBarangPPn = 0;
-        $omsetBarangNonPPn = 0;
+        foreach ($items as $inv) {
+            $sub = $inv->sub_total;
+            $grossRevenue += $sub;
 
-        foreach ($invoiceItems as $item) {
-            $itemModel = $item->item;
-            $subTotal = $item->sub_total;
-            $isTax = $itemModel->is_tax ?? false;
-
-            // Pajak, omzet, dsb ... (kode sebelumnya tetap)
-            $taxRate = match ($item->price_type) {
-                'retail' => $itemModel->tax_percentage_retail ?? 0,
-                'grosir' => $itemModel->tax_percentage_wholesale ?? 0,
-                'eceran' => $itemModel->tax_percentage_eceran ?? 0,
-                'semi_grosir' => $itemModel->tax_percentage_semi_grosir ?? 0,
-                default => 0,
+            // ——— Hitung PPN & Net Revenue ———
+            $rate = match ($inv->price_type) {
+                'retail'      => $inv->item->tax_percentage_retail ?? 0,
+                'grosir'      => $inv->item->tax_percentage_wholesale ?? 0,
+                'eceran'      => $inv->item->tax_percentage_eceran ?? 0,
+                'semi_grosir' => $inv->item->tax_percentage_semi_grosir ?? 0,
+                default       => 0,
             };
 
-            $totalRevenueGross += $subTotal;
+            if (($inv->item->is_tax ?? false) && $rate > 0) {
+                // DPP (dasar pengenaan pajak) = sub_total / (1 + rate/100)
+                $dpp = $sub / (1 + $rate / 100);
+                $ppn = $sub - $dpp;
 
-            if ($isTax && $taxRate > 0) {
-                $dpp = $subTotal / (1 + $taxRate / 100);
-                $ppn = $subTotal - $dpp;
-
-                $totalRevenueNet += $dpp;
-                $totalPPN += $ppn;
-                $omsetBarangPPn += $subTotal;
+                $netRevenue += $dpp;
+                $totalPPN   += $ppn;
             } else {
-                $totalRevenueNet += $subTotal;
-                $omsetBarangNonPPn += $subTotal;
+                // Tidak kena pajak → seluruhnya masuk Net Revenue
+                $netRevenue += $sub;
             }
 
-            // --- HPP: sesuai price_type ---
-            if ($item->price_type === 'eceran' && ($itemModel->retail_conversion ?? 0) > 0) {
-                $hpp = ($itemModel->price / $itemModel->retail_conversion) * $item->qty;
+            // ——— Hitung HPP (Cost of Goods Sold) ———
+            $price        = $inv->item->price;
+            $conversion   = $inv->item->retail_conversion ?? 0;
+            $qty          = $inv->qty;
+            if ($inv->price_type === 'eceran' && $conversion > 0) {
+                // konversi eceran ke satuan utama
+                $cogs = ($price / $conversion) * $qty;
             } else {
-                $hpp = $itemModel->price * $item->qty;
+                $cogs = $price * $qty;
             }
-            $totalHpp += $hpp;
+            $totalCOGS += $cogs;
         }
 
+        // 4. Hitung Laba Kotor sesuai akuntansi
+        $grossProfit = $netRevenue - $totalCOGS;
 
-        $grossProfit = $totalRevenueNet - $totalHpp;
-
+        // 5. Kembalikan response JSON
         return response()->json([
-            'total_revenue_gross' => round($totalRevenueGross),
-            'total_revenue_net' => round($totalRevenueNet),
-            'total_ppn' => round($totalPPN),
-            'total_hpp' => round($totalHpp),
-            'gross_profit' => round($grossProfit),
-            'omset_barang_ppn' => round($omsetBarangPPn),
-            'omset_barang_nonppn' => round($omsetBarangNonPPn),
+            'total_revenue_gross' => round($grossRevenue),
+            'total_revenue_net'   => round($netRevenue),
+            'total_ppn'           => round($totalPPN),
+            'total_hpp'           => round($totalCOGS),
+            'gross_profit'        => round($grossProfit),
         ]);
     }
+
 
 
 

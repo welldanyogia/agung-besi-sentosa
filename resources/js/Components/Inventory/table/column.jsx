@@ -96,21 +96,22 @@ export const columns = [
         header: () => <div className="text-center min-w-[100px]">Pajak</div>,
         cell: ({getValue}) => {
             const isTax = getValue();
+            // console.log(isTax)
             return (
                 <div className="text-center min-w-[100px]">
                     <Badge variant={isTax ? "destructive" : "secondary"}>
-                        {isTax ? "Pajak" : "Non Pajak"}
+                        {isTax === 1 ? "Pajak" : "Non Pajak"}
                     </Badge>
                 </div>
             );
         },
     }),
-    columnHelper.accessor("tax-percentage", {
+    columnHelper.accessor("persentase_pajak", {
         header: () => <div className="text-center min-w-[100px]">Persentase Pajak</div>,
         cell: ({row}) => {
             // Ambil nilai persentase pajak dari data baris
             // const taxPercentageRaw = row.original["tax-percentage"];
-            const taxPercentageRaw = 11;
+            const taxPercentageRaw = row.original.persentase_pajak;
 
             // Jika nilai berupa angka persentase (misal 10), ubah ke desimal (0.1)
             const taxDecimal = taxPercentageRaw / 100;
