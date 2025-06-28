@@ -65,19 +65,20 @@ export default function Dashboard({auth}) {
             if (transactionDate === today) {
                 orders += 1;
 
-                transaction.items.forEach((item) => {
-                    // Konversi qty jika price_type === 'eceran'
-                    let qty = item.qty;
-                    if (item.price_type === 'eceran') {
-                        const conversion = item.item?.retail_conversion || 1;
-                        qty = item.qty / conversion;
-                    }
-
-                    productsSold += qty;
-                });
 
                 if (transaction.status === 'paid') {
-                    sales += transaction.total_price;
+                    transaction.items.forEach((item) => {
+                        // Konversi qty jika price_type === 'eceran'
+                        let qty = item.qty;
+                        if (item.price_type === 'eceran') {
+                            const conversion = item.item?.retail_conversion || 1;
+                            qty = item.qty / conversion;
+                        }
+
+                        productsSold += qty;
+                        sales += item.sub_total;
+                    });
+
                 }
             }
         });
@@ -102,7 +103,7 @@ export default function Dashboard({auth}) {
 
             return () => clearTimeout(timer);
         }
-    }, [error, success,date]);
+    }, [error, success, date]);
 
 
     return (
@@ -167,12 +168,13 @@ export default function Dashboard({auth}) {
                             <Card className="w-2/3 h-fit">
                                 <SalesChart data={data}/>
                             </Card>
-                            <StockTabsCard date={date} setDate={setDate} barangKeluar={barangKeluar} barangMasuk={barangMasuk}/>
+                            <StockTabsCard date={date} setDate={setDate} barangKeluar={barangKeluar}
+                                           barangMasuk={barangMasuk}/>
                         </div>
                         {/*<Card className={'w-full h-[200px]'}></Card>*/}
                     </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <DataTable columns={columns} data={data} auth={auth} setError={setError}
+                        <DataTable columns={columns} data={data} auth={auth} setError={setError}
                                    setSuccess={setSuccess} getData={getData}/>
                     </div>
                 </div>

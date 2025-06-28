@@ -447,10 +447,22 @@ class DashboardController extends Controller
         }
 
         // 2. Ambil semua invoice items di periode
-        $items = InvoiceItems::with('item')
-            ->whereDate('created_at', '>=', $from)
-            ->whereDate('created_at', '<=', $to)
+//        $items = InvoiceItems::with('item')
+//            ->whereHas('invoice', function ($q) {
+//                $q->where('status', 'paid');
+//            })
+//            ->whereDate('created_at', '>=', $from)
+//            ->whereDate('created_at', '<=', $to)
+//            ->get();
+
+        $items= InvoiceItems::with('item')
+            ->whereHas('invoice', function($q) use($from, $to) {
+                $q->where('status', 'paid')
+                    ->whereDate('created_at', '>=', $from)
+                    ->whereDate('created_at', '<=', $to);
+            })
             ->get();
+
 
 
         // 3. Inisialisasi akumulator
