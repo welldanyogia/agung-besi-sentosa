@@ -448,8 +448,10 @@ class DashboardController extends Controller
 
         // 2. Ambil semua invoice items di periode
         $items = InvoiceItems::with('item')
-            ->whereBetween('created_at', [$from, $to])
+            ->whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to)
             ->get();
+
 
         // 3. Inisialisasi akumulator
         $grossRevenue = 0;   // Total Penjualan Bruto (termasuk PPN)
