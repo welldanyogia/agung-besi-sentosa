@@ -41,8 +41,13 @@ Route::get('/', function () {
 //    return Inertia::render('Setting/Dashboard');
 //})->middleware(['auth', 'verified'])->name('setting');
 
+//Route::middleware('auth')->group(function () {
+//    Route::middleware(['role:admin|superadmin'])->group(function () {
+//        Route::get('/dashboard',[\App\Http\Controllers\DashboardController::class,'index'])->name('dashboard');
+//    });
+//});
 Route::middleware('auth')->group(function () {
-    Route::middleware(['role:admin|superadmin'])->group(function () {
+    Route::middleware(['role:superadmin'])->group(function () {
         Route::get('/dashboard',[\App\Http\Controllers\DashboardController::class,'index'])->name('dashboard');
     });
 });
