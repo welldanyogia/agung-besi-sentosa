@@ -438,93 +438,79 @@ class DashboardController extends Controller
         // 1. Tentukan periode
         $from = $request->input('from');
         $to   = $request->input('to');
-        if (!$from || !$to) {
-            $month = $request->input('month', now()->month);
-            $year  = $request->input('year',  now()->year);
-            $dt    = \Carbon\Carbon::create($year, $month, 1);
-            $from  = $dt->startOfMonth()->toDateString();
-            $to    = $dt->endOfMonth()->toDateString();
+        if (! $from || ! $to) {
+            $dt   = Carbon::create(
+                $request->input('year', now()->year),
+                $request->input('month', now()->month),
+                1
+            );
+            $from = $dt->startOfMonth()->toDateString();
+            $to   = $dt->endOfMonth()->toDateString();
         }
 
-        // 2. Ambil semua invoice items di periode
-//        $items = InvoiceItems::with('item')
-//            ->whereHas('invoice', function ($q) {
-//                $q->where('status', 'paid');
-//            })
-//            ->whereDate('created_at', '>=', $from)
-//            ->whereDate('created_at', '<=', $to)
-//            ->get();
+        // 2. Hitung agregat lewat Eloquent
+        $row = InvoiceItems::query()
+            ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
+            ->join('items',    'invoice_items.item_id',    '=', 'items.id')
+            ->where('invoices.status', 'paid')
+            ->whereDate('invoices.created_at', '>=', $from)
+            ->whereDate('invoices.created_at', '<=', $to)
+            ->selectRaw(implode("\n", [
+                'ROUND(SUM(invoice_items.sub_total)) AS total_revenue_gross',
+                ', ROUND(SUM( CASE',
+                '    WHEN items.is_tax = 1',
+                '         AND (CASE invoice_items.price_type',
+                "             WHEN 'retail'      THEN COALESCE(items.tax_percentage_retail,0)",
+                "             WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
+                "             WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
+                "             WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                '             ELSE 0 END) > 0',
+                '      THEN invoice_items.sub_total / (1 +',
+                '           (CASE invoice_items.price_type',
+                "               WHEN 'retail'      THEN COALESCE(items.tax_percentage_retail,0)",
+                "               WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
+                "               WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
+                "               WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                '               ELSE 0 END) / 100)',
+                '    ELSE invoice_items.sub_total',
+                'END )) AS total_revenue_net',
+                ', ROUND(SUM( CASE',
+                '    WHEN items.is_tax = 1',
+                '         AND (CASE invoice_items.price_type',
+                "             WHEN 'retail'      THEN COALESCE(items.tax_percentage_retail,0)",
+                "             WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
+                "             WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
+                "             WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                '             ELSE 0 END) > 0',
+                '      THEN invoice_items.sub_total - (invoice_items.sub_total / (1 +',
+                '           (CASE invoice_items.price_type',
+                "               WHEN 'retail'      THEN COALESCE(items.tax_percentage_retail,0)",
+                "               WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
+                "               WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
+                "               WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                '               ELSE 0 END) / 100))',
+                '    ELSE 0',
+                'END )) AS total_ppn',
+                ', ROUND(SUM( CASE',
+                "    WHEN invoice_items.price_type = 'eceran' AND COALESCE(items.retail_conversion,0) > 0",
+                '      THEN (items.price / items.retail_conversion) * invoice_items.qty',
+                '    ELSE items.price * invoice_items.qty',
+                'END )) AS total_hpp',
+            ]))
+            ->first();
 
-        $items= InvoiceItems::with('item')
-            ->whereHas('invoice', function($q) use($from, $to) {
-                $q->where('status', 'paid')
-                    ->whereDate('created_at', '>=', $from)
-                    ->whereDate('created_at', '<=', $to);
-            })
-            ->get();
+        // 3. Hitung gross profit
+        $grossProfit = round($row->total_revenue_net - $row->total_hpp);
 
-
-
-        // 3. Inisialisasi akumulator
-        $grossRevenue = 0;   // Total Penjualan Bruto (termasuk PPN)
-        $netRevenue   = 0;   // Penjualan Bersih (ex-PPN)
-        $totalPPN     = 0;   // Total PPN Keluaran
-        $totalCOGS    = 0;   // Harga Pokok Penjualan (HPP / COGS)
-
-        foreach ($items as $inv) {
-            $sub = $inv->sub_total;
-            $grossRevenue += $sub;
-
-            // ——— Hitung PPN & Net Revenue ———
-            $rate = match ($inv->price_type) {
-                'retail'      => $inv->item->tax_percentage_retail ?? 0,
-                'grosir'      => $inv->item->tax_percentage_wholesale ?? 0,
-                'eceran'      => $inv->item->tax_percentage_eceran ?? 0,
-                'semi_grosir' => $inv->item->tax_percentage_semi_grosir ?? 0,
-                default       => 0,
-            };
-
-            if (($inv->item->is_tax ?? false) && $rate > 0) {
-                // DPP (dasar pengenaan pajak) = sub_total / (1 + rate/100)
-                $dpp = $sub / (1 + $rate / 100);
-                $ppn = $sub - $dpp;
-
-                $netRevenue += $dpp;
-                $totalPPN   += $ppn;
-            } else {
-                // Tidak kena pajak → seluruhnya masuk Net Revenue
-                $netRevenue += $sub;
-            }
-
-            // ——— Hitung HPP (Cost of Goods Sold) ———
-            $price        = $inv->item->price;
-            $conversion   = $inv->item->retail_conversion ?? 0;
-            $qty          = $inv->qty;
-            if ($inv->price_type === 'eceran' && $conversion > 0) {
-                // konversi eceran ke satuan utama
-                $cogs = ($price / $conversion) * $qty;
-            } else {
-                $cogs = $price * $qty;
-            }
-            $totalCOGS += $cogs;
-        }
-
-        // 4. Hitung Laba Kotor sesuai akuntansi
-        $grossProfit = $netRevenue - $totalCOGS;
-
-        // 5. Kembalikan response JSON
+        // 4. Kembalikan response JSON
         return response()->json([
-            'total_revenue_gross' => round($grossRevenue),
-            'total_revenue_net'   => round($netRevenue),
-            'total_ppn'           => round($totalPPN),
-            'total_hpp'           => round($totalCOGS),
-            'gross_profit'        => round($grossProfit),
+            'total_revenue_gross' => (int) $row->total_revenue_gross,
+            'total_revenue_net'   => (int) $row->total_revenue_net,
+            'total_ppn'           => (int) $row->total_ppn,
+            'total_hpp'           => (int) $row->total_hpp,
+            'gross_profit'        => $grossProfit,
         ]);
     }
-
-
-
-
 
 
     /**
