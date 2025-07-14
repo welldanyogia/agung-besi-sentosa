@@ -169,7 +169,7 @@ class InvoiceItems extends Model
                 // Update kondisi pengecualian
                 $shouldExclude = $isCategoryExcluded || $isItemNameExcluded || $isUnitExcluded || $isTaxedExcluded;
 
-                if (fmod($item->qty, 1) === 0.5 && !$shouldExclude) {
+                if ($item->qty == 0.5  && !$shouldExclude) {
                     $item->sub_total += 5000;
                 }
 
