@@ -29,7 +29,8 @@ export default function Dashboard({auth}) {
             setLoading(true);
             const response = await axios.post('/api/report/show');
             // Format tanggal yang dipilih ke format YYYY-MM-DD
-            const selectedDate = new Date(date).toISOString().split('T')[0];
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            const selectedDate = local.toISOString().split('T')[0];
 
             // Filter hanya yang sesuai dengan tanggal yang dipilih
             const filteredMasuk = response.data.barang_masuk.filter(
@@ -46,8 +47,6 @@ export default function Dashboard({auth}) {
             setLoading(false);
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
-            console.log('transaction :' , response.data.transaction)
-            console.log('transaction :' , response.data.transaction.length)
 
         } catch (error) {
             setLoading(false);
@@ -116,7 +115,6 @@ export default function Dashboard({auth}) {
             // Debug: show raw and parsed date
 
             if (transactionDate === today) {
-                console.log(`Including invoice ${transaction.invoice_code} dated ${transactionDate}`);
                 orders += 1;
 
                 if (transaction.status === 'paid') {
