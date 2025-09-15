@@ -36,6 +36,11 @@ class Pembelian extends Model
         return $this->belongsTo(Categories::class, 'kategori');
     }
 
+    public function item()
+    {
+        return $this->belongsTo(Items::class, 'kode_barang', 'item_code');
+    }
+
     protected static function booted()
     {
         static::deleting(function ($pembelian) {
