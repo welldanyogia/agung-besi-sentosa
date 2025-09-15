@@ -43,8 +43,14 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin|superadmin'])->group(function () {
-
-
+        Route::get('/report', function () {
+            return Inertia::render('Report/Dashboard');
+        })->name('report');
+    });
+});
+Route::middleware('auth')->group(function () {
+    Route::middleware(['role:superadmin'])->group(function () {
+        Route::get('/dashboard',[\App\Http\Controllers\DashboardController::class,'index'])->name('dashboard');
     });
 });
 
@@ -56,14 +62,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/user/{id}', [\App\Http\Controllers\SettingController::class, 'destroy'])->name('user.destroy');
     Route::get('/cashier',[\App\Http\Controllers\CashierController::class,'index'])->name('cashier');
-    Route::get('/dashboard',[\App\Http\Controllers\DashboardController::class,'index'])->name('dashboard');
     Route::get('/inventory',[\App\Http\Controllers\InventoryController::class,'index'])->name('inventory');
     Route::post('/users', [\App\Http\Controllers\SettingController::class, 'store']);
     Route::get('/setting', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting');
-    Route::get('/report', function () {
-        return Inertia::render('Report/Dashboard');
-    })->name('report');
-
 });
 
 

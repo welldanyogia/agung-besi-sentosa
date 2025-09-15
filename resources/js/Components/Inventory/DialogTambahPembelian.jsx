@@ -332,7 +332,7 @@ export function DialogTambahPembelian({auth, setError, setSuccess, dataSatuan,it
             console.error("Terjadi kesalahan:", err);
             setError("Terjadi kesalahan Saat Menambahkan Barang");
         } finally {
-            // router.get(route("inventory"), {preserveState: true, tabValue: 'pembelian'});
+            router.get(route("inventory"), {preserveState: true, tabValue: 'pembelian'});
             setOpenDialog(false)
             setLoading(false);
         }

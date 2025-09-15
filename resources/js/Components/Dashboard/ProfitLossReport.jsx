@@ -87,11 +87,11 @@ export default function ProfitLossReport({ thisMonth }) {
                         {/*</div>*/}
                         <div className="flex justify-between">
                             <span>Harga Pokok Penjualan (HPP)</span>
-                            <span>Rp {formatRupiah(report.total_hpp+report.total_ppn)}</span>
+                            <span>Rp {formatRupiah(report.total_hpp)}</span>
                         </div>
                         <div className="flex justify-between pt-2 border-t font-bold">
                             <span>Laba Kotor</span>
-                            <span>Rp {formatRupiah(report.total_revenue_gross-(report.total_hpp+report.total_ppn))}</span>
+                            <span>Rp {formatRupiah(report.total_revenue_gross-report.total_hpp)}</span>
                         </div>
                     </div>
                 )}
