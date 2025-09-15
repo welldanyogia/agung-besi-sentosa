@@ -67,7 +67,6 @@ export default function StockChartTabs({date,setDate,barangMasuk,barangKeluar}) 
     const [activeTab, setActiveTab] = useState("masuk")
 
 
-
     return (
         <Card className="w-1/3 h-full">
             <CardHeader className="flex flex-row items-start justify-between">

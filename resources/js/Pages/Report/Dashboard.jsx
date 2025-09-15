@@ -29,7 +29,8 @@ export default function Dashboard({auth}) {
             setLoading(true);
             const response = await axios.post('/api/report/show');
             // Format tanggal yang dipilih ke format YYYY-MM-DD
-            const selectedDate = new Date(date).toISOString().split('T')[0];
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            const selectedDate = local.toISOString().split('T')[0];
 
             // Filter hanya yang sesuai dengan tanggal yang dipilih
             const filteredMasuk = response.data.barang_masuk.filter(
@@ -46,46 +47,98 @@ export default function Dashboard({auth}) {
             setLoading(false);
             // Calculate totals after fetching data
             calculateTotals(response.data.transaction);
+
         } catch (error) {
             setLoading(false);
         }
     };
 
 
+    // const calculateTotals = (transactions) => {
+    //     let sales = 0;
+    //     let orders = 0;
+    //     let productsSold = 0;
+    //
+    //     const today = new Date().toISOString().split("T")[0];
+    //
+    //     transactions.forEach((transaction) => {
+    //         const transactionDate = new Date(transaction.created_at).toISOString().split("T")[0];
+    //
+    //         if (transactionDate === today) {
+    //             console.log(`Transaksi pada ${today}:`, transaction);
+    //             orders += 1;
+    //
+    //
+    //             if (transaction.status === 'paid') {
+    //                 transaction.items.forEach((item) => {
+    //                     // Konversi qty jika price_type === 'eceran'
+    //                     let qty = item.qty;
+    //                     if (item.price_type === 'eceran') {
+    //                         const conversion = item.item?.retail_conversion || 1;
+    //                         qty = item.qty / conversion;
+    //                     }
+    //
+    //                     productsSold += qty;
+    //                     sales += item.sub_total;
+    //                 });
+    //
+    //             }
+    //         }
+    //     });
+    //
+    //     setTotalSales(sales);
+    //     setTotalOrders(orders);
+    //     setTotalProductsSold(productsSold);
+    // };
+
+    // Utility: extract local YYYY-MM-DD date string
+    // Utility: extract local YYYY-MM-DD date string
+    const getLocalDateString = (dateInput) => {
+        const d = new Date(dateInput);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const calculateTotals = (transactions) => {
         let sales = 0;
         let orders = 0;
         let productsSold = 0;
 
-        const today = new Date().toISOString().split("T")[0];
+        const today = getLocalDateString(new Date());
 
         transactions.forEach((transaction) => {
-            const transactionDate = new Date(transaction.created_at).toISOString().split("T")[0];
+            const rawDate = transaction.created_at;
+            const transactionDate = getLocalDateString(rawDate);
+
+            // Debug: show raw and parsed date
 
             if (transactionDate === today) {
                 orders += 1;
 
-                transaction.items.forEach((item) => {
-                    // Konversi qty jika price_type === 'eceran'
-                    let qty = item.qty;
-                    if (item.price_type === 'eceran') {
-                        const conversion = item.item?.retail_conversion || 1;
-                        qty = item.qty / conversion;
-                    }
-
-                    productsSold += qty;
-                });
-
                 if (transaction.status === 'paid') {
-                    sales += transaction.total_price;
+                    transaction.items.forEach((item) => {
+                        let qty = item.qty;
+                        if (item.price_type === 'eceran') {
+                            const conversion = item.item?.retail_conversion || 1;
+                            qty = item.qty / conversion;
+                        }
+
+                        productsSold += qty;
+                        sales += item.sub_total;
+                    });
                 }
+            } else {
             }
         });
+
 
         setTotalSales(sales);
         setTotalOrders(orders);
         setTotalProductsSold(productsSold);
     };
+
 
 
     useEffect(() => {
@@ -102,7 +155,7 @@ export default function Dashboard({auth}) {
 
             return () => clearTimeout(timer);
         }
-    }, [error, success,date]);
+    }, [error, success, date]);
 
 
     return (
@@ -167,12 +220,13 @@ export default function Dashboard({auth}) {
                             <Card className="w-2/3 h-fit">
                                 <SalesChart data={data}/>
                             </Card>
-                            <StockTabsCard date={date} setDate={setDate} barangKeluar={barangKeluar} barangMasuk={barangMasuk}/>
+                            <StockTabsCard date={date} setDate={setDate} barangKeluar={barangKeluar}
+                                           barangMasuk={barangMasuk}/>
                         </div>
                         {/*<Card className={'w-full h-[200px]'}></Card>*/}
                     </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <DataTable columns={columns} data={data} auth={auth} setError={setError}
+                        <DataTable columns={columns} data={data} auth={auth} setError={setError}
                                    setSuccess={setSuccess} getData={getData}/>
                     </div>
                 </div>
