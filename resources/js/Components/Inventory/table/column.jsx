@@ -1,7 +1,7 @@
 'use client';
 
 import {createColumnHelper} from "@tanstack/react-table";
-import {MoreHorizontal} from "lucide-react"
+import {MoreHorizontal, CircleArrowUp, CircleArrowDown} from "lucide-react"
 import {Button} from "@/Components/ui/button"
 import {
     DropdownMenu,
@@ -81,6 +81,8 @@ export const columns = [
         header: () => <div className="text-center min-w-[100px]">Harga</div>,
         cell: ({row}) => {
             const price = row.original.harga;
+            const status = row.original.item?.status_perubahan_harga;
+            const selisih = row.original.item?.selisih_perubahan_harga;
 
             return (
                 <div className="text-center min-w-[100px]">
@@ -88,6 +90,21 @@ export const columns = [
                         style: 'currency',
                         currency: 'IDR',
                     }).format(parseFloat(price))}
+                    {(status === 'naik' || status === 'turun') && (
+                        <Badge
+                            className={`flex gap-2 text-xs ${status === 'naik' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                        >
+                            {status === 'naik' ? (
+                                <CircleArrowUp size={12} />
+                            ) : (
+                                <CircleArrowDown size={12} />
+                            )}
+                            {new Intl.NumberFormat('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                            }).format(selisih)}
+                        </Badge>
+                    )}
                 </div>
             );
         },

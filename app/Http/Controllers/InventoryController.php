@@ -20,7 +20,7 @@ class InventoryController extends Controller
     {
         // Ambil semua item, beserta relasi kategori dan creator
         $items = \App\Models\Items::with('category', 'createdBy')->get();
-        $pembelians = \App\Models\Pembelian::with('category')->latest()->get();
+        $pembelians = \App\Models\Pembelian::with(['category', 'item'])->get();
         $satuan = \App\Models\Satuan::all();
         $uniqueItemCodes = \App\Models\Items::distinct()->pluck('item_code');
 
