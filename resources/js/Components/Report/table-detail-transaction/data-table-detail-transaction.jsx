@@ -254,8 +254,10 @@ const DataTableDetailTransaction = ({columns, data, auth, setError, setSuccess, 
                 selectedPrice = item.item.eceran_price;
             } else if (item.price_type === 'retail') {
                 selectedPrice = item.item.retail_price;
-            }else if (item.price_type === 'semi_grosir') {
+            } else if (item.price_type === 'semi_grosir') {
                 selectedPrice = item.item.semi_grosir_price;
+            } else if (item.price_type === 'reseller') {
+                selectedPrice = item.item.reseller_price;
             } else {
                 selectedPrice = item.item.wholesale_price; // grosir
             }

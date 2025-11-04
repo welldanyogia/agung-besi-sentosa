@@ -45,6 +45,7 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     const [quantity, setQuantity] = useState(initialQuantity);
     const availableTabs = [
         {key: 'retail', label: 'Retail', price: product.retail_price},
+        {key: 'reseller', label: 'Reseller', price: product.reseller_price},
         {key: 'semi_grosir', label: 'Semi Grosir', price: product.semi_grosir_price},
         {key: 'grosir', label: 'Grosir', price: product.wholesale_price},
         {key: 'eceran', label: 'Eceran', price: product.eceran_price},
@@ -130,6 +131,9 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                 break;
             case "grosir":
                 itemPrice = product.wholesale_price;
+                break;
+            case "reseller":
+                itemPrice = product.reseller_price;
                 break;
             case "retail":
             default:

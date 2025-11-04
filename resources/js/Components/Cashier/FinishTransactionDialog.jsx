@@ -616,8 +616,10 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                 selectedPrice = item.item.eceran_price;
             } else if (item.price_type === 'retail') {
                 selectedPrice = item.item.retail_price;
-            }else if (item.price_type === 'semi_grosir') {
+            } else if (item.price_type === 'semi_grosir') {
                 selectedPrice = item.item.semi_grosir_price;
+            } else if (item.price_type === 'reseller') {
+                selectedPrice = item.item.reseller_price;
             } else {
                 selectedPrice = item.item.wholesale_price; // grosir
             }
@@ -1098,7 +1100,11 @@ export function FinishTransactionDialog({invoiceItems, setError, invoice_id, set
                                                     ? formatRupiah(item?.item?.eceran_price)
                                                     : item?.price_type === 'retail'
                                                         ? formatRupiah(item?.item?.retail_price)
-                                                        : formatRupiah(item?.item?.wholesale_price)}
+                                                        : item?.price_type === 'semi_grosir'
+                                                            ? formatRupiah(item?.item?.semi_grosir_price)
+                                                            : item?.price_type === 'reseller'
+                                                                ? formatRupiah(item?.item?.reseller_price)
+                                                                : formatRupiah(item?.item?.wholesale_price)}
                                             </TableCell>
                                             <TableCell>{item?.qty}</TableCell>
                                             <TableCell>{formatRupiah(item?.sub_total)}</TableCell>

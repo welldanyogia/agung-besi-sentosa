@@ -53,6 +53,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
         satuan: "",
         harga_beli: "",
         wholesale_price: "",
+        reseller_price: "",
         retail_price: "",
         eceran_price: "",
         retail_unit: "",
@@ -189,6 +190,14 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                 }))
             }
         }
+        if (id === 'reseller_price') {
+            if (value === '') {
+                setData((prevData) => ({
+                    ...prevData,
+                    reseller_price: 0
+                }))
+            }
+        }
         if (id === 'retail_price') {
             if (value === '') {
                 setData((prevData) => ({
@@ -222,6 +231,12 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             }))
         }
         if (id === 'eceran_price') {
+            setData((prevData) => ({
+                ...prevData,
+                [id]: value
+            }))
+        }
+        if (id === 'reseller_price') {
             setData((prevData) => ({
                 ...prevData,
                 [id]: value
@@ -276,6 +291,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             satuan: data.satuan,
             price: data.harga_beli,
             wholesale_price: data.wholesale_price,
+            reseller_price: data.reseller_price,
             retail_price: data.retail_price,
             eceran_price: data.eceran_price,
             retail_unit: data.retail_unit,
@@ -317,6 +333,7 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
             satuan_id: "",
             harga_beli: "",
             wholesale_price: "",
+            reseller_price: "",
             retail_price: "",
             eceran_price: "",
             retail_unit: "",
@@ -556,6 +573,13 @@ export function DialogTambahBarang({auth, setError, setSuccess, dataSatuan}) {
                             Harga Retail
                         </Label>
                         <Input id="retail_price" value={formatRupiah(data.retail_price)} onChange={handlePriceChange}
+                               className="col-span-3"/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="reseller_price" className="text-right">
+                            Harga Reseller
+                        </Label>
+                        <Input id="reseller_price" value={formatRupiah(data.reseller_price)} onChange={handlePriceChange}
                                className="col-span-3"/>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">

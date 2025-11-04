@@ -102,6 +102,7 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
         "stock": "Stok",
         "price": "Harga Modal",
         "retail_price": "Harga Retail",
+        "reseller_price": "Harga Reseller",
         "wholesale_price": "Harga Grosir",
         "eceran_price": "Harga Eceran",
         "satuan": "Satuan",
@@ -165,7 +166,7 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
                     if (col === "is_tax") return row[col] ? "Pajak" : "Tanpa Pajak"; // Ubah 1/0 menjadi Pajak/Tanpa Pajak
                     if (col === "category.category_name") return formatUppercase(data[index].category?.category_name);
                     if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
-                    if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
+                    if (["price", "retail_price", "reseller_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
                     return row[col] || "-"; // Isi data atau "-"
                 })
             );
@@ -229,7 +230,7 @@ const DataTable = ({setTabValue,columns, data, auth, setError, setSuccess, getDa
 
                     // return row[col]; // Format timestamp
                     if (col === "created_at" || col === "updated_at") return formatTimestamp(row[col]); // Format timestamp
-                    if (["price", "retail_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
+                    if (["price", "retail_price", "reseller_price", "wholesale_price", "eceran_price"].includes(col)) return formatRupiah(row[col]); // Format harga menjadi rupiah
                     return row[col] || "-"; // Isi data atau "-"
                 })
             );

@@ -19,6 +19,7 @@ class UpdateTaxPercentageSeeder extends Seeder
                 $item->tax_percentage_wholesale = $item->tax;
                 $item->tax_percentage_eceran = $item->tax;
                 $item->tax_percentage_semi_grosir = $item->tax;
+                $item->tax_percentage_reseller = $item->tax;
 
                 // Rehitung pajak luaran
                 $item->pajak_luaran_retail = $item->retail_price > 0
@@ -32,6 +33,9 @@ class UpdateTaxPercentageSeeder extends Seeder
                     : 0;
                 $item->pajak_luaran_semi_grosir = $item->semi_grosir_price > 0
                     ? $item->semi_grosir_price * ($item->tax / (100 + $item->tax))
+                    : 0;
+                $item->pajak_luaran_reseller = $item->reseller_price > 0
+                    ? $item->reseller_price * ($item->tax / (100 + $item->tax))
                     : 0;
 
                 $item->save();
