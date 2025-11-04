@@ -60,6 +60,8 @@ export const columns = [
                 selectedPrice = item?.retail_price;
             } else if (priceType === 'semi_grosir') {
                 selectedPrice = item?.semi_grosir_price;
+            } else if (priceType === 'reseller') {
+                selectedPrice = item?.reseller_price;
             }else {
                 selectedPrice = item?.wholesale_price; // grosir
             }

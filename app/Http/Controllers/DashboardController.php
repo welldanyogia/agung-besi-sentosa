@@ -47,6 +47,7 @@ class DashboardController extends Controller
                 'grosir' => $itemModel->tax_percentage_wholesale ?? 0,
                 'eceran' => $itemModel->tax_percentage_eceran ?? 0,
                 'semi_grosir' => $itemModel->tax_percentage_semi_grosir ?? 0,
+                'reseller' => $itemModel->tax_percentage_reseller ?? 0,
                 default => 0,
             };
 
@@ -83,6 +84,10 @@ class DashboardController extends Controller
                 case 'eceran':
                     $type = 'Eceran';
                     $fill= "hsl(var(--chart-4))";
+                    break;
+                case 'reseller':
+                    $type = 'Reseller';
+                    $fill= "hsl(var(--chart-5))";
                     break;
 
             }
@@ -128,6 +133,7 @@ class DashboardController extends Controller
                 'grosir' => $itemModel->pajak_luaran_wholesale,
                 'eceran' => $itemModel->pajak_luaran_eceran,
                 'semi_grosir' => $itemModel->pajak_luaran_semi_grosir,
+                'reseller' => $itemModel->pajak_luaran_reseller,
                 default => 0,
             };
 
@@ -253,6 +259,7 @@ class DashboardController extends Controller
                         'grosir' => $itemModel->tax_percentage_wholesale ?? 0,
                         'eceran' => $itemModel->tax_percentage_eceran ?? 0,
                         'semi_grosir' => $itemModel->tax_percentage_semi_grosir ?? 0,
+                        'reseller' => $itemModel->tax_percentage_reseller ?? 0,
                         default => 0,
                     };
 
@@ -303,6 +310,7 @@ class DashboardController extends Controller
                         'semi_grosir' => $itemModel->pajak_luaran_semi_grosir ?? 0,
                         'retail' => $itemModel->pajak_luaran_retail ?? 0,
                         'eceran' => $itemModel->pajak_luaran_eceran ?? 0,
+                        'reseller' => $itemModel->pajak_luaran_reseller ?? 0,
                         default => 0,
                     };
 
@@ -464,6 +472,7 @@ class DashboardController extends Controller
                 "             WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
                 "             WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
                 "             WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                "             WHEN 'reseller'    THEN COALESCE(items.tax_percentage_reseller,0)",
                 '             ELSE 0 END) > 0',
                 '      THEN invoice_items.sub_total / (1 +',
                 '           (CASE invoice_items.price_type',
@@ -471,6 +480,7 @@ class DashboardController extends Controller
                 "               WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
                 "               WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
                 "               WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                "               WHEN 'reseller'    THEN COALESCE(items.tax_percentage_reseller,0)",
                 '               ELSE 0 END) / 100)',
                 '    ELSE invoice_items.sub_total',
                 'END )) AS total_revenue_net',
@@ -481,6 +491,7 @@ class DashboardController extends Controller
                 "             WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
                 "             WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
                 "             WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                "             WHEN 'reseller'    THEN COALESCE(items.tax_percentage_reseller,0)",
                 '             ELSE 0 END) > 0',
                 '      THEN invoice_items.sub_total - (invoice_items.sub_total / (1 +',
                 '           (CASE invoice_items.price_type',
@@ -488,6 +499,7 @@ class DashboardController extends Controller
                 "               WHEN 'grosir'      THEN COALESCE(items.tax_percentage_wholesale,0)",
                 "               WHEN 'eceran'      THEN COALESCE(items.tax_percentage_eceran,0)",
                 "               WHEN 'semi_grosir' THEN COALESCE(items.tax_percentage_semi_grosir,0)",
+                "               WHEN 'reseller'    THEN COALESCE(items.tax_percentage_reseller,0)",
                 '               ELSE 0 END) / 100))',
                 '    ELSE 0',
                 'END )) AS total_ppn',

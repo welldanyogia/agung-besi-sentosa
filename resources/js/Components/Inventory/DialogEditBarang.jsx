@@ -46,6 +46,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
         harga: barang.price,
         wholesale_price: barang.wholesale_price,
         semi_grosir_price: barang.semi_grosir_price,
+        reseller_price: barang.reseller_price,
         retail_price: barang.retail_price,
         eceran_price: barang.eceran_price,
         retail_unit: barang.retail_unit,
@@ -57,6 +58,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
         tax: barang.tax,
         pajak_luaran_retail: barang.pajak_luaran_retail,
         pajak_luaran_semi_grosir: barang.pajak_luaran_semi_grosir,
+        pajak_luaran_reseller: barang.pajak_luaran_reseller,
         pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
         pajak_luaran_eceran: barang.pajak_luaran_eceran,
         dpp: barang.dpp
@@ -177,6 +179,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             price: data.harga,
             wholesale_price: data.wholesale_price,
             semi_grosir_price: data.semi_grosir_price,
+            reseller_price: data.reseller_price,
             retail_price: data.retail_price,
             eceran_price: data.eceran_price,
             retail_unit: data.retail_unit,
@@ -188,6 +191,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             updated_by: auth.user.id, // Menyertakan siapa yang mengupdate
             pajak_luaran_retail: data.pajak_luaran_retail,
             pajak_luaran_semi_grosir: data.pajak_luaran_semi_grosir,
+            pajak_luaran_reseller: data.pajak_luaran_reseller,
             pajak_luaran_wholesale: data.pajak_luaran_wholesale,
             pajak_luaran_eceran: data.pajak_luaran_eceran
         };
@@ -214,6 +218,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
         let pajak_luaran_retail = 0;
         let pajak_luaran_grosir = 0;
         let pajak_luaran_semi_grosir = 0;
+        let pajak_luaran_reseller = 0;
         let pajak_luaran_eceran = 0;
 
         if (!isNaN(numericValue) && numericValue > 0) {
@@ -221,6 +226,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             pajak_luaran_retail = data.retail_price * taxFactor;
             pajak_luaran_grosir = data.wholesale_price * taxFactor;
             pajak_luaran_semi_grosir = data.semi_grosir_price * taxFactor;
+            pajak_luaran_reseller = data.reseller_price * taxFactor;
             pajak_luaran_eceran = data.eceran_price * taxFactor;
         }
 
@@ -230,6 +236,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             pajak_luaran_retail: pajak_luaran_retail,
             pajak_luaran_wholesale: pajak_luaran_grosir,
             pajak_luaran_semi_grosir: pajak_luaran_semi_grosir,
+            pajak_luaran_reseller: pajak_luaran_reseller,
             pajak_luaran_eceran: pajak_luaran_eceran
         }));
     };
@@ -245,6 +252,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             harga: barang.price,
             wholesale_price: barang.wholesale_price,
             semi_grosir_price: barang.semi_grosir_price,
+            reseller_price: barang.reseller_price,
             retail_price: barang.retail_price,
             eceran_price: barang.eceran_price,
             retail_unit: barang.retail_unit,
@@ -256,6 +264,7 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
             tax: barang.tax,
             pajak_luaran_retail: barang.pajak_luaran_retail,
             pajak_luaran_semi_grosir: barang.pajak_luaran_semi_grosir,
+            pajak_luaran_reseller: barang.pajak_luaran_reseller,
         pajak_luaran_wholesale: barang.pajak_luaran_wholesale,
         pajak_luaran_eceran: barang.pajak_luaran_eceran,
         dpp: barang.dpp
@@ -316,6 +325,14 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
                 }))
             }
         }
+        if (id === 'reseller_price') {
+            if (value === '') {
+                setData((prevData) => ({
+                    ...prevData,
+                    reseller_price: 0
+                }))
+            }
+        }
         if (!value || isNaN(value)) {
             return; // Do nothing if the value is invalid or NaN
         }
@@ -361,6 +378,14 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
                 ...prevData,
                 [id]: value,
                 pajak_luaran_semi_grosir: pajak_luaran
+            }))
+        }
+        if (id === 'reseller_price') {
+            const pajak_luaran = value*(parseFloat(data.tax)/(100+parseFloat(data.tax)))
+            setData((prevData) => ({
+                ...prevData,
+                [id]: value,
+                pajak_luaran_reseller: pajak_luaran
             }))
         }
 
@@ -619,6 +644,22 @@ export function DialogEditBarang({barang, dataSatuan, setError, setSuccess}) {
                                 Pajak Luaran Semi Grosir
                             </Label>
                             <Input readOnly={true} id="pajak_luaran_semi_grosir" value={formatRupiah(data.pajak_luaran_semi_grosir,2)} onChange={handlePriceChange}
+                                   className="col-span-3"/>
+                        </div>
+                    )}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="reseller_price" className="text-right">
+                            Harga Reseller
+                        </Label>
+                        <Input id="reseller_price" value={formatRupiah(data.reseller_price)}
+                               onChange={handlePriceChange} className="col-span-3"/>
+                    </div>
+                    {(data.is_tax === true || data.is_tax === 1) && (
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="pajak_luaran_reseller" className="text-right">
+                                Pajak Luaran Reseller
+                            </Label>
+                            <Input readOnly={true} id="pajak_luaran_reseller" value={formatRupiah(data.pajak_luaran_reseller,2)} onChange={handlePriceChange}
                                    className="col-span-3"/>
                         </div>
                     )}

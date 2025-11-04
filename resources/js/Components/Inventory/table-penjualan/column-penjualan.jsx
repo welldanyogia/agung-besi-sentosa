@@ -270,6 +270,51 @@ export const columns_penjualan = [
             );
         },
     }),
+    columnHelper.accessor("reseller_price", {
+        header: () => <div className="text-center min-w-[100px]">Harga Reseller</div>,
+        cell: ({row}) => {
+            const priceModal = row.original.price;
+            const price = row.original.reseller_price;
+            const is_tax = row.original.is_tax;
+            const tax_percentage = parseFloat(row.original.tax);
+            const reseller_price = row.original.reseller_price;
+
+            const pajakMasukan = is_tax === 1
+                ? priceModal * (tax_percentage / (tax_percentage + 100))
+                : 0;
+            const dpp = priceModal - pajakMasukan;
+            const margin = dpp > 0 ?
+                ((reseller_price - dpp) / dpp) * 100
+                : 0;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
+                    <Badge className="text-xs text-white">
+                        {margin.toFixed(2)}%
+                    </Badge>
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("pajak_luaran_reseller", {
+        header: () => <div className="text-center min-w-[100px]">Pajak Luaran Reseller</div>,
+        cell: ({row}) => {
+            const price = row.original.pajak_luaran_reseller;
+
+            return (
+                <div className="text-center min-w-[100px]">
+                    {new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                    }).format(price)}
+                </div>
+            );
+        },
+    }),
     columnHelper.accessor("wholesale_price", {
         header: () => <div className="text-center min-w-[100px]">Harga Grosir</div>,
         cell: ({row}) => {
