@@ -1,7 +1,7 @@
 'use client';
 
 import {createColumnHelper} from "@tanstack/react-table";
-import {MoreHorizontal, CircleArrowUp, CircleArrowDown} from "lucide-react"
+import {CircleArrowUp, CircleArrowDown} from "lucide-react"
 import {Button} from "@/Components/ui/button"
 import {
     DropdownMenu,

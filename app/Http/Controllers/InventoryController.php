@@ -264,7 +264,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Item berhasil ditambahkan',
-                'item' => $pembelian,
+                'pembelian' => $pembelian->load(['category', 'item']),
                 'category' => $category,
             ], 201);
         } catch (\Exception $e) {
@@ -333,7 +333,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Item berhasil diperbarui',
-                'item' => $pembelian,
+                'pembelian' => $pembelian->load(['category', 'item']),
                 'category' => $category,
             ], 200);
 
