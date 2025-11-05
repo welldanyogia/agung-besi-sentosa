@@ -45,9 +45,9 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
     const [quantity, setQuantity] = useState(initialQuantity);
     const availableTabs = [
         {key: 'retail', label: 'Retail', price: product.retail_price},
-        {key: 'reseller', label: 'Reseller', price: product.reseller_price},
         {key: 'semi_grosir', label: 'Semi Grosir', price: product.semi_grosir_price},
         {key: 'grosir', label: 'Grosir', price: product.wholesale_price},
+        {key: 'reseller', label: 'Reseller', price: product.reseller_price},
         {key: 'eceran', label: 'Eceran', price: product.eceran_price},
     ].filter(tab => Number(tab.price) !== 0);// Filter hanya yang memiliki harga
 
@@ -302,6 +302,28 @@ export function DialogTambahItem({auth, product, setInvoiceItems, setSuccess, se
                                             </div>
                                         </div>
                                     </TabsContent>
+                                    <TabsContent value="reseller">
+                                        <div className={'w-full flex flex-col'}>
+                                            <div className={'justify-center text-center font-bold'}>
+                                                Harga : {formatRupiah(product.reseller_price)}
+                                            </div>
+                                            <div className="w-full h-full flex gap-8 items-center p-4 justify-center">
+                                                <Button onClick={handleDecrease} disabled={quantity <= step}>-</Button>
+                                                <Input
+                                                    type="number"
+                                                    value={quantity}
+                                                    step={step}
+                                                    onChange={handleChange}
+                                                    className="w-16 text-center"
+                                                    disabled={product.stock === 0}
+                                                />
+                                                <span className={'-ml-6'}>/{product.satuan}</span>
+                                                <Button onClick={handleIncrease}
+                                                        disabled={quantity >= product.stock}>+</Button>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+
                                     <TabsContent value="semi_grosir">
                                         <div className={'w-full flex flex-col'}>
                                             <div className={'justify-center text-center font-bold'}>
