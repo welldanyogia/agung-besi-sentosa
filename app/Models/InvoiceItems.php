@@ -187,6 +187,7 @@ class InvoiceItems extends Model
             'semi_grosir' => $item->semi_grosir_price,
             'grosir' => $item->wholesale_price,
             'eceran' => $item->eceran_price,
+            'reseller' => $item->reseller_price,
             default => 0,
         };
     }

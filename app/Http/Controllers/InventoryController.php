@@ -120,6 +120,7 @@ class InventoryController extends Controller
             'satuan' => 'required|string',
             'price' => 'nullable|numeric|min:0',
             'wholesale_price' => 'nullable|numeric|min:0',
+            'reseller_price' => 'nullable|numeric|min:0',
             'retail_price' => 'nullable|numeric|min:0',
             'eceran_price' => 'nullable|numeric|min:0',
             'retail_unit' => 'nullable|string',
@@ -148,6 +149,7 @@ class InventoryController extends Controller
 
             $wholesale = $request->wholesale_price ? ceil(($request->wholesale_price) / 100) * 100 : null;
             $retail = $request->retail_price ? ceil(($request->retail_price) / 100) * 100 : null;
+            $reseller = $request->reseller_price ? ceil(($request->reseller_price) / 100) * 100 : null;
             $eceran = $request->eceran_price ? ceil(($request->eceran_price) / 100) * 100 : null;
 
             $item = \App\Models\Items::create([
@@ -159,6 +161,7 @@ class InventoryController extends Controller
                 'satuan' => $request->satuan,
                 'price' => $request->price,
                 'wholesale_price' => $wholesale,
+                'reseller_price' => $reseller,
                 'retail_price' => $retail,
                 'eceran_price' => $eceran,
                 'retail_unit' => $request->retail_unit ?? null,
@@ -401,6 +404,7 @@ class InventoryController extends Controller
                 'price' => ['nullable', 'numeric', 'min:0'],
                 'wholesale_price' => ['nullable', 'numeric', 'min:0'],
                 'semi_grosir_price' => ['nullable', 'numeric', 'min:0'],
+                'reseller_price' => ['nullable', 'numeric', 'min:0'],
                 'retail_price' => ['nullable', 'numeric', 'min:0'],
                 'eceran_price' => ['nullable', 'numeric', 'min:0'],
                 'retail_unit' => ['nullable', 'string'],
@@ -428,7 +432,7 @@ class InventoryController extends Controller
             // Kalikan harga dengan tax jika is_tax true
 //            $taxMultiplier = ($request->is_tax ?? false) ? (1 + ($request->tax / 100)) : 1;
 
-            foreach (['wholesale_price', 'retail_price', 'eceran_price','semi_grosir_price'] as $priceField) {
+            foreach (['wholesale_price', 'retail_price', 'eceran_price','semi_grosir_price','reseller_price'] as $priceField) {
                 if ($request->has($priceField)) {
                     $validated[$priceField] = $request->$priceField;
                 }

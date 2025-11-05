@@ -302,6 +302,9 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
                         case 'retail':
                             pajakLuaranUnit = itemData.pajak_luaran_retail;
                             break;
+                        case 'reseller':
+                            pajakLuaranUnit = itemData.pajak_luaran_reseller ?? itemData.item?.pajak_luaran_reseller ?? 0;
+                            break;
                         default:
                             pajakLuaranUnit = 0;
                     }
@@ -503,6 +506,9 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
                     case "retail":
                         priceType = "Retail";
                         break;
+                    case "reseller":
+                        priceType = "Reseller";
+                        break;
                     default:
                         priceType = "-";
                 }
@@ -527,6 +533,10 @@ const DataTable = ({columns, data, auth, setError, setSuccess, getData}) => {
                         case "retail":
                             pajakLuaranUnit = item.pajak_luaran_retail;
                             priceType = "Retail";
+                            break;
+                        case "reseller":
+                            pajakLuaranUnit = item.pajak_luaran_reseller ?? item.item?.pajak_luaran_reseller ?? 0;
+                            priceType = "Reseller";
                             break;
                         default:
                             pajakLuaranUnit = 0;

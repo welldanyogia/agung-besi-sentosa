@@ -27,6 +27,7 @@ class Items extends Model
         'tax_percentage_wholesale',
         'tax_percentage_eceran',
         'semi_grosir_price', 'tax_percentage_semi_grosir','pajak_luaran_semi_grosir',
+        'reseller_price', 'tax_percentage_reseller','pajak_luaran_reseller',
         'status_perubahan_harga', 'selisih_perubahan_harga',
         'dpp'
     ];
@@ -115,6 +116,7 @@ class Items extends Model
             $item->tax_percentage_wholesale = $item->tax;
             $item->tax_percentage_eceran = $item->tax;
             $item->tax_percentage_semi_grosir = $item->tax;
+            $item->tax_percentage_reseller = $item->tax;
         }
 
         // Pajak Luaran Retail
@@ -143,6 +145,13 @@ class Items extends Model
             $item->pajak_luaran_semi_grosir = $item->semi_grosir_price * ($item->tax_percentage_semi_grosir / (100 + $item->tax_percentage_semi_grosir));
         } else {
             $item->pajak_luaran_semi_grosir = 0;
+        }
+
+        // Pajak Luaran Reseller
+        if ($item->tax_percentage_reseller > 0 && $item->reseller_price > 0) {
+            $item->pajak_luaran_reseller = $item->reseller_price * ($item->tax_percentage_reseller / (100 + $item->tax_percentage_reseller));
+        } else {
+            $item->pajak_luaran_reseller = 0;
         }
     }
 
